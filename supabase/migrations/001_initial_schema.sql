@@ -1,0 +1,4 @@
+-- 교회 여름행사 LMS - 초기 스키마
+-- supabase/migrations/001_initial_schema.sql
+-- 이 파일은 참조용입니다. 실제 적용은 BYOS 온보딩 위자드의 SQL 복사-붙여넣기를 통해 진행합니다.
+-- 전체 SQL은 src/lib/supabase/schema-sql.ts를 참조하세요.

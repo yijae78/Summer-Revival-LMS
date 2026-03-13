@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+/* Step 1: Tailwind 네임스페이스 매핑 */
+@theme inline {
+  --font-mono: "JetBrains Mono", "D2Coding", ui-monospace, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-hero-from: var(--hero-from);
+  --color-hero-to: var(--hero-to);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-success: var(--success);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Step 2: 다크 프리미엄 + 하늘색 계열 */
+:root {
+  --radius: 0.75rem;
+
+  /* ── 배경 ── */
+  --background: #0c0e14;            /* 깊은 네이비-블랙 */
+  --foreground: #e2e8f0;            /* 밝은 슬레이트 */
+
+  /* ── 카드/표면 ── */
+  --card: #151823;
+  --card-foreground: #e2e8f0;
+  --surface: #151823;
+  --surface-raised: #1c2030;
+
+  /* ── Primary (스카이 블루) ── */
+  --primary: #38bdf8;               /* Sky 400 */
+  --primary-foreground: #0c0e14;
+
+  /* ── Secondary (시안) ── */
+  --secondary: #22d3ee;             /* Cyan 400 */
+  --secondary-foreground: #0c0e14;
+
+  /* ── Accent (바이올렛) ── */
+  --accent: #a78bfa;                /* Violet 400 */
+  --accent-foreground: #0c0e14;
+
+  /* ── Success ── */
+  --success: #34d399;
+
+  /* ── Muted ── */
+  --muted: #111420;
+  --muted-foreground: #8892a8;
+
+  /* ── Destructive ── */
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+
+  /* ── 보더 ── */
+  --border: #1e2235;
+  --input: #1e2235;
+  --ring: #38bdf8;
+
+  /* ── 히어로 그라데이션 ── */
+  --hero-from: #0ea5e9;             /* Sky 500 */
+  --hero-to: #0369a1;               /* Sky 700 */
+}
+
+/* 라이트 테마 */
+.light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-raised: #f1f5f9;
+  --primary: #0ea5e9;
+  --primary-foreground: #ffffff;
+  --secondary: #06b6d4;
+  --secondary-foreground: #ffffff;
+  --accent: #8b5cf6;
+  --accent-foreground: #ffffff;
+  --success: #10b981;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0ea5e9;
+  --hero-from: #0ea5e9;
+  --hero-to: #0369a1;
+}
+
+/* 글로벌 타이포그래피 */
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system,
+    BlinkMacSystemFont, 'Apple SD Gothic Neo', system-ui, 'Segoe UI',
+    'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+
+/* Shimmer 애니메이션 */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+/* 성령의 불꽃 애니메이션 */
+@keyframes flameFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.03); }
+}
+
+@keyframes flamePulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+/* 물결 애니메이션 — Living Water 모티프 */
+@keyframes waveSlide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* 수면 빛 반사 (Water Caustics) */
+@keyframes causticsDrift1 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(60px, -40px) rotate(120deg) scale(1.1); }
+  66% { transform: translate(-30px, 30px) rotate(240deg) scale(0.95); }
+  100% { transform: translate(0, 0) rotate(360deg) scale(1); }
+}
+
+@keyframes causticsDrift2 {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(-50px, 50px) rotate(-120deg) scale(1.15); }
+  66% { transform: translate(40px, -20px) rotate(-240deg) scale(0.9); }
+  100% { transform: translate(0, 0) rotate(-360deg) scale(1); }
+}
+
+@keyframes causticsDrift3 {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  50% { transform: translate(30px, -60px) scale(1.2); opacity: 0.7; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+}
+
+/* 다층 물결 수직 부유 */
+@keyframes waveFloat1 {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-8px); }
+}
+
+@keyframes waveFloat2 {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+
+@keyframes waveFloat3 {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+
+/* 회전 그라디언트 보더 */
+@keyframes borderRotate {
+  0% { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
+}
+
+/* 텍스트 쉬머 그라디언트 */
+@keyframes textShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* 물 흐르는 그라디언트 (FLOWING 로고) */
+@keyframes waterFlow {
+  0% { background-position: 300% center; }
+  100% { background-position: 0% center; }
+}
+
+/* 심장 박동 (하나로) */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); text-shadow: 0 0 8px rgba(255,77,106,0.6), 0 0 20px rgba(255,77,106,0.3); }
+  15% { transform: scale(1.15); text-shadow: 0 0 16px rgba(255,77,106,0.8), 0 0 40px rgba(255,77,106,0.5); }
+  30% { transform: scale(1); text-shadow: 0 0 8px rgba(255,77,106,0.6), 0 0 20px rgba(255,77,106,0.3); }
+  45% { transform: scale(1.08); text-shadow: 0 0 12px rgba(255,77,106,0.7), 0 0 30px rgba(255,77,106,0.4); }
+  60% { transform: scale(1); text-shadow: 0 0 8px rgba(255,77,106,0.6), 0 0 20px rgba(255,77,106,0.3); }
+}
+
+/* 글로우 펄스 */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(56,189,248,0.15), 0 0 30px rgba(56,189,248,0.05); }
+  50% { box-shadow: 0 0 20px rgba(56,189,248,0.30), 0 0 50px rgba(56,189,248,0.10); }
+}
+
+/* 모션 축소 설정 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
