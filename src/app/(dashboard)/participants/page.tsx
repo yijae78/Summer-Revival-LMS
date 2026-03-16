@@ -141,18 +141,20 @@ function ParticipantSkeleton() {
 }
 
 const GRADE_FILTERS = [
-  { key: 'all', label: '전체' },
-  { key: 'children', label: '아동부' },
-  { key: 'elementary', label: '초등부' },
-  { key: 'middle', label: '중등부' },
-  { key: 'high', label: '고등부' },
-  { key: 'college', label: '청년부' },
-  { key: 'adult', label: '성인' },
+  { key: 'all', label: '전체', emoji: '👥', gradient: 'from-slate-500 to-slate-600' },
+  { key: 'kindergarten', label: '유치부', emoji: '🧒', gradient: 'from-pink-500 to-rose-500' },
+  { key: 'children', label: '아동부', emoji: '🌱', gradient: 'from-emerald-500 to-green-500' },
+  { key: 'elementary', label: '초등부', emoji: '📚', gradient: 'from-sky-500 to-blue-500' },
+  { key: 'middle', label: '중등부', emoji: '⚡', gradient: 'from-indigo-500 to-purple-500' },
+  { key: 'high', label: '고등부', emoji: '🔥', gradient: 'from-orange-500 to-amber-500' },
+  { key: 'college', label: '청년부', emoji: '✨', gradient: 'from-fuchsia-500 to-purple-500' },
+  { key: 'adult', label: '성인', emoji: '🙏', gradient: 'from-cyan-500 to-teal-500' },
 ]
 
 function matchGradeFilter(grade: string | null, filter: string): boolean {
   if (filter === 'all') return true
   if (!grade) return false
+  if (filter === 'kindergarten') return grade === '유치부'
   if (filter === 'children') return ['초1', '초2', '초3', 'elementary_1', 'elementary_2', 'elementary_3'].includes(grade)
   if (filter === 'elementary') return ['초4', '초5', '초6', 'elementary_4', 'elementary_5', 'elementary_6'].includes(grade)
   if (filter === 'middle') return grade.startsWith('middle') || grade.startsWith('중')
@@ -233,33 +235,49 @@ export default function ParticipantsPage() {
         />
       </motion.div>
 
-      {/* Grade filter tabs */}
-      <motion.div variants={fadeUp} className="flex gap-1.5 overflow-x-auto pb-1">
+      {/* Grade filter tabs — 3D hover effect */}
+      <motion.div variants={fadeUp} className="flex gap-2 overflow-x-auto pb-2">
         {GRADE_FILTERS.map((f) => {
           const count = gradeCountMap[f.key] ?? 0
           const isActive = gradeFilter === f.key
           return (
-            <button
+            <motion.button
               key={f.key}
               type="button"
               onClick={() => setGradeFilter(f.key)}
+              whileHover={{
+                y: -6,
+                scale: 1.05,
+                rotateX: -5,
+                transition: { type: 'spring', stiffness: 400, damping: 15 },
+              }}
+              whileTap={{ scale: 0.95, y: 0 }}
               className={cn(
-                'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-all duration-200',
+                'relative flex shrink-0 flex-col items-center gap-1 rounded-2xl px-4 py-3 text-xs font-bold transition-colors duration-200',
                 isActive
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-[0_0_16px_rgba(99,102,241,0.3)]'
-                  : 'border border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06] hover:text-foreground'
+                  ? cn('bg-gradient-to-br text-white shadow-xl', f.gradient)
+                  : 'border border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:text-foreground',
               )}
+              style={{
+                perspective: '600px',
+                boxShadow: isActive
+                  ? '0 10px 30px -5px rgba(0,0,0,0.4), 0 0 20px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.15)'
+                  : undefined,
+              }}
             >
-              {f.label}
+              <span className="text-base">{f.emoji}</span>
+              <span>{f.label}</span>
               {count > 0 && (
                 <span className={cn(
-                  'rounded-full px-1.5 py-0.5 text-[0.625rem]',
-                  isActive ? 'bg-white/20 text-white' : 'bg-white/[0.06] text-muted-foreground'
+                  'absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.5625rem] font-black',
+                  isActive
+                    ? 'bg-white text-slate-900 shadow-md'
+                    : 'bg-white/10 text-muted-foreground',
                 )}>
                   {count}
                 </span>
               )}
-            </button>
+            </motion.button>
           )
         })}
       </motion.div>
