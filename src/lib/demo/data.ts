@@ -33,7 +33,7 @@ export const DEMO_EVENT: Event = {
   invite_code: 'FLOW26',
   settings: {
     churchName: '넘치는교회',
-    departments: ['중등부', '고등부'],
+    departments: ['중고등부'],
     theme: '주여 은혜를 주옵소서',
     themeVerse: '고린도후서 9:8',
   },

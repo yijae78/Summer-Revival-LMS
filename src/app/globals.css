@@ -220,6 +220,19 @@ body {
   50% { box-shadow: 0 0 20px rgba(56,189,248,0.30), 0 0 50px rgba(56,189,248,0.10); }
 }
 
+/* 은혜 흘러가는 ripple — 중심에서 바깥으로 */
+@keyframes graceRipple {
+  0% { transform: scale(0.3); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* 은혜 아래로 흐르는 파티클 */
+@keyframes graceFlow {
+  0% { transform: translateY(-100%); opacity: 0; }
+  20% { opacity: 0.6; }
+  100% { transform: translateY(300%); opacity: 0; }
+}
+
 /* 모션 축소 설정 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

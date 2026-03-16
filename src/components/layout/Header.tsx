@@ -31,7 +31,13 @@ interface HeaderProps {
 export function Header({ className }: HeaderProps) {
   const { event } = useCurrentEvent()
   const settings = (event?.settings ?? {}) as Record<string, unknown>
-  const churchName = (settings.churchName as string) ?? null
+  const rawChurchName = (settings.churchName as string) ?? null
+  const departments = (settings.departments as string[]) ?? []
+  const churchName = rawChurchName
+    ? departments.length > 0
+      ? `${rawChurchName} ${departments.join(' · ')}`
+      : rawChurchName
+    : null
   const eventTheme = (settings.theme as string) ?? null
   const themeVerse = (settings.themeVerse as string) ?? null
 
@@ -42,47 +48,114 @@ export function Header({ className }: HeaderProps) {
         className
       )}
     >
-      {/* Church name + Theme banner */}
+      {/* Church name + Theme banner — 3D + flowing grace effect */}
       {(churchName || eventTheme) && (
-        <div className="overflow-hidden border-b border-white/[0.06] bg-gradient-to-r from-indigo-500/[0.08] via-purple-500/[0.06] to-fuchsia-500/[0.08] px-4 py-2">
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5"
-          >
-            {churchName && (
-              <span
-                className="bg-clip-text text-xs font-bold text-transparent"
+        <div className="relative overflow-hidden border-b border-white/[0.06] px-4 py-5"
+          style={{ background: 'linear-gradient(180deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 40%, rgba(232,121,249,0.06) 70%, transparent 100%)' }}>
+
+          {/* Flowing grace ripples — 은혜가 중심에서 바깥으로 흘러가는 효과 */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="absolute rounded-full border border-purple-400/10"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, #818cf8, #c084fc, #e879f9, #c084fc, #818cf8)',
-                  backgroundSize: '200% auto',
-                  animation: 'textShimmer 4s linear infinite',
+                  width: `${i * 120}px`,
+                  height: `${i * 60}px`,
+                  animation: `graceRipple ${3 + i * 0.8}s ease-out infinite`,
+                  animationDelay: `${i * 0.6}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Downward flowing particles */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="absolute h-8 w-px rounded-full"
+                style={{
+                  left: `${15 + i * 18}%`,
+                  background: 'linear-gradient(180deg, rgba(139,92,246,0.3), transparent)',
+                  animation: `graceFlow ${2.5 + i * 0.4}s ease-in infinite`,
+                  animationDelay: `${i * 0.5}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Content — 3D push/pull effect */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, z: -20 }}
+            animate={{ opacity: 1, scale: 1, z: 0 }}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+            className="relative flex flex-col items-center gap-2 text-center"
+            style={{ perspective: '600px' }}
+          >
+            {/* Church name — large, 3D breathing */}
+            {churchName && (
+              <motion.h2
+                className="bg-clip-text text-lg font-black tracking-wide text-transparent md:text-xl"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, #818cf8, #c084fc, #e879f9, #f0abfc, #e879f9, #c084fc, #818cf8)',
+                  backgroundSize: '300% auto',
+                  animation: 'waterFlow 6s linear infinite',
+                }}
+                animate={{
+                  scale: [1, 1.04, 1],
+                  rotateX: [0, 2, 0, -2, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
                 }}
               >
                 {churchName}
-              </span>
+              </motion.h2>
             )}
+
+            {/* Theme — medium, 3D pop */}
             {eventTheme && (
-              <motion.span
-                className="bg-clip-text text-xs font-semibold text-transparent"
+              <motion.p
+                className="bg-clip-text text-base font-bold text-transparent md:text-lg"
                 style={{
-                  backgroundImage: 'linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #818cf8, #38bdf8)',
+                  backgroundImage: 'linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #e879f9, #c084fc, #818cf8, #38bdf8)',
                   backgroundSize: '200% auto',
                   animation: 'textShimmer 5s linear infinite',
+                  textShadow: '0 0 30px rgba(139,92,246,0.3)',
                 }}
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                animate={{
+                  scale: [1, 1.06, 1],
+                  z: [0, 15, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: 0.5,
+                }}
               >
                 &ldquo;{eventTheme}&rdquo;
-              </motion.span>
+              </motion.p>
             )}
+
+            {/* Verse — subtle glow */}
             {themeVerse && (
-              <span className="text-[0.625rem] text-muted-foreground/60">
+              <motion.p
+                className="text-sm text-purple-300/70"
+                animate={{ opacity: [0.5, 0.9, 0.5] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              >
                 {themeVerse}
-              </span>
+              </motion.p>
             )}
           </motion.div>
+
+          {/* Bottom gradient fade */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-4"
+            style={{ background: 'linear-gradient(to top, var(--card), transparent)' }} />
         </div>
       )}
       {/* Main header row */}

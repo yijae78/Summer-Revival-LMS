@@ -19,8 +19,41 @@ import {
 
 import { cn } from '@/lib/utils'
 import { useSidebarStore } from '@/stores/sidebarStore'
+import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 
 import type { UserRole } from '@/types'
+
+function SidebarTitle() {
+  const { event } = useCurrentEvent()
+  const settings = (event?.settings ?? {}) as Record<string, unknown>
+  const departments = (settings.departments as string[]) ?? []
+  const eventName = event?.name
+
+  if (eventName) {
+    const deptLabel = departments.length > 0 ? ` ${departments.join('·')}` : ''
+    return (
+      <span
+        className="truncate bg-clip-text text-[0.8125rem] font-bold text-transparent"
+        style={{
+          backgroundImage: 'linear-gradient(90deg, #818cf8, #c084fc, #e879f9)',
+        }}
+      >
+        {eventName}{deptLabel}
+      </span>
+    )
+  }
+
+  return (
+    <span
+      className="bg-clip-text text-sm font-black tracking-wider text-transparent"
+      style={{
+        backgroundImage: 'linear-gradient(90deg, #818cf8, #c084fc, #e879f9)',
+      }}
+    >
+      FLOWING
+    </span>
+  )
+}
 
 interface NavItem {
   label: string
@@ -76,19 +109,19 @@ export function Sidebar({ role = 'admin' }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'hidden lg:flex flex-col border-r bg-card transition-all duration-200',
-        collapsed ? 'w-[72px]' : 'w-[240px]'
+        'hidden lg:flex flex-col border-r border-white/[0.08] bg-gradient-to-b from-[#0f172a] via-[#131b2e] to-[#0f172a] transition-all duration-300',
+        collapsed ? 'w-[72px]' : 'w-[260px]'
       )}
     >
-      {/* Logo */}
-      <div className="flex h-14 items-center border-b px-4">
+      {/* Logo / Event name */}
+      <div className="flex h-14 items-center border-b border-white/[0.06] px-4">
         {!collapsed && (
-          <span className="text-sm font-bold text-foreground">여름행사 LMS</span>
+          <SidebarTitle />
         )}
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className="flex-1 space-y-1 p-3">
         {items.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -99,15 +132,15 @@ export function Sidebar({ role = 'admin' }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200',
                 'min-h-[48px]',
                 isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  ? 'bg-gradient-to-r from-indigo-500/15 to-purple-500/10 text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.12)] border border-indigo-500/20'
+                  : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground border border-transparent'
               )}
               title={collapsed ? item.label : undefined}
             >
-              <item.icon className="h-5 w-5 shrink-0" />
+              <item.icon className={cn('h-5 w-5 shrink-0', isActive && 'text-indigo-400')} />
               {!collapsed && <span>{item.label}</span>}
             </Link>
           )
