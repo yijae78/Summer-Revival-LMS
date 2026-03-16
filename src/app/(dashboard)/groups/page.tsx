@@ -60,11 +60,15 @@ function GroupCard({
     <motion.div
       variants={fadeUp}
       className={cn(
-        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'cursor-pointer rounded-2xl border backdrop-blur-xl',
         'transition-all duration-300',
-        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+        'hover:scale-[1.02] hover:shadow-2xl',
         'active:scale-[0.98]'
       )}
+      style={{
+        borderColor: `${color ?? '#6b7280'}25`,
+        background: `linear-gradient(to bottom right, ${color ?? '#6b7280'}15, ${color ?? '#6b7280'}05)`,
+      }}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -99,10 +103,10 @@ function GroupCard({
           </span>
         </div>
       </div>
-      {/* Colored left border accent */}
+      {/* Colored bottom border accent */}
       <div
         className="h-1 w-full rounded-b-2xl"
-        style={{ backgroundColor: `${color ?? '#6b7280'}60` }}
+        style={{ background: `linear-gradient(to right, ${color ?? '#6b7280'}80, ${color ?? '#6b7280'}20)` }}
       />
     </motion.div>
   )

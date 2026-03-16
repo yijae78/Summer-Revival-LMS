@@ -101,12 +101,12 @@ function GlassSection({
   return (
     <motion.div
       variants={fadeUp}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.12]"
+      className="rounded-2xl border border-indigo-500/15 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(99,102,241,0.1)]"
     >
       <div className="px-4 py-4 md:px-6">
         <h3 className="flex items-center gap-2.5 text-base font-semibold">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <Icon className="size-4 text-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+            <Icon className="size-4 text-white" />
           </div>
           {title}
         </h3>
@@ -209,9 +209,9 @@ export default function ParticipantDetailPage() {
         ) : (
           <>
             {/* Profile header */}
-            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+            <motion.div variants={fadeUp} className="rounded-2xl border border-purple-500/15 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/5 backdrop-blur-xl">
               <div className="flex items-center gap-4 px-4 py-5 md:px-6">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-primary/20">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white ring-2 ring-purple-500/20">
                   <span className="text-xl font-bold">
                     {participant.name.charAt(0)}
                   </span>

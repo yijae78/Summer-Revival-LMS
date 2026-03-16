@@ -104,9 +104,9 @@ function TimelineCard({ schedule, isLast }: { schedule: Schedule; isLast: boolea
       <motion.div
         variants={fadeUp}
         className={cn(
-          'mb-3 flex-1 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+          'mb-3 flex-1 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-xl',
           'transition-all duration-300',
-          'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]'
+          'hover:scale-[1.01] hover:shadow-2xl'
         )}
       >
         <div className="flex gap-4 px-4 py-4 md:px-5">
@@ -261,8 +261,8 @@ export default function SchedulePage() {
                         className={cn(
                           'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-300',
                           activeDay === day
-                            ? 'border-primary/30 bg-primary/10 text-primary shadow-[0_0_16px_rgba(56,189,248,0.15)]'
-                            : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:border-primary/20 hover:bg-white/[0.06]'
+                            ? 'border-indigo-500/30 bg-gradient-to-r from-indigo-500/15 to-purple-500/15 text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.15)]'
+                            : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:border-indigo-500/20 hover:bg-white/[0.06]'
                         )}
                       >
                         <CalendarDays className="size-3.5" />

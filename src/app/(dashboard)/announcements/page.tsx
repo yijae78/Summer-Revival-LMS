@@ -79,9 +79,9 @@ function AnnouncementCard({
       className={cn(
         'rounded-2xl border backdrop-blur-xl transition-all duration-300',
         isPinned
-          ? 'border-amber-500/20 bg-amber-500/[0.03] shadow-[0_0_20px_rgba(245,158,11,0.06)]'
-          : 'border-white/[0.08] bg-white/[0.04]',
-        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]'
+          ? 'border-amber-500/25 bg-gradient-to-br from-amber-500/15 to-amber-600/5 shadow-[0_0_25px_rgba(245,158,11,0.12)]'
+          : 'border-rose-500/15 bg-gradient-to-br from-rose-500/10 to-rose-600/5',
+        'hover:scale-[1.01] hover:shadow-2xl transition-all duration-300'
       )}
     >
       <div className="px-4 py-4 md:px-6">

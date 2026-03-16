@@ -8,30 +8,80 @@ interface StatCardProps {
   icon: LucideIcon
   delta?: string
   description?: string
-  color?: 'primary' | 'secondary' | 'accent' | 'success'
+  color?: 'indigo' | 'emerald' | 'fuchsia' | 'amber' | 'primary' | 'secondary' | 'accent' | 'success' | 'rose' | 'cyan'
   className?: string
 }
 
 const colorMap = {
+  indigo: {
+    gradient: 'from-indigo-500/15 to-indigo-600/5',
+    border: 'border-indigo-500/15',
+    iconBg: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
+    watermark: 'text-indigo-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]',
+  },
+  emerald: {
+    gradient: 'from-emerald-500/15 to-emerald-600/5',
+    border: 'border-emerald-500/15',
+    iconBg: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+    watermark: 'text-emerald-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]',
+  },
+  fuchsia: {
+    gradient: 'from-fuchsia-500/15 to-fuchsia-600/5',
+    border: 'border-fuchsia-500/15',
+    iconBg: 'bg-gradient-to-br from-fuchsia-500 to-fuchsia-600',
+    watermark: 'text-fuchsia-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(232,121,249,0.15)]',
+  },
+  amber: {
+    gradient: 'from-amber-500/15 to-amber-600/5',
+    border: 'border-amber-500/15',
+    iconBg: 'bg-gradient-to-br from-amber-500 to-amber-600',
+    watermark: 'text-amber-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]',
+  },
+  rose: {
+    gradient: 'from-rose-500/15 to-rose-600/5',
+    border: 'border-rose-500/15',
+    iconBg: 'bg-gradient-to-br from-rose-500 to-rose-600',
+    watermark: 'text-rose-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(244,63,94,0.15)]',
+  },
+  cyan: {
+    gradient: 'from-cyan-500/15 to-cyan-600/5',
+    border: 'border-cyan-500/15',
+    iconBg: 'bg-gradient-to-br from-cyan-500 to-cyan-600',
+    watermark: 'text-cyan-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]',
+  },
   primary: {
-    bg: 'bg-[#38bdf8]/12',
-    icon: 'text-[#38bdf8]',
-    glow: 'hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+    gradient: 'from-indigo-500/15 to-indigo-600/5',
+    border: 'border-indigo-500/15',
+    iconBg: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
+    watermark: 'text-indigo-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]',
   },
   secondary: {
-    bg: 'bg-[#22d3ee]/12',
-    icon: 'text-[#22d3ee]',
-    glow: 'hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]',
+    gradient: 'from-fuchsia-500/15 to-fuchsia-600/5',
+    border: 'border-fuchsia-500/15',
+    iconBg: 'bg-gradient-to-br from-fuchsia-500 to-fuchsia-600',
+    watermark: 'text-fuchsia-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(232,121,249,0.15)]',
   },
   accent: {
-    bg: 'bg-[#a78bfa]/12',
-    icon: 'text-[#a78bfa]',
-    glow: 'hover:shadow-[0_0_20px_rgba(167,139,250,0.1)]',
+    gradient: 'from-purple-500/15 to-purple-600/5',
+    border: 'border-purple-500/15',
+    iconBg: 'bg-gradient-to-br from-purple-500 to-purple-600',
+    watermark: 'text-purple-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]',
   },
   success: {
-    bg: 'bg-[#34d399]/12',
-    icon: 'text-[#34d399]',
-    glow: 'hover:shadow-[0_0_20px_rgba(52,211,153,0.1)]',
+    gradient: 'from-emerald-500/15 to-emerald-600/5',
+    border: 'border-emerald-500/15',
+    iconBg: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+    watermark: 'text-emerald-500/[0.03]',
+    glow: 'hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]',
   },
 }
 
@@ -41,7 +91,7 @@ export function StatCard({
   icon: Icon,
   delta,
   description,
-  color = 'primary',
+  color = 'indigo',
   className,
 }: StatCardProps) {
   const isPositive = delta?.startsWith('+')
@@ -51,26 +101,31 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-5 transition-all duration-300',
-        'hover:border-primary/20 hover:bg-white/[0.06] hover:-translate-y-0.5',
+        'group relative overflow-hidden rounded-2xl border bg-gradient-to-br backdrop-blur-xl p-5 transition-all duration-300',
+        'hover:scale-[1.02] hover:-translate-y-0.5',
+        colors.gradient,
+        colors.border,
         colors.glow,
         className
       )}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#38bdf8]/3 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      {/* Background watermark icon */}
+      <div className="pointer-events-none absolute -bottom-4 -right-4 opacity-100">
+        <Icon className={cn('h-28 w-28', colors.watermark)} />
+      </div>
 
       <div className="relative z-10">
         <div className="flex items-center justify-between">
-          <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', colors.bg)}>
-            <Icon className={cn('h-5 w-5', colors.icon)} />
+          <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg', colors.iconBg)}>
+            <Icon className="h-5 w-5 text-white" />
           </div>
           {delta && (
             <span
               className={cn(
                 'rounded-full px-2.5 py-0.5 text-xs font-semibold',
-                isPositive && 'bg-[#34d399]/12 text-[#34d399]',
-                isNegative && 'bg-[#f87171]/12 text-[#f87171]',
-                !isPositive && !isNegative && 'bg-white/[0.04] text-[#8892a8]'
+                isPositive && 'bg-emerald-500/15 text-emerald-400',
+                isNegative && 'bg-red-500/15 text-red-400',
+                !isPositive && !isNegative && 'bg-white/[0.04] text-slate-400'
               )}
             >
               {delta}
@@ -79,8 +134,8 @@ export function StatCard({
         </div>
 
         <p className="mt-4 font-mono text-3xl font-bold tracking-tight text-white">{value}</p>
-        <p className="mt-1 text-sm text-[#8892a8]">{label}</p>
-        {description && <p className="mt-2 text-xs text-[#5c6478]">{description}</p>}
+        <p className="mt-1 text-sm text-slate-400">{label}</p>
+        {description && <p className="mt-2 text-xs text-slate-500">{description}</p>}
       </div>
     </div>
   )

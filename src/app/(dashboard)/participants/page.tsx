@@ -52,9 +52,9 @@ function ParticipantCard({
     <motion.div
       variants={fadeUp}
       className={cn(
-        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'cursor-pointer rounded-2xl border border-indigo-500/15 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 backdrop-blur-xl',
         'transition-all duration-300',
-        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+        'hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]',
         'active:scale-[0.99]'
       )}
       onClick={onClick}
@@ -68,7 +68,7 @@ function ParticipantCard({
       }}
     >
       <div className="flex items-center gap-4 px-4 py-4 md:px-6">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-primary/20">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white ring-2 ring-indigo-500/20">
           <span className="text-base font-semibold">
             {participant.name.charAt(0)}
           </span>
@@ -197,10 +197,10 @@ export default function ParticipantsPage() {
       {participants && participants.length > 0 && (
         <motion.div
           variants={fadeUp}
-          className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-3 backdrop-blur-xl"
+          className="flex items-center gap-4 rounded-2xl border border-purple-500/15 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/5 px-5 py-3 backdrop-blur-xl"
         >
           <div className="flex items-center gap-2 text-sm">
-            <Users className="size-4 text-primary" />
+            <Users className="size-4 text-indigo-400" />
             <span className="font-medium text-foreground">
               총 {participants.length}명
             </span>

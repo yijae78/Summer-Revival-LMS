@@ -26,21 +26,30 @@ export default function DashboardLayout({
         {/* Ambient caustics — Living Water 세계관 연결 */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <div
-            className="absolute h-[600px] w-[600px] rounded-full opacity-30"
+            className="absolute h-[700px] w-[700px] rounded-full opacity-40"
             style={{
               top: '5%',
               right: '10%',
-              background: 'radial-gradient(circle, rgba(56,189,248,0.04) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)',
               animation: 'causticsDrift1 30s ease-in-out infinite',
             }}
           />
           <div
-            className="absolute h-[400px] w-[400px] rounded-full opacity-20"
+            className="absolute h-[500px] w-[500px] rounded-full opacity-35"
             style={{
               bottom: '20%',
               left: '5%',
-              background: 'radial-gradient(circle, rgba(34,211,238,0.03) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(232,121,249,0.10) 0%, transparent 70%)',
               animation: 'causticsDrift2 40s ease-in-out infinite',
+            }}
+          />
+          <div
+            className="absolute h-[400px] w-[400px] rounded-full opacity-25"
+            style={{
+              top: '50%',
+              left: '40%',
+              background: 'radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%)',
+              animation: 'causticsDrift3 35s ease-in-out infinite',
             }}
           />
         </div>

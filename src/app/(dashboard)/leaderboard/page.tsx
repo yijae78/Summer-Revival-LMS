@@ -80,12 +80,12 @@ export default function LeaderboardPage() {
       {/* Tabs */}
       <motion.div variants={fadeUp}>
       <Tabs defaultValue="group" className="space-y-4">
-        <TabsList className="w-full rounded-full border border-white/[0.08] bg-white/[0.04] p-1 backdrop-blur-xl">
-          <TabsTrigger value="group" className="flex-1 gap-1.5 rounded-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+        <TabsList className="w-full rounded-full border border-amber-500/15 bg-gradient-to-r from-amber-500/10 to-orange-500/5 p-1 backdrop-blur-xl">
+          <TabsTrigger value="group" className="flex-1 gap-1.5 rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/15 data-[state=active]:to-orange-500/15 data-[state=active]:text-amber-300">
             <Users className="size-4" />
             조별 순위
           </TabsTrigger>
-          <TabsTrigger value="individual" className="flex-1 gap-1.5 rounded-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+          <TabsTrigger value="individual" className="flex-1 gap-1.5 rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/15 data-[state=active]:to-orange-500/15 data-[state=active]:text-amber-300">
             <User className="size-4" />
             개인 순위
           </TabsTrigger>

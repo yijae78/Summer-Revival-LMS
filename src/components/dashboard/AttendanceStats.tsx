@@ -26,23 +26,23 @@ export function AttendanceStats({
   }
 
   const segments = [
-    { value: present, label: '출석', color: 'bg-emerald-500', textColor: 'text-emerald-500' },
-    { value: late, label: '지각', color: 'bg-amber-500', textColor: 'text-amber-500' },
-    { value: absent, label: '결석', color: 'bg-red-500', textColor: 'text-red-500' },
-    { value: excused, label: '사유', color: 'bg-sky-500', textColor: 'text-sky-500' },
+    { value: present, label: '출석', gradient: 'bg-gradient-to-r from-emerald-500 to-emerald-400', dot: 'bg-emerald-500', textColor: 'text-emerald-400' },
+    { value: late, label: '지각', gradient: 'bg-gradient-to-r from-amber-500 to-amber-400', dot: 'bg-amber-500', textColor: 'text-amber-400' },
+    { value: absent, label: '결석', gradient: 'bg-gradient-to-r from-red-500 to-red-400', dot: 'bg-red-500', textColor: 'text-red-400' },
+    { value: excused, label: '사유', gradient: 'bg-gradient-to-r from-sky-500 to-sky-400', dot: 'bg-sky-500', textColor: 'text-sky-400' },
   ]
 
   return (
     <div className={cn('space-y-3', className)}>
       {/* Stat bar */}
-      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="flex h-3 w-full overflow-hidden rounded-full bg-white/[0.06]">
         {segments.map((segment) => {
           const percent = getPercent(segment.value)
           if (percent === 0) return null
           return (
             <div
               key={segment.label}
-              className={cn('transition-all duration-300', segment.color)}
+              className={cn('transition-all duration-300', segment.gradient)}
               style={{ width: `${percent}%` }}
               role="meter"
               aria-label={`${segment.label} ${percent}%`}
@@ -64,7 +64,7 @@ export function AttendanceStats({
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         {segments.map((segment) => (
           <div key={segment.label} className="flex items-center gap-1.5">
-            <div className={cn('size-2.5 rounded-full', segment.color)} />
+            <div className={cn('size-2.5 rounded-full', segment.dot)} />
             <span className="text-xs text-muted-foreground">
               {segment.label}
             </span>

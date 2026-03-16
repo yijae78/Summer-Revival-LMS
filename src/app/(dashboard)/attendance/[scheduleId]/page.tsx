@@ -150,7 +150,7 @@ export default function AttendanceDetailPage() {
         ) : (
           <div className="space-y-4">
             {/* Summary stats in glass card */}
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl">
+            <div className="rounded-2xl border border-emerald-500/15 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-4 backdrop-blur-xl">
               <AttendanceStats
                 present={stats.present}
                 late={stats.late}

@@ -33,11 +33,21 @@ export function EventBanner({ eventName, startDate, endDate }: EventBannerProps)
   const dateText = `${format(startDate, 'M월 d일 (EEE)', { locale: ko })} ~ ${format(endDate, 'M월 d일 (EEE)', { locale: ko })}`
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-6 shadow-[0_0_30px_rgba(56,189,248,0.06)]">
-      {/* Sky blue glow effects */}
-      <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#38bdf8]/10 blur-3xl" />
-      <div className="absolute -bottom-10 left-1/4 h-36 w-36 rounded-full bg-[#22d3ee]/6 blur-2xl" />
-      <div className="absolute right-1/3 top-1/2 h-20 w-20 rounded-full bg-[#a78bfa]/8 blur-xl" />
+    <div className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-fuchsia-500/5 backdrop-blur-xl p-6 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+      {/* Vivid gradient glow effects */}
+      <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/10 blur-3xl" />
+      <div className="absolute -bottom-10 left-1/4 h-36 w-36 rounded-full bg-fuchsia-500/10 blur-2xl" />
+      <div className="absolute right-1/3 top-1/2 h-20 w-20 rounded-full bg-cyan-500/10 blur-xl" />
+
+      {/* Shimmer border animation */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-2xl"
+        style={{
+          background: 'linear-gradient(90deg, transparent 0%, rgba(129,140,248,0.15) 50%, transparent 100%)',
+          backgroundSize: '200% 100%',
+          animation: 'textShimmer 4s ease-in-out infinite',
+        }}
+      />
 
       {/* Holy Spirit flame mark */}
       <div className="absolute right-6 top-6 opacity-15 lg:right-10 lg:top-1/2 lg:-translate-y-1/2">
@@ -49,30 +59,30 @@ export function EventBanner({ eventName, startDate, endDate }: EventBannerProps)
         >
           <path
             d="M60 10 C60 10, 30 50, 30 72 C30 92, 45 110, 60 110 C75 110, 90 92, 90 72 C90 50, 60 10, 60 10Z"
-            fill="url(#skyFlame)"
+            fill="url(#vividFlame)"
             style={{ animation: 'flamePulse 2.5s ease-in-out infinite' }}
           />
           <path
             d="M60 40 C60 40, 44 65, 44 78 C44 92, 52 102, 60 102 C68 102, 76 92, 76 78 C76 65, 60 40, 60 40Z"
-            fill="url(#skyFlameInner)"
+            fill="url(#vividFlameInner)"
             style={{ animation: 'flamePulse 2.5s ease-in-out infinite 0.4s' }}
           />
-          <ellipse cx="60" cy="88" rx="7" ry="10" fill="#e0f2fe" opacity="0.8" />
+          <ellipse cx="60" cy="88" rx="7" ry="10" fill="#e0e7ff" opacity="0.8" />
           <path
             d="M54 78 C54 78, 56 74, 60 74 C64 74, 66 78, 66 78 C66 78, 64 76, 60 76 C56 76, 54 78, 54 78Z"
             fill="white"
             opacity="0.5"
           />
           <defs>
-            <linearGradient id="skyFlame" x1="60" y1="10" x2="60" y2="110" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.9" />
-              <stop offset="40%" stopColor="#38bdf8" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#0369a1" stopOpacity="0.5" />
+            <linearGradient id="vividFlame" x1="60" y1="10" x2="60" y2="110" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#e0e7ff" stopOpacity="0.9" />
+              <stop offset="40%" stopColor="#818cf8" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.5" />
             </linearGradient>
-            <linearGradient id="skyFlameInner" x1="60" y1="40" x2="60" y2="102" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#f0f9ff" stopOpacity="0.9" />
-              <stop offset="50%" stopColor="#7dd3fc" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.5" />
+            <linearGradient id="vividFlameInner" x1="60" y1="40" x2="60" y2="102" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#f5f3ff" stopOpacity="0.9" />
+              <stop offset="50%" stopColor="#c084fc" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#a855f7" stopOpacity="0.5" />
             </linearGradient>
           </defs>
         </svg>
@@ -80,14 +90,14 @@ export function EventBanner({ eventName, startDate, endDate }: EventBannerProps)
 
       <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-3">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 px-3 py-1 text-xs font-semibold text-indigo-300">
             <FlameIcon className="h-3.5 w-3.5" />
             여름행사
           </div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-white lg:text-3xl">
+          <h2 className="bg-gradient-to-r from-indigo-200 via-purple-200 to-fuchsia-200 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent lg:text-3xl">
             {eventName}
           </h2>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[#8892a8]">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
             <span className="inline-flex items-center gap-1.5">
               <CalendarDays className="h-4 w-4" />
               {dateText}
@@ -100,10 +110,10 @@ export function EventBanner({ eventName, startDate, endDate }: EventBannerProps)
         </div>
 
         <div className="flex items-center gap-4 lg:flex-col lg:items-end lg:gap-1">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#8892a8]">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
             {getDdayLabel()}
           </p>
-          <p className="font-mono text-5xl font-black tracking-tighter text-primary lg:text-6xl">
+          <p className="bg-gradient-to-r from-indigo-400 via-purple-400 to-fuchsia-400 bg-clip-text font-mono text-5xl font-black tracking-tighter text-transparent lg:text-6xl">
             {getDdayText()}
           </p>
         </div>

@@ -16,14 +16,35 @@ interface LeaderboardTableProps {
   type: 'group' | 'individual'
 }
 
-function getMedalStyles(rank: number): { bg: string; text: string; icon: string } | null {
+function getMedalStyles(rank: number) {
   switch (rank) {
     case 1:
-      return { bg: 'bg-amber-500/15', text: 'text-amber-400', icon: 'text-amber-400' }
+      return {
+        gradient: 'from-amber-500/20 to-yellow-500/10',
+        border: 'border-amber-500/25',
+        text: 'text-amber-300',
+        icon: 'text-amber-400',
+        iconBg: 'bg-gradient-to-br from-amber-500 to-yellow-600',
+        glow: 'shadow-[0_0_25px_rgba(245,158,11,0.15)]',
+      }
     case 2:
-      return { bg: 'bg-slate-400/15', text: 'text-slate-300', icon: 'text-slate-300' }
+      return {
+        gradient: 'from-slate-400/15 to-slate-500/5',
+        border: 'border-slate-400/20',
+        text: 'text-slate-300',
+        icon: 'text-slate-300',
+        iconBg: 'bg-gradient-to-br from-slate-400 to-slate-500',
+        glow: 'shadow-[0_0_20px_rgba(148,163,184,0.1)]',
+      }
     case 3:
-      return { bg: 'bg-orange-600/15', text: 'text-orange-400', icon: 'text-orange-400' }
+      return {
+        gradient: 'from-orange-600/15 to-orange-700/5',
+        border: 'border-orange-500/20',
+        text: 'text-orange-400',
+        icon: 'text-orange-400',
+        iconBg: 'bg-gradient-to-br from-orange-500 to-orange-700',
+        glow: 'shadow-[0_0_20px_rgba(234,88,12,0.1)]',
+      }
     default:
       return null
   }
@@ -36,11 +57,11 @@ function RankBadge({ rank }: { rank: number }) {
     return (
       <div
         className={cn(
-          'flex size-10 items-center justify-center rounded-full',
-          medalStyles.bg
+          'flex size-10 items-center justify-center rounded-full shadow-lg',
+          medalStyles.iconBg
         )}
       >
-        <Trophy className={cn('size-5', medalStyles.icon)} />
+        <Trophy className="size-5 text-white" />
       </div>
     )
   }
@@ -69,10 +90,15 @@ export function LeaderboardTable({ entries, type }: LeaderboardTableProps) {
           <div
             key={`${entry.rank}-${entry.name}`}
             className={cn(
-              'flex items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-300',
-              isTopThree
-                ? 'border-primary/20 bg-white/[0.06] backdrop-blur-xl shadow-[0_0_20px_rgba(56,189,248,0.06)]'
-                : 'border-white/[0.06] bg-white/[0.02] hover:border-primary/15 hover:bg-white/[0.04]'
+              'flex items-center gap-3 rounded-xl border px-4 py-3 backdrop-blur-xl transition-all duration-300',
+              isTopThree && medalStyles
+                ? cn(
+                    'bg-gradient-to-br',
+                    medalStyles.gradient,
+                    medalStyles.border,
+                    medalStyles.glow
+                  )
+                : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
             )}
           >
             <RankBadge rank={entry.rank} />
@@ -80,7 +106,10 @@ export function LeaderboardTable({ entries, type }: LeaderboardTableProps) {
             {type === 'group' && entry.color && (
               <div
                 className="size-3 shrink-0 rounded-full"
-                style={{ backgroundColor: entry.color }}
+                style={{
+                  backgroundColor: entry.color,
+                  boxShadow: `0 0 8px ${entry.color}60`,
+                }}
                 aria-hidden="true"
               />
             )}

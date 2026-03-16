@@ -116,14 +116,14 @@ function MaterialCard({
     <motion.div
       variants={fadeUp}
       className={cn(
-        'rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'rounded-2xl border border-fuchsia-500/15 bg-gradient-to-br from-fuchsia-500/10 to-fuchsia-600/5 backdrop-blur-xl',
         'transition-all duration-300',
-        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]'
+        'hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(232,121,249,0.12)]'
       )}
     >
       <div className="flex items-center gap-4 px-4 py-4 md:px-6">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">
-          <FileIcon className="size-5 text-muted-foreground" />
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 shadow-lg">
+          <FileIcon className="size-5 text-white" />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -304,9 +304,9 @@ export default function MaterialsPage() {
             />
           ) : (
             <Tabs defaultValue="all">
-              <TabsList className="w-full overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.04] p-1 backdrop-blur-xl md:w-auto">
+              <TabsList className="w-full overflow-x-auto rounded-full border border-fuchsia-500/15 bg-gradient-to-r from-fuchsia-500/10 to-purple-500/5 p-1 backdrop-blur-xl md:w-auto">
                 {TABS.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9 rounded-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9 rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-fuchsia-500/15 data-[state=active]:to-purple-500/15 data-[state=active]:text-fuchsia-300">
                     {tab.label}
                   </TabsTrigger>
                 ))}

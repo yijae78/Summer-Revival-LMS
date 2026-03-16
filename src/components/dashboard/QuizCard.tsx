@@ -32,9 +32,11 @@ export function QuizCard({
   return (
     <div
       className={cn(
-        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] active:scale-[0.98]',
-        quiz.is_active &&
-          'border-primary/40 bg-primary/10 shadow-[0_0_16px_rgba(56,189,248,0.15)]',
+        'cursor-pointer rounded-2xl border backdrop-blur-xl transition-all duration-300',
+        'hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]',
+        quiz.is_active
+          ? 'border-amber-500/25 bg-gradient-to-br from-amber-500/15 to-orange-500/10 shadow-[0_0_25px_rgba(245,158,11,0.12)]'
+          : 'border-purple-500/15 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/5 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]',
         className
       )}
       onClick={onClick}
@@ -48,7 +50,10 @@ export function QuizCard({
           </h3>
           <Badge
             variant={quiz.is_active ? 'default' : 'secondary'}
-            className="shrink-0"
+            className={cn(
+              'shrink-0',
+              quiz.is_active && 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0'
+            )}
           >
             {quiz.is_active ? '활성' : '비활성'}
           </Badge>
@@ -60,7 +65,7 @@ export function QuizCard({
             {getTypeLabel(quiz.type)}
           </Badge>
           <span>{questionCount}문제</span>
-          <span className="text-primary font-medium">
+          <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text font-medium text-transparent">
             {quiz.points_per_question}점/문제
           </span>
         </div>

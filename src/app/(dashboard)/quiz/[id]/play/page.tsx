@@ -202,9 +202,9 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
 
         {/* Quick Summary */}
         <motion.div variants={fadeUp}>
-          <Card className="border-primary/30 bg-primary/5 backdrop-blur-xl">
+          <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-500/15 to-purple-500/10 backdrop-blur-xl">
             <CardContent className="py-6 text-center">
-              <p className="text-4xl font-bold tabular-nums text-primary">{totalScore}점</p>
+              <p className="bg-gradient-to-r from-indigo-400 via-purple-400 to-fuchsia-400 bg-clip-text text-4xl font-bold tabular-nums text-transparent">{totalScore}점</p>
               <p className="mt-2 text-sm text-muted-foreground">
                 {totalQuestions}문제 중 {correctCount}문제 정답이에요
               </p>
@@ -285,7 +285,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
               </div>
               <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
                 <motion.div
-                  className="h-full rounded-full bg-primary"
+                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-fuchsia-500"
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
                   transition={{ duration: 0.3 }}
@@ -295,10 +295,10 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
 
             {/* Question */}
             <motion.div variants={fadeUp}>
-              <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+              <Card className="border-purple-500/15 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/5 backdrop-blur-xl">
                 <CardContent className="py-6">
                   <p className="text-center text-lg font-semibold leading-relaxed text-foreground">
-                    <span className="mr-2 text-primary">
+                    <span className="mr-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                       Q{currentIndex + 1}.
                     </span>
                     {currentQuestion.question}
@@ -336,7 +336,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       className={cn(
                         'flex min-h-[56px] items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all',
                         phase === 'playing' &&
-                          'border-white/[0.08] bg-white/[0.03] hover:border-primary/50 hover:bg-primary/5',
+                          'border-white/[0.08] bg-white/[0.03] hover:border-indigo-500/50 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-purple-500/5',
                         isCorrectAnswer &&
                           'border-emerald-500 bg-emerald-500/10',
                         isWrongSelected &&
@@ -404,7 +404,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       className={cn(
                         'flex min-h-[100px] flex-col items-center justify-center gap-2 rounded-2xl border-2 text-center transition-all',
                         phase === 'playing' &&
-                          'border-white/[0.08] bg-white/[0.03] hover:border-primary/50 hover:bg-primary/5',
+                          'border-white/[0.08] bg-white/[0.03] hover:border-indigo-500/50 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-purple-500/5',
                         isCorrectAnswer &&
                           'border-emerald-500 bg-emerald-500/10',
                         isWrongSelected &&

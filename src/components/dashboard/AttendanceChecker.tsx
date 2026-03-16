@@ -25,26 +25,26 @@ const STATUS_OPTIONS: Array<{
   {
     value: 'present',
     label: '출석',
-    activeClassName: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-emerald-500/20 hover:bg-emerald-500/10',
+    activeClassName: 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.3)]',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-emerald-500/30 hover:bg-emerald-500/10',
   },
   {
     value: 'late',
     label: '지각',
-    activeClassName: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-amber-500/20 hover:bg-amber-500/10',
+    activeClassName: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.3)]',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-amber-500/30 hover:bg-amber-500/10',
   },
   {
     value: 'absent',
     label: '결석',
-    activeClassName: 'bg-red-500/20 text-red-400 border-red-500/30',
-    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-red-500/20 hover:bg-red-500/10',
+    activeClassName: 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-red-500/30 hover:bg-red-500/10',
   },
   {
     value: 'excused',
     label: '사유',
-    activeClassName: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
-    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-sky-500/20 hover:bg-sky-500/10',
+    activeClassName: 'bg-gradient-to-r from-sky-500 to-sky-600 text-white border-sky-500/30 shadow-[0_0_15px_rgba(14,165,233,0.3)]',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-sky-500/30 hover:bg-sky-500/10',
   },
 ]
 
@@ -64,7 +64,7 @@ export function AttendanceChecker({
   return (
     <div
       className={cn(
-        'flex min-h-14 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 transition-all duration-300 hover:border-primary/15 hover:bg-white/[0.04] md:px-4',
+        'flex min-h-14 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 transition-all duration-300 hover:border-indigo-500/15 hover:bg-white/[0.04] md:px-4',
         isUpdating && 'opacity-70'
       )}
     >

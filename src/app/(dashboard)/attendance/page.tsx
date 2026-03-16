@@ -39,9 +39,9 @@ function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCard
     <motion.div
       variants={fadeUp}
       className={cn(
-        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'cursor-pointer rounded-2xl border border-emerald-500/15 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 backdrop-blur-xl',
         'transition-all duration-300',
-        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+        'hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]',
         'active:scale-[0.99]'
       )}
       onClick={() => onNavigate(schedule.id)}
@@ -56,8 +56,8 @@ function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCard
     >
       <div className="flex items-center gap-3 px-4 py-4 md:px-6">
         {/* Icon */}
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-          <ClipboardCheck className="size-5 text-primary" />
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg">
+          <ClipboardCheck className="size-5 text-white" />
         </div>
 
         {/* Content */}
@@ -169,8 +169,8 @@ export default function AttendancePage() {
                     className={cn(
                       'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-300',
                       activeDay === day
-                        ? 'border-primary/30 bg-primary/10 text-primary shadow-[0_0_16px_rgba(56,189,248,0.15)]'
-                        : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:border-primary/20 hover:bg-white/[0.06]'
+                        ? 'border-emerald-500/30 bg-gradient-to-r from-emerald-500/15 to-emerald-600/15 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.15)]'
+                        : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:border-emerald-500/20 hover:bg-white/[0.06]'
                     )}
                   >
                     <CalendarDays className="size-3.5" />

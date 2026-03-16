@@ -46,7 +46,7 @@ export function PageHeader({
               'mt-0.5 flex min-h-[40px] min-w-[40px] shrink-0 items-center justify-center',
               'rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm',
               'text-muted-foreground transition-all duration-300',
-              'hover:border-primary/20 hover:bg-white/[0.06] hover:text-foreground',
+              'hover:border-indigo-500/20 hover:bg-white/[0.06] hover:text-foreground',
               'active:scale-95'
             )}
             aria-label={backLabel}
@@ -55,7 +55,12 @@ export function PageHeader({
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold tracking-[-0.01em] text-foreground md:text-2xl">
+          <h1 className={cn(
+            'text-xl font-bold tracking-[-0.01em] md:text-2xl',
+            !backHref
+              ? 'bg-gradient-to-r from-indigo-300 via-purple-300 to-fuchsia-300 bg-clip-text text-transparent'
+              : 'text-foreground'
+          )}>
             {title}
           </h1>
           {description && (

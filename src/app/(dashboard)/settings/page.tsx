@@ -42,12 +42,12 @@ function GlassSection({
   return (
     <motion.div
       variants={fadeUp}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.12]"
+      className="rounded-2xl border border-indigo-500/15 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_0_25px_rgba(99,102,241,0.1)]"
     >
       <div className="px-5 pt-5 pb-2">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <Icon className="size-4 text-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+            <Icon className="size-4 text-white" />
           </div>
           <div>
             <h3 className="text-base font-semibold text-foreground">{title}</h3>
@@ -97,7 +97,7 @@ export default function SettingsPage() {
       <GlassSection icon={User} title="프로필" description="내 계정 정보를 확인하세요">
         <div className="flex items-center gap-4">
           <div
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary ring-2 ring-primary/20"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xl font-bold text-white ring-2 ring-indigo-500/20 shadow-lg"
             aria-hidden="true"
           >
             {user?.name?.charAt(0) ?? '?'}
@@ -125,8 +125,8 @@ export default function SettingsPage() {
                 className={cn(
                   'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl border p-3 text-sm transition-all duration-300',
                   theme === option.value
-                    ? 'border-primary/40 bg-primary/10 text-primary shadow-[0_0_16px_rgba(56,189,248,0.15)]'
-                    : 'border-white/[0.08] bg-white/[0.04] hover:border-primary/20 hover:bg-white/[0.06]'
+                    ? 'border-indigo-500/30 bg-gradient-to-br from-indigo-500/15 to-purple-500/10 text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.15)]'
+                    : 'border-white/[0.08] bg-white/[0.04] hover:border-indigo-500/20 hover:bg-white/[0.06]'
                 )}
                 aria-pressed={theme === option.value}
               >

@@ -111,7 +111,7 @@ export function ZeroDataGuide({
               className={cn(
                 'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105',
                 step.completed
-                  ? 'bg-primary text-[#0c0e14]'
+                  ? 'bg-primary text-[#0f172a]'
                   : cn(step.iconBg, step.iconColor)
               )}
             >
