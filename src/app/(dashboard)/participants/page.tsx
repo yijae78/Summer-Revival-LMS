@@ -142,17 +142,19 @@ function ParticipantSkeleton() {
 
 const GRADE_FILTERS = [
   { key: 'all', label: '전체' },
-  { key: 'elementary', label: '초등' },
-  { key: 'middle', label: '중등' },
-  { key: 'high', label: '고등' },
-  { key: 'college', label: '대학' },
+  { key: 'children', label: '아동부' },
+  { key: 'elementary', label: '초등부' },
+  { key: 'middle', label: '중등부' },
+  { key: 'high', label: '고등부' },
+  { key: 'college', label: '청년부' },
   { key: 'adult', label: '성인' },
 ]
 
 function matchGradeFilter(grade: string | null, filter: string): boolean {
   if (filter === 'all') return true
   if (!grade) return false
-  if (filter === 'elementary') return grade.startsWith('elementary') || grade.startsWith('초')
+  if (filter === 'children') return ['초1', '초2', '초3', 'elementary_1', 'elementary_2', 'elementary_3'].includes(grade)
+  if (filter === 'elementary') return ['초4', '초5', '초6', 'elementary_4', 'elementary_5', 'elementary_6'].includes(grade)
   if (filter === 'middle') return grade.startsWith('middle') || grade.startsWith('중')
   if (filter === 'high') return grade.startsWith('high') || grade.startsWith('고')
   if (filter === 'college') return grade === 'college' || grade === '대학생'
