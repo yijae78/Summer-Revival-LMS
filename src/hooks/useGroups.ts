@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
 import { DEMO_GROUPS, DEMO_GROUP_MEMBERS, DEMO_PARTICIPANTS } from '@/lib/demo/data'
@@ -53,7 +54,7 @@ export function useGroups(eventId: string | null) {
         member_count: countMap.get(g.id) ?? 0,
       }))
     },
-    enabled: eventId !== null && !isDemoMode,
+    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -88,7 +89,7 @@ export function useGroup(groupId: string | null) {
       if (error) throw error
       return data as Group
     },
-    enabled: groupId !== null && !isDemoMode,
+    enabled: groupId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -114,7 +115,7 @@ export function useGroupMembers(groupId: string | null) {
       if (error) throw error
       return (data ?? []) as GroupMemberWithParticipant[]
     },
-    enabled: groupId !== null && !isDemoMode,
+    enabled: groupId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

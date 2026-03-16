@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
 import {
@@ -52,7 +53,7 @@ export function useQuizzes(eventId: string | null) {
 
       return quizzes
     },
-    enabled: eventId !== null && !isDemoMode,
+    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -91,7 +92,7 @@ export function useQuiz(quizId: string | null) {
         questions: sorted,
       } as QuizWithQuestions
     },
-    enabled: quizId !== null && !isDemoMode,
+    enabled: quizId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -155,7 +156,7 @@ export function useQuizResponses(quizId: string | null) {
 
       return responses
     },
-    enabled: quizId !== null && !isDemoMode,
+    enabled: quizId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -212,7 +213,7 @@ export function useMyQuizResponses(
 
       return (data ?? []) as QuizResponse[]
     },
-    enabled: quizId !== null && participantId !== null && !isDemoMode,
+    enabled: quizId !== null && participantId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

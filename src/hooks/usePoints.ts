@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
 import { DEMO_GROUPS, DEMO_POINTS, DEMO_PARTICIPANTS } from '@/lib/demo/data'
@@ -89,7 +90,7 @@ export function usePointsRanking(eventId: string | null, type: 'individual' | 'g
 
       return entries
     },
-    enabled: eventId !== null && !isDemoMode,
+    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -150,7 +151,7 @@ export function usePointHistory(eventId: string | null, groupId?: string | null)
       if (error) throw error
       return (data ?? []) as PointRecord[]
     },
-    enabled: eventId !== null && !isDemoMode,
+    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

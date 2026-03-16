@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
@@ -32,7 +33,7 @@ export function useMaterials(eventId: string, category?: string) {
       if (error) throw error
       return data as Material[]
     },
-    enabled: !!eventId && !isDemoMode,
+    enabled: !!eventId && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

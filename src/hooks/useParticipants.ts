@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
 import { DEMO_PARTICIPANTS } from '@/lib/demo/data'
@@ -41,7 +42,7 @@ export function useParticipants(eventId: string | null, filters?: ParticipantFil
       if (error) throw error
       return (data ?? []) as Participant[]
     },
-    enabled: eventId !== null && !isDemoMode,
+    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -75,7 +76,7 @@ export function useParticipant(id: string | null) {
       if (error) throw error
       return data as Participant
     },
-    enabled: id !== null && !isDemoMode,
+    enabled: id !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

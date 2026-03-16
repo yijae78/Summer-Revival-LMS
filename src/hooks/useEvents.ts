@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
@@ -23,7 +24,7 @@ export function useEvents() {
       if (error) throw error
       return data
     },
-    enabled: !isDemoMode,
+    enabled: !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

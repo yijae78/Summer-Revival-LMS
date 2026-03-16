@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 import { useDemoStore } from '@/stores/demoStore'
 import { DEMO_USER } from '@/lib/demo/data'
@@ -48,7 +49,7 @@ export function useUser() {
         hasSeenOnboarding: data.has_seen_onboarding,
       }
     },
-    enabled: !isDemoMode,
+    enabled: !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

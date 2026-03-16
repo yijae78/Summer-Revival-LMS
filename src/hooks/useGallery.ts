@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
 import { DEMO_ALBUMS, DEMO_PHOTOS } from '@/lib/demo/data'
@@ -30,7 +31,7 @@ export function useAlbums(eventId: string | null) {
           : 0,
       })) as (GalleryAlbum & { photoCount: number })[]
     },
-    enabled: eventId !== null && !isDemoMode,
+    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
@@ -59,7 +60,7 @@ export function usePhotos(albumId: string | null) {
       if (error) throw error
       return (data ?? []) as GalleryPhoto[]
     },
-    enabled: albumId !== null && !isDemoMode,
+    enabled: albumId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {

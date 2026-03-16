@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
 import { useDemoStore } from '@/stores/demoStore'
 import { DEMO_ATTENDANCE, DEMO_PARTICIPANTS } from '@/lib/demo/data'
@@ -39,7 +40,7 @@ export function useAttendance(scheduleId: string | null) {
 
       return records
     },
-    enabled: scheduleId !== null && !isDemoMode,
+    enabled: scheduleId !== null && !isDemoMode && isSupabaseConfigured(),
   })
 
   if (isDemoMode) {
