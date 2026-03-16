@@ -140,45 +140,54 @@ function ParticipantSkeleton() {
   )
 }
 
-const GRADE_FILTERS = [
-  { key: 'all', label: '전체', emoji: '👥', gradient: 'from-slate-500 to-slate-600' },
-  { key: 'kindergarten', label: '유치부', emoji: '🧒', gradient: 'from-pink-500 to-rose-500' },
-  { key: 'children', label: '아동부', emoji: '🌱', gradient: 'from-emerald-500 to-green-500' },
-  { key: 'elementary', label: '초등부', emoji: '📚', gradient: 'from-sky-500 to-blue-500' },
-  { key: 'middle', label: '중등부', emoji: '⚡', gradient: 'from-indigo-500 to-purple-500' },
-  { key: 'high', label: '고등부', emoji: '🔥', gradient: 'from-orange-500 to-amber-500' },
-  { key: 'college', label: '청년부', emoji: '✨', gradient: 'from-fuchsia-500 to-purple-500' },
-  { key: 'adult', label: '성인', emoji: '🙏', gradient: 'from-cyan-500 to-teal-500' },
+const DEPARTMENTS = [
+  { key: 'all', label: '전체', emoji: '👥', gradient: 'from-slate-500 to-slate-600', subGrades: [] },
+  { key: 'kindergarten', label: '유치부', emoji: '🧒', gradient: 'from-pink-500 to-rose-500', subGrades: ['유치부'] },
+  { key: 'children', label: '아동부', emoji: '🌱', gradient: 'from-emerald-500 to-green-500', subGrades: ['초1', '초2', '초3'] },
+  { key: 'elementary', label: '초등부', emoji: '📚', gradient: 'from-sky-500 to-blue-500', subGrades: ['초4', '초5', '초6'] },
+  { key: 'middle', label: '중등부', emoji: '⚡', gradient: 'from-indigo-500 to-purple-500', subGrades: ['중1', '중2', '중3'] },
+  { key: 'high', label: '고등부', emoji: '🔥', gradient: 'from-orange-500 to-amber-500', subGrades: ['고1', '고2', '고3'] },
+  { key: 'college', label: '청년부', emoji: '✨', gradient: 'from-fuchsia-500 to-purple-500', subGrades: ['대학생'] },
+  { key: 'adult', label: '성인', emoji: '🙏', gradient: 'from-cyan-500 to-teal-500', subGrades: ['성인'] },
 ]
 
-function matchGradeFilter(grade: string | null, filter: string): boolean {
-  if (filter === 'all') return true
+function matchDepartment(grade: string | null, deptKey: string): boolean {
+  if (deptKey === 'all') return true
   if (!grade) return false
-  if (filter === 'kindergarten') return grade === '유치부'
-  if (filter === 'children') return ['초1', '초2', '초3', 'elementary_1', 'elementary_2', 'elementary_3'].includes(grade)
-  if (filter === 'elementary') return ['초4', '초5', '초6', 'elementary_4', 'elementary_5', 'elementary_6'].includes(grade)
-  if (filter === 'middle') return grade.startsWith('middle') || grade.startsWith('중')
-  if (filter === 'high') return grade.startsWith('high') || grade.startsWith('고')
-  if (filter === 'college') return grade === 'college' || grade === '대학생'
-  if (filter === 'adult') return grade === 'adult' || grade === '성인'
-  return false
+  const dept = DEPARTMENTS.find((d) => d.key === deptKey)
+  if (!dept) return false
+  return dept.subGrades.includes(grade)
+}
+
+function matchSubGrade(grade: string | null, subGrade: string | null): boolean {
+  if (!subGrade) return true
+  if (!grade) return false
+  return grade === subGrade
 }
 
 export default function ParticipantsPage() {
   const router = useRouter()
   const { eventId } = useCurrentEvent()
   const [searchQuery, setSearchQuery] = useState('')
-  const [gradeFilter, setGradeFilter] = useState('all')
+  const [department, setDepartment] = useState('all')
+  const [subGrade, setSubGrade] = useState<string | null>(null)
 
   const { data: participants, isLoading } = useParticipants(eventId ?? null)
+
+  const activeDept = DEPARTMENTS.find((d) => d.key === department)
 
   const filteredParticipants = useMemo(() => {
     if (!participants) return []
     let filtered = participants
 
-    // 학년 필터
-    if (gradeFilter !== 'all') {
-      filtered = filtered.filter((p) => matchGradeFilter(p.grade, gradeFilter))
+    // 부서 필터
+    if (department !== 'all') {
+      filtered = filtered.filter((p) => matchDepartment(p.grade, department))
+    }
+
+    // 세부 학년 필터
+    if (subGrade) {
+      filtered = filtered.filter((p) => matchSubGrade(p.grade, subGrade))
     }
 
     // 검색 필터
@@ -188,21 +197,35 @@ export default function ParticipantsPage() {
     }
 
     return filtered
-  }, [participants, searchQuery, gradeFilter])
+  }, [participants, searchQuery, department, subGrade])
 
   const paidCount = useMemo(
     () => participants?.filter((p) => p.fee_paid).length ?? 0,
     [participants]
   )
 
-  const gradeCountMap = useMemo(() => {
+  const deptCountMap = useMemo(() => {
     if (!participants) return {} as Record<string, number>
     const map: Record<string, number> = { all: participants.length }
-    GRADE_FILTERS.slice(1).forEach((f) => {
-      map[f.key] = participants.filter((p) => matchGradeFilter(p.grade, f.key)).length
+    DEPARTMENTS.slice(1).forEach((d) => {
+      map[d.key] = participants.filter((p) => matchDepartment(p.grade, d.key)).length
     })
     return map
   }, [participants])
+
+  const subGradeCountMap = useMemo(() => {
+    if (!participants || !activeDept) return {} as Record<string, number>
+    const map: Record<string, number> = {}
+    activeDept.subGrades.forEach((sg) => {
+      map[sg] = participants.filter((p) => p.grade === sg).length
+    })
+    return map
+  }, [participants, activeDept])
+
+  function handleDeptChange(key: string) {
+    setDepartment(key)
+    setSubGrade(null)
+  }
 
   const handleNavigateToDetail = useCallback(
     (id: string) => {
@@ -235,51 +258,103 @@ export default function ParticipantsPage() {
         />
       </motion.div>
 
-      {/* Grade filter tabs — 3D hover effect */}
-      <motion.div variants={fadeUp} className="flex gap-2 overflow-x-auto pb-2">
-        {GRADE_FILTERS.map((f) => {
-          const count = gradeCountMap[f.key] ?? 0
-          const isActive = gradeFilter === f.key
-          return (
-            <motion.button
-              key={f.key}
-              type="button"
-              onClick={() => setGradeFilter(f.key)}
-              whileHover={{
-                y: -6,
-                scale: 1.05,
-                rotateX: -5,
-                transition: { type: 'spring', stiffness: 400, damping: 15 },
-              }}
-              whileTap={{ scale: 0.95, y: 0 }}
-              className={cn(
-                'relative flex shrink-0 flex-col items-center gap-1 rounded-2xl px-4 py-3 text-xs font-bold transition-colors duration-200',
-                isActive
-                  ? cn('bg-gradient-to-br text-white shadow-xl', f.gradient)
-                  : 'border border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:text-foreground',
-              )}
-              style={{
-                perspective: '600px',
-                boxShadow: isActive
-                  ? '0 10px 30px -5px rgba(0,0,0,0.4), 0 0 20px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.15)'
-                  : undefined,
-              }}
-            >
-              <span className="text-base">{f.emoji}</span>
-              <span>{f.label}</span>
-              {count > 0 && (
-                <span className={cn(
-                  'absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.5625rem] font-black',
+      {/* Department filter — 3D hover */}
+      <motion.div variants={fadeUp} className="space-y-2">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {DEPARTMENTS.map((d) => {
+            const count = deptCountMap[d.key] ?? 0
+            const isActive = department === d.key
+            return (
+              <motion.button
+                key={d.key}
+                type="button"
+                onClick={() => handleDeptChange(d.key)}
+                whileHover={{
+                  y: -6,
+                  scale: 1.05,
+                  rotateX: -5,
+                  transition: { type: 'spring', stiffness: 400, damping: 15 },
+                }}
+                whileTap={{ scale: 0.95, y: 0 }}
+                className={cn(
+                  'relative flex shrink-0 flex-col items-center gap-1 rounded-2xl px-4 py-3 text-xs font-bold transition-colors duration-200',
                   isActive
-                    ? 'bg-white text-slate-900 shadow-md'
-                    : 'bg-white/10 text-muted-foreground',
-                )}>
-                  {count}
-                </span>
+                    ? cn('bg-gradient-to-br text-white shadow-xl', d.gradient)
+                    : 'border border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:text-foreground',
+                )}
+                style={{
+                  perspective: '600px',
+                  boxShadow: isActive
+                    ? '0 10px 30px -5px rgba(0,0,0,0.4), 0 0 20px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.15)'
+                    : undefined,
+                }}
+              >
+                <span className="text-base">{d.emoji}</span>
+                <span>{d.label}</span>
+                {count > 0 && (
+                  <span className={cn(
+                    'absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.5625rem] font-black',
+                    isActive
+                      ? 'bg-white text-slate-900 shadow-md'
+                      : 'bg-white/10 text-muted-foreground',
+                  )}>
+                    {count}
+                  </span>
+                )}
+              </motion.button>
+            )
+          })}
+        </div>
+
+        {/* Sub-grade tabs — 세부 학년 */}
+        {activeDept && activeDept.subGrades.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex gap-1.5 overflow-x-auto"
+          >
+            <button
+              type="button"
+              onClick={() => setSubGrade(null)}
+              className={cn(
+                'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+                !subGrade
+                  ? 'bg-white/[0.12] text-foreground'
+                  : 'text-muted-foreground hover:bg-white/[0.06] hover:text-foreground'
               )}
-            </motion.button>
-          )
-        })}
+            >
+              전체 {activeDept.label}
+            </button>
+            {activeDept.subGrades.map((sg) => {
+              const sgCount = subGradeCountMap[sg] ?? 0
+              const isActive = subGrade === sg
+              return (
+                <button
+                  key={sg}
+                  type="button"
+                  onClick={() => setSubGrade(isActive ? null : sg)}
+                  className={cn(
+                    'flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+                    isActive
+                      ? cn('bg-gradient-to-r text-white shadow-md', activeDept.gradient)
+                      : 'text-muted-foreground hover:bg-white/[0.06] hover:text-foreground'
+                  )}
+                >
+                  {sg}
+                  {sgCount > 0 && (
+                    <span className={cn(
+                      'rounded-full px-1.5 text-[0.5625rem]',
+                      isActive ? 'bg-white/20' : 'bg-white/[0.06]'
+                    )}>
+                      {sgCount}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Summary bar */}
