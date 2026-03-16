@@ -223,22 +223,36 @@ function DashboardContent() {
             endDate={endDate}
           />
         </motion.div>
-        <motion.div variants={fadeUp}>
+        <motion.div
+          variants={fadeUp}
+          className="cursor-pointer"
+          onClick={() => router.push('/participants')}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
           <StatCard
             value={isParticipantsLoading ? '...' : participantCount}
             label="참가자"
             icon={Users}
             color="indigo"
             description={hasParticipants ? undefined : '아직 등록된 참가자가 없어요'}
+            className="h-full"
           />
         </motion.div>
-        <motion.div variants={fadeUp}>
+        <motion.div
+          variants={fadeUp}
+          className="cursor-pointer"
+          onClick={() => router.push('/schedule')}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
           <StatCard
             value={isSchedulesLoading ? '...' : hasSchedule ? scheduleCount : '\u2014'}
             label={hasSchedule ? '일정' : '출석률'}
             icon={hasSchedule ? Calendar : ClipboardCheck}
             color="fuchsia"
             description={hasSchedule ? `${scheduleCount}개 세션이 준비됐어요` : '행사가 시작되면 표시돼요'}
+            className="h-full"
           />
         </motion.div>
       </div>
