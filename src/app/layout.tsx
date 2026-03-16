@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 
 import { Providers } from '@/components/shared/Providers'
 import { OfflineIndicator } from '@/components/shared/OfflineIndicator'
+import { ChatWidget } from '@/components/chat/ChatWidget'
 
 import './globals.css'
 
@@ -50,6 +51,7 @@ export default function RootLayout({
         <Providers>
           <OfflineIndicator />
           {children}
+          <ChatWidget />
         </Providers>
       </body>
     </html>
