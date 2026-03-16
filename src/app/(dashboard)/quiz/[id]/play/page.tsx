@@ -4,6 +4,8 @@ import { use, useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, CheckCircle2, Clock, XCircle } from 'lucide-react'
 
+import { motion } from 'framer-motion'
+
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +18,9 @@ import { useUser } from '@/hooks/useUser'
 import { submitAnswer } from '@/actions/quiz'
 
 import type { QuizQuestion } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 interface QuizPlayPageProps {
   params: Promise<{ id: string }>
@@ -192,7 +197,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
         </div>
 
         {/* Quick Summary */}
-        <Card className="border-primary/30 bg-primary/5">
+        <Card className="border-primary/30 bg-primary/5 backdrop-blur-xl">
           <CardContent className="py-6 text-center">
             <p className="text-4xl font-bold text-primary">{totalScore}점</p>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -239,7 +244,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
               'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium',
               timeLeft <= 5
                 ? 'bg-destructive/10 text-destructive'
-                : 'bg-muted text-muted-foreground'
+                : 'bg-white/[0.06] text-muted-foreground'
             )}
           >
             <Clock className="h-4 w-4" />
@@ -259,7 +264,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                 </span>
                 <span>{progressPercent}%</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
                 <div
                   className="h-full rounded-full bg-primary transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
@@ -268,7 +273,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
             </div>
 
             {/* Question */}
-            <Card>
+            <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
               <CardContent className="py-6">
                 <p className="text-center text-lg font-semibold leading-relaxed text-foreground">
                   <span className="mr-2 text-primary">
@@ -301,7 +306,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       className={cn(
                         'flex min-h-[56px] items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all active:scale-[0.98]',
                         phase === 'playing' &&
-                          'border-border hover:border-primary/50 hover:bg-primary/5',
+                          'border-white/[0.08] hover:border-primary/50 hover:bg-primary/5',
                         isCorrectAnswer &&
                           'border-emerald-500 bg-emerald-500/10',
                         isWrongSelected &&
@@ -309,14 +314,14 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                         phase !== 'playing' &&
                           !isCorrectAnswer &&
                           !isWrongSelected &&
-                          'border-border opacity-50'
+                          'border-white/[0.08] opacity-50'
                       )}
                     >
                       <span
                         className={cn(
                           'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold',
                           phase === 'playing' &&
-                            'bg-muted text-muted-foreground',
+                            'bg-white/[0.06] text-muted-foreground',
                           isCorrectAnswer &&
                             'bg-emerald-500 text-white',
                           isWrongSelected &&
@@ -362,7 +367,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       className={cn(
                         'flex min-h-[100px] flex-col items-center justify-center gap-2 rounded-2xl border-2 text-center transition-all active:scale-[0.97]',
                         phase === 'playing' &&
-                          'border-border hover:border-primary/50 hover:bg-primary/5',
+                          'border-white/[0.08] hover:border-primary/50 hover:bg-primary/5',
                         isCorrectAnswer &&
                           'border-emerald-500 bg-emerald-500/10',
                         isWrongSelected &&
@@ -370,7 +375,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                         phase !== 'playing' &&
                           !isCorrectAnswer &&
                           !isWrongSelected &&
-                          'border-border opacity-50'
+                          'border-white/[0.08] opacity-50'
                       )}
                     >
                       <span

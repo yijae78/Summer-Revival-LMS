@@ -16,22 +16,22 @@ const colorMap = {
   primary: {
     bg: 'bg-[#38bdf8]/12',
     icon: 'text-[#38bdf8]',
-    glow: 'shadow-[0_0_20px_rgba(56,189,248,0.08)]',
+    glow: 'hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
   },
   secondary: {
     bg: 'bg-[#22d3ee]/12',
     icon: 'text-[#22d3ee]',
-    glow: 'shadow-[0_0_20px_rgba(34,211,238,0.08)]',
+    glow: 'hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]',
   },
   accent: {
     bg: 'bg-[#a78bfa]/12',
     icon: 'text-[#a78bfa]',
-    glow: 'shadow-[0_0_20px_rgba(167,139,250,0.08)]',
+    glow: 'hover:shadow-[0_0_20px_rgba(167,139,250,0.1)]',
   },
   success: {
     bg: 'bg-[#34d399]/12',
     icon: 'text-[#34d399]',
-    glow: 'shadow-[0_0_20px_rgba(52,211,153,0.08)]',
+    glow: 'hover:shadow-[0_0_20px_rgba(52,211,153,0.1)]',
   },
 }
 
@@ -51,8 +51,8 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-[#1e2235] bg-[#151823] p-5 transition-all duration-200',
-        'hover:border-[#2a3048] hover:shadow-lg hover:-translate-y-0.5',
+        'group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-5 transition-all duration-300',
+        'hover:border-primary/20 hover:bg-white/[0.06] hover:-translate-y-0.5',
         colors.glow,
         className
       )}
@@ -70,7 +70,7 @@ export function StatCard({
                 'rounded-full px-2.5 py-0.5 text-xs font-semibold',
                 isPositive && 'bg-[#34d399]/12 text-[#34d399]',
                 isNegative && 'bg-[#f87171]/12 text-[#f87171]',
-                !isPositive && !isNegative && 'bg-[#1c2030] text-[#8892a8]'
+                !isPositive && !isNegative && 'bg-white/[0.04] text-[#8892a8]'
               )}
             >
               {delta}

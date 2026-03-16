@@ -1,7 +1,6 @@
 import { Camera, Image as ImageIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 import type { GalleryAlbum } from '@/types'
@@ -14,9 +13,9 @@ interface AlbumCardProps {
 
 export function AlbumCard({ album, onClick, className }: AlbumCardProps) {
   return (
-    <Card
+    <div
       className={cn(
-        'group relative min-h-[160px] cursor-pointer overflow-hidden rounded-xl border-0 bg-gradient-to-br from-primary/20 via-primary/10 to-background transition-all hover:shadow-lg active:scale-[0.98]',
+        'group relative min-h-[160px] cursor-pointer overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] active:scale-[0.98]',
         className
       )}
       onClick={onClick}
@@ -52,8 +51,6 @@ export function AlbumCard({ album, onClick, className }: AlbumCardProps) {
           </div>
         </div>
       </div>
-
-      <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-foreground/5 transition-all group-hover:ring-primary/20" />
-    </Card>
+    </div>
   )
 }

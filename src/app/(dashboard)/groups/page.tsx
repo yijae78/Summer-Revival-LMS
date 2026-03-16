@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { Users, Plus, ChevronRight, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -27,6 +28,9 @@ import { useUser } from '@/hooks/useUser'
 import { createGroup } from '@/actions/groups'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 const GROUP_COLORS = [
   '#ef4444', // red
@@ -54,7 +58,7 @@ function GroupCard({
 }) {
   return (
     <Card
-      className="cursor-pointer gap-0 py-0 transition-colors hover:bg-accent/50 active:scale-[0.98]"
+      className="cursor-pointer gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] active:scale-[0.98]"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -136,9 +140,14 @@ export default function GroupsPage() {
   }, [eventId, groupName, selectedColor, queryClient])
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <motion.div
+      className="space-y-6 p-4 md:p-6"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground md:text-2xl">조 관리</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -158,9 +167,10 @@ export default function GroupsPage() {
             <span className="sm:hidden">추가</span>
           </Button>
         )}
-      </div>
+      </motion.div>
 
       {/* Group Grid */}
+      <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<GroupsSkeletons />}>
         {hasGroups ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -191,6 +201,7 @@ export default function GroupsPage() {
           />
         )}
       </LoadingSkeleton>
+      </motion.div>
 
       {/* Create Group Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -253,6 +264,6 @@ export default function GroupsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   )
 }

@@ -14,6 +14,8 @@ import {
   Coffee,
 } from 'lucide-react'
 
+import { motion } from 'framer-motion'
+
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -24,6 +26,9 @@ import { useSchedules } from '@/hooks/useSchedules'
 import { cn } from '@/lib/utils'
 
 import type { Schedule, SessionType } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 const SESSION_CONFIG: Record<
   SessionType,
@@ -80,7 +85,7 @@ function ScheduleCard({ schedule }: { schedule: Schedule }) {
   const TypeIcon = config.icon
 
   return (
-    <Card className="gap-0 py-0">
+    <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
       <CardContent className="flex gap-4 px-4 py-4 md:px-6">
         {/* Time column */}
         <div className="flex w-20 shrink-0 flex-col items-start pt-0.5">
@@ -149,7 +154,7 @@ function ScheduleSkeleton() {
         <div key={dayIdx} className="space-y-3">
           <SkeletonBox className="h-6 w-24" />
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex gap-4 rounded-xl border bg-card p-4 md:p-6">
+            <div key={i} className="flex gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
               <div className="w-20 space-y-1">
                 <SkeletonBox className="h-4 w-12" />
                 <SkeletonBox className="h-3 w-10" />
@@ -194,50 +199,57 @@ export default function SchedulePage() {
   )
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-foreground">일정표</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             행사 일정을 확인해 보세요
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      <LoadingSkeleton isLoading={isLoading} skeleton={<ScheduleSkeleton />}>
-        {sortedDays.length === 0 ? (
-          <EmptyState
-            icon={CalendarDays}
-            title="아직 등록된 일정이 없어요"
-            description="관리자가 일정을 등록하면 여기에 표시돼요."
-          />
-        ) : (
-          <div className="space-y-8">
-            {sortedDays.map((day) => {
-              const daySchedules = groupedByDay.get(day) ?? []
-              const firstSchedule = daySchedules[0]
-              const dateDisplay = firstSchedule?.date
-                ? ` (${firstSchedule.date})`
-                : ''
+      <motion.div variants={fadeUp}>
+        <LoadingSkeleton isLoading={isLoading} skeleton={<ScheduleSkeleton />}>
+          {sortedDays.length === 0 ? (
+            <EmptyState
+              icon={CalendarDays}
+              title="아직 등록된 일정이 없어요"
+              description="관리자가 일정을 등록하면 여기에 표시돼요."
+            />
+          ) : (
+            <div className="space-y-8">
+              {sortedDays.map((day) => {
+                const daySchedules = groupedByDay.get(day) ?? []
+                const firstSchedule = daySchedules[0]
+                const dateDisplay = firstSchedule?.date
+                  ? ` (${firstSchedule.date})`
+                  : ''
 
-              return (
-                <section key={day} className="space-y-3">
-                  <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                    <CalendarDays className="size-4 text-primary" />
-                    {day}일차{dateDisplay}
-                  </h2>
+                return (
+                  <section key={day} className="space-y-3">
+                    <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                      <CalendarDays className="size-4 text-primary" />
+                      {day}일차{dateDisplay}
+                    </h2>
 
-                  <div className="space-y-2">
-                    {daySchedules.map((schedule) => (
-                      <ScheduleCard key={schedule.id} schedule={schedule} />
-                    ))}
-                  </div>
-                </section>
-              )
-            })}
-          </div>
-        )}
-      </LoadingSkeleton>
-    </div>
+                    <div className="space-y-2">
+                      {daySchedules.map((schedule) => (
+                        <ScheduleCard key={schedule.id} schedule={schedule} />
+                      ))}
+                    </div>
+                  </section>
+                )
+              })}
+            </div>
+          )}
+        </LoadingSkeleton>
+      </motion.div>
+    </motion.div>
   )
 }

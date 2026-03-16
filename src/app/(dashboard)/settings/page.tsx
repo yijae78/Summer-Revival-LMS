@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { LogOut, Moon, Sun, Monitor, RefreshCw, CloudOff, Info } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,6 +14,9 @@ import { useOfflineSync } from '@/hooks/useOfflineSync'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 import { cn } from '@/lib/utils'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 const APP_VERSION = '0.1.0'
 
@@ -42,11 +46,19 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">설정</h1>
+    <motion.div
+      className="space-y-6"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={fadeUp}>
+        <h1 className="text-2xl font-bold">설정</h1>
+      </motion.div>
 
       {/* Profile Section */}
-      <Card>
+      <motion.div variants={fadeUp}>
+      <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
         <CardHeader>
           <CardTitle>프로필</CardTitle>
           <CardDescription>내 계정 정보를 확인하세요</CardDescription>
@@ -70,9 +82,11 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Theme Section */}
-      <Card>
+      <motion.div variants={fadeUp}>
+      <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
         <CardHeader>
           <CardTitle>테마</CardTitle>
           <CardDescription>화면 밝기를 설정하세요</CardDescription>
@@ -86,10 +100,10 @@ export default function SettingsPage() {
                   key={option.value}
                   onClick={() => setTheme(option.value)}
                   className={cn(
-                    'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg border p-3 text-sm transition-colors',
+                    'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg border p-3 text-sm transition-all duration-300',
                     theme === option.value
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border hover:bg-accent'
+                      ? 'border-primary/40 bg-primary/10 text-primary shadow-[0_0_16px_rgba(56,189,248,0.15)]'
+                      : 'border-white/[0.08] bg-white/[0.04] hover:border-primary/20 hover:bg-white/[0.06]'
                   )}
                   aria-pressed={theme === option.value}
                 >
@@ -101,9 +115,11 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Offline Queue Section */}
-      <Card>
+      <motion.div variants={fadeUp}>
+      <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CloudOff className="h-5 w-5" />
@@ -151,9 +167,11 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* App Info Section */}
-      <Card>
+      <motion.div variants={fadeUp}>
+      <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5" />
@@ -177,9 +195,11 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {/* Sign Out */}
-      <Card>
+      <motion.div variants={fadeUp}>
+      <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
         <CardContent className="pt-6">
           <Button
             onClick={handleSignOut}
@@ -192,6 +212,7 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

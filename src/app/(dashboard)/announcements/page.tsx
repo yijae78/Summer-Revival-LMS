@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { Megaphone, Pin, Plus, Trash2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,9 @@ import { formatRelativeTime } from '@/lib/utils/format-date'
 
 import type { Announcement, AnnouncementType } from '@/types'
 
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
+
 const TYPE_CONFIG: Record<AnnouncementType, { label: string; className: string }> = {
   general: {
     label: '일반',
@@ -69,7 +73,7 @@ function AnnouncementCard({
   const typeConfig = TYPE_CONFIG[announcement.type as AnnouncementType] ?? TYPE_CONFIG.general
 
   return (
-    <Card className="gap-0 py-0">
+    <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
       <CardHeader className="gap-3 px-4 py-4 md:px-6">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-1 flex-col gap-2">
@@ -117,7 +121,7 @@ function AnnouncementSkeleton() {
   return (
     <div className="space-y-4">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-xl border bg-card p-4 md:p-6">
+        <div key={i} className="rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
           <div className="flex items-center gap-2">
             <SkeletonBox className="h-5 w-12" />
             <SkeletonBox className="h-5 w-48" />
@@ -287,8 +291,13 @@ export default function AnnouncementsPage() {
   )
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-foreground">공지사항</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -301,28 +310,30 @@ export default function AnnouncementsPage() {
             onCreated={handleRefresh}
           />
         )}
-      </div>
+      </motion.div>
 
-      <LoadingSkeleton isLoading={isLoading} skeleton={<AnnouncementSkeleton />}>
-        {!announcements || announcements.length === 0 ? (
-          <EmptyState
-            icon={Megaphone}
-            title="아직 공지사항이 없어요"
-            description="행사 관련 공지가 등록되면 여기에 표시돼요."
-          />
-        ) : (
-          <div className="space-y-3">
-            {announcements.map((announcement) => (
-              <AnnouncementCard
-                key={announcement.id}
-                announcement={announcement}
-                canManage={canManage}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        )}
-      </LoadingSkeleton>
-    </div>
+      <motion.div variants={fadeUp}>
+        <LoadingSkeleton isLoading={isLoading} skeleton={<AnnouncementSkeleton />}>
+          {!announcements || announcements.length === 0 ? (
+            <EmptyState
+              icon={Megaphone}
+              title="아직 공지사항이 없어요"
+              description="행사 관련 공지가 등록되면 여기에 표시돼요."
+            />
+          ) : (
+            <div className="space-y-3">
+              {announcements.map((announcement) => (
+                <AnnouncementCard
+                  key={announcement.id}
+                  announcement={announcement}
+                  canManage={canManage}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+        </LoadingSkeleton>
+      </motion.div>
+    </motion.div>
   )
 }

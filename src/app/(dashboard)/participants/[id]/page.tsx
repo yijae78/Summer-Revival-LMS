@@ -16,10 +16,10 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { RoleGuard } from '@/components/shared/RoleGuard'
@@ -29,6 +29,9 @@ import { useUser } from '@/hooks/useUser'
 import { updateParticipant } from '@/actions/participants'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 const GRADE_LABELS: Record<string, string> = {
   elementary_1: '초등 1학년',
@@ -94,7 +97,7 @@ function DetailSkeleton() {
         <SkeletonBox className="h-9 w-9 rounded-md" />
         <SkeletonBox className="h-6 w-32" />
       </div>
-      <div className="rounded-xl border bg-card p-4 md:p-6">
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 md:p-6">
         <SkeletonBox className="h-5 w-24" />
         <div className="mt-4 space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -105,7 +108,7 @@ function DetailSkeleton() {
           ))}
         </div>
       </div>
-      <div className="rounded-xl border bg-card p-4 md:p-6">
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 md:p-6">
         <SkeletonBox className="h-5 w-24" />
         <div className="mt-4 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -158,9 +161,14 @@ export default function ParticipantDetailPage() {
       : null
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <motion.div variants={fadeUp} className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -171,7 +179,7 @@ export default function ParticipantDetailPage() {
           <ArrowLeft className="size-5" />
         </Button>
         <h1 className="text-xl font-bold text-foreground">참가자 정보</h1>
-      </div>
+      </motion.div>
 
       <LoadingSkeleton isLoading={isLoading} skeleton={<DetailSkeleton />}>
         {!participant ? (
@@ -185,10 +193,10 @@ export default function ParticipantDetailPage() {
             }}
           />
         ) : (
-          <div className="space-y-4">
+          <>
             {/* Profile header */}
-            <Card className="gap-0 py-0">
-              <CardContent className="flex items-center gap-4 px-4 py-5 md:px-6">
+            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+              <div className="flex items-center gap-4 px-4 py-5 md:px-6">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <span className="text-xl font-bold">
                     {participant.name.charAt(0)}
@@ -226,37 +234,39 @@ export default function ParticipantDetailPage() {
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
 
             {/* Fee toggle (admin/staff only) */}
             {canManage && (
-              <RoleGuard allowedRoles={['admin', 'staff']}>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'min-h-12 w-full gap-2',
-                    participant.fee_paid
-                      ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
-                      : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
-                  )}
-                  onClick={handleToggleFeePaid}
-                >
-                  <DollarSign className="size-4" />
-                  {participant.fee_paid ? '미납으로 변경' : '납부 완료로 변경'}
-                </Button>
-              </RoleGuard>
+              <motion.div variants={fadeUp}>
+                <RoleGuard allowedRoles={['admin', 'staff']}>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'min-h-12 w-full gap-2',
+                      participant.fee_paid
+                        ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
+                        : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
+                    )}
+                    onClick={handleToggleFeePaid}
+                  >
+                    <DollarSign className="size-4" />
+                    {participant.fee_paid ? '미납으로 변경' : '납부 완료로 변경'}
+                  </Button>
+                </RoleGuard>
+              </motion.div>
             )}
 
             {/* Basic Info */}
-            <Card className="gap-0 py-0">
-              <CardHeader className="px-4 py-4 md:px-6">
-                <CardTitle className="flex items-center gap-2 text-base">
+            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+              <div className="px-4 py-4 md:px-6">
+                <h3 className="flex items-center gap-2 text-base font-semibold">
                   <User className="size-4 text-muted-foreground" />
                   기본 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="divide-y divide-border px-4 pb-4 pt-0 md:px-6">
+                </h3>
+              </div>
+              <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
                 <InfoRow label="이름" value={participant.name} />
                 <InfoRow
                   label="생년월일"
@@ -280,50 +290,50 @@ export default function ParticipantDetailPage() {
                       : null
                   }
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
 
             {/* Contact Info */}
-            <Card className="gap-0 py-0">
-              <CardHeader className="px-4 py-4 md:px-6">
-                <CardTitle className="flex items-center gap-2 text-base">
+            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+              <div className="px-4 py-4 md:px-6">
+                <h3 className="flex items-center gap-2 text-base font-semibold">
                   <Phone className="size-4 text-muted-foreground" />
                   연락처
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="divide-y divide-border px-4 pb-4 pt-0 md:px-6">
+                </h3>
+              </div>
+              <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
                 <InfoRow label="본인 연락처" value={participant.phone} />
                 <InfoRow label="보호자 연락처" value={participant.parent_phone} />
                 <InfoRow label="비상연락처" value={participant.emergency_contact} />
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
 
             {/* Health & Dietary */}
             {(healthNote || participant.dietary_restrictions) && (
-              <Card className="gap-0 py-0">
-                <CardHeader className="px-4 py-4 md:px-6">
-                  <CardTitle className="flex items-center gap-2 text-base">
+              <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+                <div className="px-4 py-4 md:px-6">
+                  <h3 className="flex items-center gap-2 text-base font-semibold">
                     <Heart className="size-4 text-muted-foreground" />
                     건강 및 식이
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="divide-y divide-border px-4 pb-4 pt-0 md:px-6">
+                  </h3>
+                </div>
+                <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
                   <InfoRow label="건강 정보" value={healthNote as string | null} />
                   <InfoRow label="식이 제한" value={participant.dietary_restrictions} />
-                </CardContent>
-              </Card>
+                </div>
+              </motion.div>
             )}
 
             {/* Transportation */}
             {participant.transportation && (
-              <Card className="gap-0 py-0">
-                <CardHeader className="px-4 py-4 md:px-6">
-                  <CardTitle className="flex items-center gap-2 text-base">
+              <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+                <div className="px-4 py-4 md:px-6">
+                  <h3 className="flex items-center gap-2 text-base font-semibold">
                     <Bus className="size-4 text-muted-foreground" />
                     교통편
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0 md:px-6">
+                  </h3>
+                </div>
+                <div className="px-4 pb-4 pt-0 md:px-6">
                   <InfoRow
                     label="교통편"
                     value={
@@ -331,19 +341,19 @@ export default function ParticipantDetailPage() {
                       participant.transportation
                     }
                   />
-                </CardContent>
-              </Card>
+                </div>
+              </motion.div>
             )}
 
             {/* Consent Status */}
-            <Card className="gap-0 py-0">
-              <CardHeader className="px-4 py-4 md:px-6">
-                <CardTitle className="flex items-center gap-2 text-base">
+            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+              <div className="px-4 py-4 md:px-6">
+                <h3 className="flex items-center gap-2 text-base font-semibold">
                   <ShieldCheck className="size-4 text-muted-foreground" />
                   동의 현황
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="divide-y divide-border px-4 pb-4 pt-0 md:px-6">
+                </h3>
+              </div>
+              <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
                 <ConsentBadge
                   label="개인정보 수집 및 이용"
                   consented={participant.consent_personal_info}
@@ -360,11 +370,11 @@ export default function ParticipantDetailPage() {
                   label="개인정보 국외 이전"
                   consented={participant.consent_overseas_transfer}
                 />
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </LoadingSkeleton>
-    </div>
+    </motion.div>
   )
 }

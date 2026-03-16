@@ -11,6 +11,7 @@ import {
   Trophy,
   Users,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +26,9 @@ import { useUser } from '@/hooks/useUser'
 import { toggleQuizActive } from '@/actions/quiz'
 
 import type { QuizQuestion } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 interface QuizDetailPageProps {
   params: Promise<{ id: string }>
@@ -82,9 +86,14 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <motion.div
+      className="space-y-6 p-4 md:p-6"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <motion.div variants={fadeUp} className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -104,13 +113,14 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
             </h1>
           </LoadingSkeleton>
         </div>
-      </div>
+      </motion.div>
 
+      <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<DetailSkeletons />}>
         {quiz && (
           <>
             {/* Quiz Info Card */}
-            <Card>
+            <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
@@ -155,7 +165,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
 
             {/* Admin Controls */}
             {isAdminOrStaff && (
-              <Card>
+              <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Settings className="h-4 w-4" />
@@ -204,7 +214,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
                 </h2>
                 {quiz.questions.map(
                   (question: QuizQuestion, index: number) => (
-                    <Card key={question.id}>
+                    <Card key={question.id} className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
                       <CardContent className="py-3">
                         <div className="flex items-start gap-3">
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
@@ -276,6 +286,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
           </>
         )}
       </LoadingSkeleton>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

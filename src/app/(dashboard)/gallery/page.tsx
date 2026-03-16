@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Camera, Plus } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { AlbumCard } from '@/components/dashboard/AlbumCard'
@@ -11,6 +12,9 @@ import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleto
 import { useAlbums } from '@/hooks/useGallery'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useUser } from '@/hooks/useUser'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 function GallerySkeletons() {
   return (
@@ -32,9 +36,14 @@ export default function GalleryPage() {
   const hasAlbums = albums && albums.length > 0
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <motion.div
+      className="space-y-6 p-4 md:p-6"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground md:text-2xl">
             사진 갤러리
@@ -56,38 +65,40 @@ export default function GalleryPage() {
             <span className="sm:hidden">추가</span>
           </Button>
         )}
-      </div>
+      </motion.div>
 
       {/* Content */}
-      <LoadingSkeleton isLoading={isLoading} skeleton={<GallerySkeletons />}>
-        {hasAlbums ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-            {albums.map((album) => (
-              <AlbumCard
-                key={album.id}
-                album={album}
-                onClick={() => router.push(`/gallery/${album.id}`)}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={Camera}
-            title="아직 사진이 없어요"
-            description="행사가 시작되면 소중한 순간들이 여기에 모여요"
-            {...(isAdminOrStaff
-              ? {
-                  action: {
-                    label: '첫 앨범 만들기',
-                    onClick: () => {
-                      // Placeholder: open create album dialog
+      <motion.div variants={fadeUp}>
+        <LoadingSkeleton isLoading={isLoading} skeleton={<GallerySkeletons />}>
+          {hasAlbums ? (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+              {albums.map((album) => (
+                <AlbumCard
+                  key={album.id}
+                  album={album}
+                  onClick={() => router.push(`/gallery/${album.id}`)}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Camera}
+              title="아직 사진이 없어요"
+              description="행사가 시작되면 소중한 순간들이 여기에 모여요"
+              {...(isAdminOrStaff
+                ? {
+                    action: {
+                      label: '첫 앨범 만들기',
+                      onClick: () => {
+                        // Placeholder: open create album dialog
+                      },
                     },
-                  },
-                }
-              : {})}
-          />
-        )}
-      </LoadingSkeleton>
-    </div>
+                  }
+                : {})}
+            />
+          )}
+        </LoadingSkeleton>
+      </motion.div>
+    </motion.div>
   )
 }

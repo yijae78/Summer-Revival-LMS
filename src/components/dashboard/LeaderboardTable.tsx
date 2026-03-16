@@ -1,6 +1,6 @@
 'use client'
 
-import { Trophy, Medal } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -46,7 +46,7 @@ function RankBadge({ rank }: { rank: number }) {
   }
 
   return (
-    <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+    <div className="flex size-10 items-center justify-center rounded-full bg-white/[0.04]">
       <span className="text-sm font-bold tabular-nums text-muted-foreground">
         {rank}
       </span>
@@ -69,10 +69,10 @@ export function LeaderboardTable({ entries, type }: LeaderboardTableProps) {
           <div
             key={`${entry.rank}-${entry.name}`}
             className={cn(
-              'flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors',
+              'flex items-center gap-3 rounded-xl border px-4 py-3 transition-all duration-300',
               isTopThree
-                ? 'border-primary/20 bg-card'
-                : 'border-border bg-card'
+                ? 'border-primary/20 bg-white/[0.06] backdrop-blur-xl shadow-[0_0_20px_rgba(56,189,248,0.06)]'
+                : 'border-white/[0.06] bg-white/[0.02] hover:border-primary/15 hover:bg-white/[0.04]'
             )}
           >
             <RankBadge rank={entry.rank} />

@@ -3,6 +3,7 @@
 import { use } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Camera, ImagePlus } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +13,9 @@ import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleto
 
 import { usePhotos } from '@/hooks/useGallery'
 import { useUser } from '@/hooks/useUser'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 interface AlbumDetailPageProps {
   params: Promise<{ albumId: string }>
@@ -37,9 +41,14 @@ export default function AlbumDetailPage({ params }: AlbumDetailPageProps) {
   const hasPhotos = photos && photos.length > 0
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <motion.div
+      className="space-y-6 p-4 md:p-6"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <motion.div variants={fadeUp} className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -75,9 +84,10 @@ export default function AlbumDetailPage({ params }: AlbumDetailPageProps) {
             <span className="sm:hidden">추가</span>
           </Button>
         )}
-      </div>
+      </motion.div>
 
       {/* Content */}
+      <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<PhotoSkeletons />}>
         {hasPhotos ? (
           <PhotoGrid photos={photos} />
@@ -99,6 +109,7 @@ export default function AlbumDetailPage({ params }: AlbumDetailPageProps) {
           />
         )}
       </LoadingSkeleton>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

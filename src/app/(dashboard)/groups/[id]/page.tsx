@@ -13,6 +13,7 @@ import {
   Search,
   Trash2,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -41,6 +42,9 @@ import { formatRelativeTime } from '@/lib/utils/format-date'
 import { cn } from '@/lib/utils'
 
 import type { PointRecord } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 const CATEGORY_LABELS: Record<string, string> = {
   attendance: '출석',
@@ -74,7 +78,7 @@ function MemberListSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl border bg-card p-4">
+        <div key={i} className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
           <SkeletonBox className="h-10 w-10 rounded-full" />
           <SkeletonBox className="h-4 w-24" />
         </div>
@@ -149,8 +153,14 @@ export default function GroupDetailPage() {
   )
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <motion.div
+      className="space-y-6 p-4 md:p-6"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Back navigation */}
+      <motion.div variants={fadeUp}>
       <button
         type="button"
         onClick={() => router.push('/groups')}
@@ -159,14 +169,16 @@ export default function GroupDetailPage() {
         <ArrowLeft className="size-4" />
         조 목록으로
       </button>
+      </motion.div>
 
       {/* Group Header */}
+      <motion.div variants={fadeUp}>
       <LoadingSkeleton
         isLoading={groupLoading}
         skeleton={<SkeletonBox className="h-24 rounded-xl" />}
       >
         {group && (
-          <Card className="gap-0 py-0">
+          <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0">
             <CardContent className="flex items-center gap-4 px-5 py-5">
               <div
                 className="size-12 shrink-0 rounded-xl"
@@ -190,8 +202,10 @@ export default function GroupDetailPage() {
           </Card>
         )}
       </LoadingSkeleton>
+      </motion.div>
 
       {/* Members Section */}
+      <motion.div variants={fadeUp}>
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">조원 목록</h2>
@@ -215,7 +229,7 @@ export default function GroupDetailPage() {
           {members && members.length > 0 ? (
             <div className="space-y-2">
               {members.map((member) => (
-                <Card key={member.id} className="gap-0 py-0">
+                <Card key={member.id} className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
                   <CardContent className="flex items-center gap-3 px-4 py-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <span className="text-sm font-semibold">
@@ -265,13 +279,15 @@ export default function GroupDetailPage() {
           )}
         </LoadingSkeleton>
       </section>
+      </motion.div>
 
       {/* Points History Section */}
+      <motion.div variants={fadeUp}>
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">포인트 내역</h2>
         {pointHistory && pointHistory.length > 0 ? (
-          <Card className="gap-0 py-0">
-            <CardContent className="divide-y px-4">
+          <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0">
+            <CardContent className="divide-y divide-white/[0.06] px-4">
               {pointHistory.map((point) => (
                 <PointHistoryItem key={point.id} point={point} />
               ))}
@@ -285,6 +301,7 @@ export default function GroupDetailPage() {
           />
         )}
       </section>
+      </motion.div>
 
       {/* Add Member Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
@@ -311,7 +328,7 @@ export default function GroupDetailPage() {
                   <button
                     key={p.id}
                     type="button"
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-accent/50 active:scale-[0.99]"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-all duration-300 hover:bg-white/[0.06] active:scale-[0.99]"
                     onClick={() => handleAddMember(p.id)}
                     disabled={isSubmitting}
                   >
@@ -335,6 +352,6 @@ export default function GroupDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   )
 }

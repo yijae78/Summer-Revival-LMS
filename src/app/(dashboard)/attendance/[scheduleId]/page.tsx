@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
 import { ArrowLeft, Search, Users, ClipboardCheck } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,9 @@ import { useParticipants } from '@/hooks/useParticipants'
 import { useOptimisticAttendance } from '@/hooks/useOptimisticAttendance'
 
 import type { AttendanceStatus } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 function AttendanceDetailSkeleton() {
   return (
@@ -45,7 +49,7 @@ function AttendanceDetailSkeleton() {
 
       {/* List skeleton */}
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl border bg-card p-3">
+        <div key={i} className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-3">
           <SkeletonBox className="h-4 w-20 flex-1" />
           <div className="flex gap-1.5">
             {Array.from({ length: 4 }).map((_, j) => (
@@ -132,9 +136,14 @@ export default function AttendanceDetailPage() {
   )
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header with back button */}
-      <div className="flex items-center gap-3">
+      <motion.div variants={fadeUp} className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -150,8 +159,9 @@ export default function AttendanceDetailPage() {
             참가자의 출석 상태를 체크하세요
           </p>
         </div>
-      </div>
+      </motion.div>
 
+      <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<AttendanceDetailSkeleton />}>
         {(!participants || participants.length === 0) ? (
           <EmptyState
@@ -217,6 +227,7 @@ export default function AttendanceDetailPage() {
           </div>
         )}
       </LoadingSkeleton>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

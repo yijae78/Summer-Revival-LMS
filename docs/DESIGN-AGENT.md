@@ -936,4 +936,91 @@ border: 1px solid rgba(255, 255, 255, 0.1);
 
 ---
 
+---
+
+## 20. 내부 페이지 글래스모피즘 레시피 (2026-03-16 추가)
+
+> 랜딩 페이지는 절대 변경 불가. 내부 페이지가 랜딩과 동일한 "Living Water" 세계관을 공유해야 함.
+
+### 20.1 Glass Card — Tailwind 레시피
+
+```
+기본:     rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl
+강조:     rounded-2xl border border-primary/20 bg-white/[0.06] backdrop-blur-xl shadow-[0_0_20px_rgba(56,189,248,0.1)]
+인터랙티브: hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] transition-all duration-300
+```
+
+### 20.2 Glass 변형
+
+| 요소 | Tailwind |
+|------|----------|
+| Glass Pill (배지/탭) | `rounded-full border border-white/[0.08] bg-white/[0.04] backdrop-blur-md px-3 py-1` |
+| Glass Input | `rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/10` |
+| Glass Row (리스트) | `rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 hover:border-primary/15 hover:bg-white/[0.04]` |
+| Glass Dialog | `rounded-2xl border border-white/[0.08] bg-[#151823] shadow-2xl` (오버레이: `bg-black/60 backdrop-blur-sm`) |
+
+### 20.3 대시보드 배경 Ambient Caustics
+
+랜딩 페이지의 caustics를 **1/3 강도**로 대시보드 배경에 적용:
+
+```tsx
+<div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+  <div
+    className="absolute h-[600px] w-[600px] rounded-full opacity-30"
+    style={{
+      top: '5%', right: '10%',
+      background: 'radial-gradient(circle, rgba(56,189,248,0.04) 0%, transparent 70%)',
+      animation: 'causticsDrift1 30s ease-in-out infinite',
+    }}
+  />
+  <div
+    className="absolute h-[400px] w-[400px] rounded-full opacity-20"
+    style={{
+      bottom: '20%', left: '5%',
+      background: 'radial-gradient(circle, rgba(34,211,238,0.03) 0%, transparent 70%)',
+      animation: 'causticsDrift2 40s ease-in-out infinite',
+    }}
+  />
+</div>
+```
+
+### 20.4 출석 상태 색상 매핑
+
+| 상태 | 활성 (filled) | 비활성 |
+|------|-------------|--------|
+| 출석 | `bg-emerald-500/20 text-emerald-400 border-emerald-500/30` | `border-white/[0.08] text-muted-foreground` |
+| 지각 | `bg-amber-500/20 text-amber-400 border-amber-500/30` | 동일 |
+| 결석 | `bg-red-500/20 text-red-400 border-red-500/30` | 동일 |
+| 사유 | `bg-sky-500/20 text-sky-400 border-sky-500/30` | 동일 |
+
+### 20.5 퀴즈 선택지 상태
+
+```
+기본:    rounded-xl border border-white/[0.08] bg-white/[0.03] p-4
+호버:    hover:border-primary/20 hover:bg-white/[0.06]
+선택됨:  border-primary/40 bg-primary/10
+정답:    border-emerald-500/40 bg-emerald-500/10
+오답:    border-red-500/40 bg-red-500/10
+```
+
+### 20.6 디자인 체크리스트 (모든 내부 페이지)
+
+- [ ] 카드가 Glass Card 레시피를 따르는가? (`bg-white/[0.04]` 아닌 `bg-card` 사용 시 ❌)
+- [ ] 호버 시 subtle glow (`shadow-[0_0_20px_rgba(56,189,248,0.1)]`)가 있는가?
+- [ ] 페이지 진입 시 staggered fade-up이 있는가?
+- [ ] 배경에 ambient caustic이 있는가? (대시보드 레이아웃)
+- [ ] 랜딩 페이지와 동일한 "세계관"을 느낄 수 있는가?
+
+### 20.7 2026-03-16 추가 리서치 출처
+
+- [Dark Glassmorphism 2026](https://medium.com/@developer_89726/dark-glassmorphism-the-aesthetic-that-will-define-ui-in-2026-93aa4153088f)
+- [Glassmorphism 2026 Guide](https://invernessdesignstudio.com/glassmorphism-what-it-is-and-how-to-use-it-in-2026)
+- [12 Glassmorphism UI Features](https://uxpilot.ai/blogs/glassmorphism-ui)
+- [SaaS Dashboard Design 2026](https://www.saasframe.io/blog/the-anatomy-of-high-performance-saas-dashboard-design-2026-trends-patterns)
+- [Tailwind CSS v4 OKLCH](https://tailwindcolor.tools/blog/tailwind-css-v4-color-system-complete-guide)
+- [Dashboard Design Examples 2026](https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/)
+- [Mobile App Design Trends 2026](https://uxpilot.ai/blogs/mobile-app-design-trends)
+
+---
+
 *이 에이전트는 프로젝트의 모든 설계 문서 + 2026 웹 디자인 트렌드 + 한국 앱 디자인 + 교회 디자인 심층 리서치를 내재화하고 있습니다.*

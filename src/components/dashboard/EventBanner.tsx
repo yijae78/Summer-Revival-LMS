@@ -33,7 +33,7 @@ export function EventBanner({ eventName, startDate, endDate }: EventBannerProps)
   const dateText = `${format(startDate, 'M월 d일 (EEE)', { locale: ko })} ~ ${format(endDate, 'M월 d일 (EEE)', { locale: ko })}`
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#1e2235] bg-gradient-to-br from-[#0ea5e9]/15 via-[#151823] to-[#151823] p-6">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-6 shadow-[0_0_30px_rgba(56,189,248,0.06)]">
       {/* Sky blue glow effects */}
       <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[#38bdf8]/10 blur-3xl" />
       <div className="absolute -bottom-10 left-1/4 h-36 w-36 rounded-full bg-[#22d3ee]/6 blur-2xl" />

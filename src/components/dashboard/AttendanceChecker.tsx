@@ -25,26 +25,26 @@ const STATUS_OPTIONS: Array<{
   {
     value: 'present',
     label: '출석',
-    activeClassName: 'bg-emerald-500 text-white hover:bg-emerald-600 border-emerald-500',
-    inactiveClassName: 'border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10',
+    activeClassName: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-emerald-500/20 hover:bg-emerald-500/10',
   },
   {
     value: 'late',
     label: '지각',
-    activeClassName: 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500',
-    inactiveClassName: 'border-amber-500/30 text-amber-500 hover:bg-amber-500/10',
+    activeClassName: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-amber-500/20 hover:bg-amber-500/10',
   },
   {
     value: 'absent',
     label: '결석',
-    activeClassName: 'bg-red-500 text-white hover:bg-red-600 border-red-500',
-    inactiveClassName: 'border-red-500/30 text-red-500 hover:bg-red-500/10',
+    activeClassName: 'bg-red-500/20 text-red-400 border-red-500/30',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-red-500/20 hover:bg-red-500/10',
   },
   {
     value: 'excused',
     label: '사유',
-    activeClassName: 'bg-sky-500 text-white hover:bg-sky-600 border-sky-500',
-    inactiveClassName: 'border-sky-500/30 text-sky-500 hover:bg-sky-500/10',
+    activeClassName: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+    inactiveClassName: 'border-white/[0.08] text-muted-foreground hover:border-sky-500/20 hover:bg-sky-500/10',
   },
 ]
 
@@ -64,7 +64,7 @@ export function AttendanceChecker({
   return (
     <div
       className={cn(
-        'flex min-h-14 items-center gap-3 rounded-xl border bg-card px-3 py-2.5 transition-opacity md:px-4',
+        'flex min-h-14 items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 transition-all duration-300 hover:border-primary/15 hover:bg-white/[0.04] md:px-4',
         isUpdating && 'opacity-70'
       )}
     >

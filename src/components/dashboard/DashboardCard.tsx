@@ -1,7 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface DashboardCardProps {
   title: string
@@ -17,14 +16,19 @@ export function DashboardCard({
   className,
 }: DashboardCardProps) {
   return (
-    <Card className={cn('@container', className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <div
+      className={cn(
+        '@container rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+        className
+      )}
+    >
+      <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+        <h3 className="text-sm font-medium text-muted-foreground">
           {title}
-        </CardTitle>
+        </h3>
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
+      </div>
+      <div className="p-6 pt-0">{children}</div>
+    </div>
   )
 }

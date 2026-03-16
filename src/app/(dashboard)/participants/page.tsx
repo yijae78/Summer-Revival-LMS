@@ -4,10 +4,10 @@ import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Users, Search, DollarSign, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 
@@ -17,6 +17,9 @@ import { cn } from '@/lib/utils'
 import { formatRelativeTime } from '@/lib/utils/format-date'
 
 import type { Participant } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 const GRADE_LABELS: Record<string, string> = {
   elementary_1: '초1',
@@ -45,8 +48,8 @@ function ParticipantCard({
   const gradeLabel = participant.grade ? GRADE_LABELS[participant.grade] ?? participant.grade : null
 
   return (
-    <Card
-      className="cursor-pointer gap-0 py-0 transition-colors hover:bg-accent/50 active:scale-[0.99]"
+    <div
+      className="cursor-pointer rounded-xl border border-white/[0.06] bg-white/[0.02] transition-all duration-300 hover:border-primary/15 hover:bg-white/[0.04] active:scale-[0.99]"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -57,7 +60,7 @@ function ParticipantCard({
         }
       }}
     >
-      <CardContent className="flex items-center gap-4 px-4 py-4 md:px-6">
+      <div className="flex items-center gap-4 px-4 py-4 md:px-6">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
           <span className="text-base font-semibold">
             {participant.name.charAt(0)}
@@ -105,8 +108,8 @@ function ParticipantCard({
         </div>
 
         <ChevronRight className="size-4 shrink-0 text-muted-foreground/40" />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
@@ -114,7 +117,7 @@ function ParticipantSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 rounded-xl border bg-card p-4 md:p-6">
+        <div key={i} className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 md:p-6">
           <SkeletonBox className="h-11 w-11 rounded-full" />
           <div className="flex-1 space-y-2">
             <SkeletonBox className="h-4 w-32" />
@@ -160,8 +163,13 @@ export default function ParticipantsPage() {
   )
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-foreground">참가자 관리</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -170,46 +178,48 @@ export default function ParticipantsPage() {
               : '참가자 목록을 불러오고 있어요'}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Search */}
-      <div className="relative">
+      <motion.div variants={fadeUp} className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="이름으로 검색해 주세요"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-12 pl-10"
+          className="h-12 pl-10 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
         />
-      </div>
+      </motion.div>
 
-      <LoadingSkeleton isLoading={isLoading} skeleton={<ParticipantSkeleton />}>
-        {filteredParticipants.length === 0 ? (
-          searchQuery.trim() ? (
-            <EmptyState
-              icon={Search}
-              title="검색 결과가 없어요"
-              description={`"${searchQuery}"에 해당하는 참가자를 찾을 수 없어요.`}
-            />
-          ) : (
-            <EmptyState
-              icon={Users}
-              title="아직 참가자가 없어요"
-              description="초대 코드를 공유해서 참가 신청을 받아 보세요."
-            />
-          )
-        ) : (
-          <div className="space-y-3">
-            {filteredParticipants.map((participant) => (
-              <ParticipantCard
-                key={participant.id}
-                participant={participant}
-                onClick={() => handleNavigateToDetail(participant.id)}
+      <motion.div variants={fadeUp}>
+        <LoadingSkeleton isLoading={isLoading} skeleton={<ParticipantSkeleton />}>
+          {filteredParticipants.length === 0 ? (
+            searchQuery.trim() ? (
+              <EmptyState
+                icon={Search}
+                title="검색 결과가 없어요"
+                description={`"${searchQuery}"에 해당하는 참가자를 찾을 수 없어요.`}
               />
-            ))}
-          </div>
-        )}
-      </LoadingSkeleton>
-    </div>
+            ) : (
+              <EmptyState
+                icon={Users}
+                title="아직 참가자가 없어요"
+                description="초대 코드를 공유해서 참가 신청을 받아 보세요."
+              />
+            )
+          ) : (
+            <div className="space-y-3">
+              {filteredParticipants.map((participant) => (
+                <ParticipantCard
+                  key={participant.id}
+                  participant={participant}
+                  onClick={() => handleNavigateToDetail(participant.id)}
+                />
+              ))}
+            </div>
+          )}
+        </LoadingSkeleton>
+      </motion.div>
+    </motion.div>
   )
 }

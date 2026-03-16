@@ -50,7 +50,7 @@ export function PhotoGrid({ photos, className }: PhotoGridProps) {
           <button
             key={photo.id}
             type="button"
-            className="group relative aspect-square overflow-hidden rounded-lg bg-muted transition-all hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
+            className="group relative aspect-square overflow-hidden rounded-lg bg-white/[0.04] transition-all hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-[0.98]"
             onClick={() => handlePhotoClick(index)}
             aria-label={photo.caption ?? '사진 보기'}
           >

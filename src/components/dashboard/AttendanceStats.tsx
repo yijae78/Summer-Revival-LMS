@@ -35,7 +35,7 @@ export function AttendanceStats({
   return (
     <div className={cn('space-y-3', className)}>
       {/* Stat bar */}
-      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted">
+      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
         {segments.map((segment) => {
           const percent = getPercent(segment.value)
           if (percent === 0) return null

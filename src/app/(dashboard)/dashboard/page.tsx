@@ -1,6 +1,7 @@
 'use client'
 
 import { Users, ClipboardCheck, Calendar } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { EventBanner } from '@/components/dashboard/EventBanner'
 import { StatCard } from '@/components/dashboard/StatCard'
@@ -11,6 +12,9 @@ import { useEvents } from '@/hooks/useEvents'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useSchedules } from '@/hooks/useSchedules'
 import { useEventStore } from '@/stores/eventStore'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 function EventSelector() {
   const { events, isLoading } = useEvents()
@@ -29,15 +33,22 @@ function EventSelector() {
 
   if (!events || events.length === 0) {
     return (
-      <div className="space-y-5">
-        <div>
+      <motion.div
+        className="space-y-5"
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={fadeUp}>
           <h1 className="text-xl font-bold text-white">환영해요!</h1>
           <p className="mt-1 text-sm text-[#8892a8]">
             아직 등록된 행사가 없어요. 새 행사를 만들어 시작해 보세요.
           </p>
-        </div>
-        <ZeroDataGuide />
-      </div>
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <ZeroDataGuide />
+        </motion.div>
+      </motion.div>
     )
   }
 
@@ -46,21 +57,27 @@ function EventSelector() {
   }
 
   return (
-    <div className="space-y-5">
-      <div>
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={fadeUp}>
         <h1 className="text-xl font-bold text-white">행사를 선택해 주세요</h1>
         <p className="mt-1 text-sm text-[#8892a8]">
           관리할 행사를 선택하면 대시보드가 표시돼요
         </p>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {events.map((event) => (
-          <button
+          <motion.button
             key={event.id}
+            variants={fadeUp}
             type="button"
             onClick={() => handleSelectEvent(event.id)}
-            className="group relative overflow-hidden rounded-2xl border border-[#1e2235] bg-[#151823] p-5 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5"
+            className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-5 text-left transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] hover:-translate-y-0.5"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             <div className="relative z-10 space-y-3">
@@ -78,10 +95,10 @@ function EventSelector() {
                 <p className="text-xs text-[#5c6478]">{event.location}</p>
               )}
             </div>
-          </button>
+          </motion.button>
         ))}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -116,8 +133,13 @@ function DashboardContent() {
   const endDate = new Date(event.end_date)
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-start justify-between">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={fadeUp} className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold text-white">안녕하세요!</h1>
           <p className="mt-1 text-sm text-[#8892a8]">
@@ -127,44 +149,50 @@ function DashboardContent() {
         <button
           type="button"
           onClick={clearCurrentEvent}
-          className="rounded-lg px-3 py-2 text-xs text-[#8892a8] transition-colors hover:bg-[#1c2030] hover:text-white"
+          className="rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs text-[#8892a8] transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:text-white"
         >
           행사 변경
         </button>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="md:col-span-2">
+        <motion.div variants={fadeUp} className="md:col-span-2">
           <EventBanner
             eventName={event.name}
             startDate={startDate}
             endDate={endDate}
           />
-        </div>
-        <StatCard
-          value={isParticipantsLoading ? '...' : participantCount}
-          label="참가자"
-          icon={Users}
-          color="primary"
-          description={hasParticipants ? undefined : '아직 등록된 참가자가 없어요'}
-        />
-        <StatCard
-          value={isSchedulesLoading ? '...' : hasSchedule ? scheduleCount : '—'}
-          label={hasSchedule ? '일정' : '출석률'}
-          icon={hasSchedule ? Calendar : ClipboardCheck}
-          color="secondary"
-          description={hasSchedule ? `${scheduleCount}개 세션이 준비됐어요` : '행사가 시작되면 표시돼요'}
-        />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard
+            value={isParticipantsLoading ? '...' : participantCount}
+            label="참가자"
+            icon={Users}
+            color="primary"
+            description={hasParticipants ? undefined : '아직 등록된 참가자가 없어요'}
+          />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard
+            value={isSchedulesLoading ? '...' : hasSchedule ? scheduleCount : '—'}
+            label={hasSchedule ? '일정' : '출석률'}
+            icon={hasSchedule ? Calendar : ClipboardCheck}
+            color="secondary"
+            description={hasSchedule ? `${scheduleCount}개 세션이 준비됐어요` : '행사가 시작되면 표시돼요'}
+          />
+        </motion.div>
       </div>
 
       {!hasData && (
-        <ZeroDataGuide
-          hasEvent
-          hasParticipants={hasParticipants}
-          hasSchedule={hasSchedule}
-        />
+        <motion.div variants={fadeUp}>
+          <ZeroDataGuide
+            hasEvent
+            hasParticipants={hasParticipants}
+            hasSchedule={hasSchedule}
+          />
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

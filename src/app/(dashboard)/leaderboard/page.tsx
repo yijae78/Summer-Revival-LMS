@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 
 import { Trophy, Users, User } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -13,6 +14,9 @@ import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { usePointsRanking } from '@/hooks/usePoints'
 
 import type { RankEntry } from '@/hooks/usePoints'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 function LeaderboardSkeleton() {
   return (
@@ -60,16 +64,22 @@ export default function LeaderboardPage() {
   )
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <motion.div
+      className="space-y-6 p-4 md:p-6"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div>
+      <motion.div variants={fadeUp}>
         <h1 className="text-xl font-bold text-foreground md:text-2xl">순위표</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           조별, 개인별 포인트 순위를 확인해 보세요
         </p>
-      </div>
+      </motion.div>
 
       {/* Tabs */}
+      <motion.div variants={fadeUp}>
       <Tabs defaultValue="group" className="space-y-4">
         <TabsList className="w-full">
           <TabsTrigger value="group" className="flex-1 gap-1.5">
@@ -113,6 +123,7 @@ export default function LeaderboardPage() {
           </LoadingSkeleton>
         </TabsContent>
       </Tabs>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

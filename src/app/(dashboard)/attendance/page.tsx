@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { ClipboardCheck, Clock, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,9 @@ import { useSchedules } from '@/hooks/useSchedules'
 import { cn } from '@/lib/utils'
 
 import type { Schedule } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 function formatTime(time: string): string {
   const parts = time.split(':')
@@ -34,7 +38,7 @@ interface ScheduleAttendanceCardProps {
 function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCardProps) {
   return (
     <Card
-      className="cursor-pointer gap-0 py-0 transition-colors hover:bg-accent/50 active:scale-[0.99]"
+      className="cursor-pointer gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] active:scale-[0.99]"
       onClick={() => onNavigate(schedule.id)}
       role="button"
       tabIndex={0}
@@ -88,7 +92,7 @@ function AttendanceSkeleton() {
 
       {/* Cards skeleton */}
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl border bg-card p-4">
+        <div key={i} className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
           <SkeletonBox className="size-10 rounded-lg" />
           <div className="flex-1 space-y-1.5">
             <SkeletonBox className="h-4 w-32" />
@@ -128,64 +132,71 @@ export default function AttendancePage() {
   }
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div>
+      <motion.div variants={fadeUp}>
         <h1 className="text-xl font-bold text-foreground">출석 체크</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           세션별 출석을 체크해 보세요
         </p>
-      </div>
+      </motion.div>
 
-      <LoadingSkeleton isLoading={isLoading} skeleton={<AttendanceSkeleton />}>
-        {dayNumbers.length === 0 ? (
-          <EmptyState
-            icon={ClipboardCheck}
-            title="아직 출석 체크할 세션이 없어요"
-            description="관리자가 일정을 등록하면 출석 체크를 할 수 있어요."
-          />
-        ) : (
-          <div className="space-y-4">
-            {/* Day selector tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {dayNumbers.map((day) => (
-                <Button
-                  key={day}
-                  variant={activeDay === day ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedDay(day)}
-                  className={cn(
-                    'shrink-0 px-4',
-                    activeDay === day && 'shadow-sm'
-                  )}
-                >
-                  {day}일차
-                </Button>
-              ))}
-            </div>
-
-            {/* Schedule cards */}
-            {filteredSchedules.length === 0 ? (
-              <EmptyState
-                icon={ClipboardCheck}
-                title="이 일차에는 세션이 없어요"
-                description="다른 일차를 선택해 보세요."
-                className="py-12"
-              />
-            ) : (
-              <div className="space-y-2">
-                {filteredSchedules.map((schedule) => (
-                  <ScheduleAttendanceCard
-                    key={schedule.id}
-                    schedule={schedule}
-                    onNavigate={handleNavigate}
-                  />
+      <motion.div variants={fadeUp}>
+        <LoadingSkeleton isLoading={isLoading} skeleton={<AttendanceSkeleton />}>
+          {dayNumbers.length === 0 ? (
+            <EmptyState
+              icon={ClipboardCheck}
+              title="아직 출석 체크할 세션이 없어요"
+              description="관리자가 일정을 등록하면 출석 체크를 할 수 있어요."
+            />
+          ) : (
+            <div className="space-y-4">
+              {/* Day selector tabs */}
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {dayNumbers.map((day) => (
+                  <Button
+                    key={day}
+                    variant={activeDay === day ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedDay(day)}
+                    className={cn(
+                      'shrink-0 px-4',
+                      activeDay === day && 'shadow-sm'
+                    )}
+                  >
+                    {day}일차
+                  </Button>
                 ))}
               </div>
-            )}
-          </div>
-        )}
-      </LoadingSkeleton>
-    </div>
+
+              {/* Schedule cards */}
+              {filteredSchedules.length === 0 ? (
+                <EmptyState
+                  icon={ClipboardCheck}
+                  title="이 일차에는 세션이 없어요"
+                  description="다른 일차를 선택해 보세요."
+                  className="py-12"
+                />
+              ) : (
+                <div className="space-y-2">
+                  {filteredSchedules.map((schedule) => (
+                    <ScheduleAttendanceCard
+                      key={schedule.id}
+                      schedule={schedule}
+                      onNavigate={handleNavigate}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </LoadingSkeleton>
+      </motion.div>
+    </motion.div>
   )
 }

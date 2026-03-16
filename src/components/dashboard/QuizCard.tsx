@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 import type { Quiz } from '@/types'
@@ -31,20 +30,22 @@ export function QuizCard({
   className,
 }: QuizCardProps) {
   return (
-    <Card
+    <div
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md active:scale-[0.98]',
+        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] active:scale-[0.98]',
         quiz.is_active &&
-          'border-primary/50 shadow-[0_0_12px_-3px] shadow-primary/20',
+          'border-primary/40 bg-primary/10 shadow-[0_0_16px_rgba(56,189,248,0.15)]',
         className
       )}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
     >
-      <CardHeader className="pb-3">
+      <div className="p-6 pb-3">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="line-clamp-2 text-base leading-snug">
+          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-foreground">
             {quiz.title}
-          </CardTitle>
+          </h3>
           <Badge
             variant={quiz.is_active ? 'default' : 'secondary'}
             className="shrink-0"
@@ -52,8 +53,8 @@ export function QuizCard({
             {quiz.is_active ? '활성' : '비활성'}
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0">
+      </div>
+      <div className="px-6 pb-6 pt-0">
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Badge variant="outline" className="text-xs">
             {getTypeLabel(quiz.type)}
@@ -73,7 +74,7 @@ export function QuizCard({
             제한시간: {quiz.time_limit}초
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

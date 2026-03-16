@@ -14,6 +14,7 @@ import {
   Upload,
   Trash2,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -32,6 +33,9 @@ import { cn } from '@/lib/utils'
 import { formatRelativeTime } from '@/lib/utils/format-date'
 
 import type { Material, MaterialCategory } from '@/types'
+
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 
 const CATEGORY_CONFIG: Record<
   MaterialCategory,
@@ -110,9 +114,9 @@ function MaterialCard({
   const FileIcon = getFileIcon(material.file_type)
 
   return (
-    <Card className="gap-0 py-0">
+    <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
       <CardContent className="flex items-center gap-4 px-4 py-4 md:px-6">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">
           <FileIcon className="size-5 text-muted-foreground" />
         </div>
 
@@ -178,7 +182,7 @@ function MaterialSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 rounded-xl border bg-card p-4 md:p-6">
+        <div key={i} className="flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
           <SkeletonBox className="h-12 w-12 rounded-xl" />
           <div className="flex-1 space-y-2">
             <SkeletonBox className="h-4 w-48" />
@@ -259,8 +263,13 @@ export default function MaterialsPage() {
   )
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-foreground">자료실</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -273,38 +282,40 @@ export default function MaterialsPage() {
             자료 업로드
           </Button>
         )}
-      </div>
+      </motion.div>
 
-      <LoadingSkeleton isLoading={isLoading} skeleton={<MaterialSkeleton />}>
-        {!materials || materials.length === 0 ? (
-          <EmptyState
-            icon={FolderOpen}
-            title="아직 등록된 자료가 없어요"
-            description="행사 자료가 등록되면 여기에 표시돼요."
-          />
-        ) : (
-          <Tabs defaultValue="all">
-            <TabsList className="w-full overflow-x-auto md:w-auto">
+      <motion.div variants={fadeUp}>
+        <LoadingSkeleton isLoading={isLoading} skeleton={<MaterialSkeleton />}>
+          {!materials || materials.length === 0 ? (
+            <EmptyState
+              icon={FolderOpen}
+              title="아직 등록된 자료가 없어요"
+              description="행사 자료가 등록되면 여기에 표시돼요."
+            />
+          ) : (
+            <Tabs defaultValue="all">
+              <TabsList className="w-full overflow-x-auto md:w-auto">
+                {TABS.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9">
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
               {TABS.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} className="min-h-9">
-                  {tab.label}
-                </TabsTrigger>
+                <TabsContent key={tab.value} value={tab.value} className="mt-4">
+                  <MaterialList
+                    materials={materials}
+                    canManage={canManage}
+                    onDelete={handleDelete}
+                    category={tab.value}
+                  />
+                </TabsContent>
               ))}
-            </TabsList>
-
-            {TABS.map((tab) => (
-              <TabsContent key={tab.value} value={tab.value} className="mt-4">
-                <MaterialList
-                  materials={materials}
-                  canManage={canManage}
-                  onDelete={handleDelete}
-                  category={tab.value}
-                />
-              </TabsContent>
-            ))}
-          </Tabs>
-        )}
-      </LoadingSkeleton>
-    </div>
+            </Tabs>
+          )}
+        </LoadingSkeleton>
+      </motion.div>
+    </motion.div>
   )
 }
