@@ -38,5 +38,9 @@ export function useCurrentEvent() {
     }
   }
 
-  return { event: query.data, isLoading: query.isLoading, error: query.error, eventId }
+  if (!isSupabaseConfigured()) {
+    return { event: null, isLoading: false, error: null, eventId }
+  }
+
+  return { event: query.data, isLoading: query.isFetching, error: query.error, eventId }
 }

@@ -56,5 +56,10 @@ export function useUser() {
     return createDemoQueryResult(DEMO_USER as UserProfile)
   }
 
+  // Supabase not configured → return null data, not loading
+  if (!isSupabaseConfigured()) {
+    return { ...query, data: null, isLoading: false, isFetching: false }
+  }
+
   return query
 }

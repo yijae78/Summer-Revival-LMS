@@ -29,8 +29,13 @@ export function useEvents() {
 
   if (isDemoMode) {
     const demoResult = createDemoQueryResult([DEMO_EVENT])
-    return { events: demoResult.data, isLoading: demoResult.isLoading, error: demoResult.error }
+    return { events: demoResult.data, isLoading: false, error: null }
   }
 
-  return { events: query.data, isLoading: query.isLoading, error: query.error }
+  // Supabase not configured and not demo → no data, not loading
+  if (!isSupabaseConfigured()) {
+    return { events: null, isLoading: false, error: null }
+  }
+
+  return { events: query.data, isLoading: query.isFetching, error: query.error }
 }
