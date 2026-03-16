@@ -5,10 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  ArrowLeft,
   User,
   Phone,
-  Calendar,
   Heart,
   Bus,
   DollarSign,
@@ -22,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 import { RoleGuard } from '@/components/shared/RoleGuard'
 
 import { useParticipant } from '@/hooks/useParticipants'
@@ -90,12 +89,46 @@ function ConsentBadge({ label, consented }: { label: string; consented: boolean 
   )
 }
 
+function GlassSection({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: typeof User
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.12]"
+    >
+      <div className="px-4 py-4 md:px-6">
+        <h3 className="flex items-center gap-2.5 text-base font-semibold">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <Icon className="size-4 text-primary" />
+          </div>
+          {title}
+        </h3>
+      </div>
+      <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
+        {children}
+      </div>
+    </motion.div>
+  )
+}
+
 function DetailSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <SkeletonBox className="h-9 w-9 rounded-md" />
-        <SkeletonBox className="h-6 w-32" />
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 md:p-6">
+        <div className="flex items-center gap-4">
+          <SkeletonBox className="h-14 w-14 rounded-full" />
+          <div className="space-y-2">
+            <SkeletonBox className="h-5 w-32" />
+            <SkeletonBox className="h-4 w-24" />
+          </div>
+        </div>
       </div>
       <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 md:p-6">
         <SkeletonBox className="h-5 w-24" />
@@ -104,17 +137,6 @@ function DetailSkeleton() {
             <div key={i} className="flex justify-between">
               <SkeletonBox className="h-4 w-20" />
               <SkeletonBox className="h-4 w-32" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 md:p-6">
-        <SkeletonBox className="h-5 w-24" />
-        <div className="mt-4 space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex justify-between">
-              <SkeletonBox className="h-4 w-36" />
-              <SkeletonBox className="h-5 w-14" />
             </div>
           ))}
         </div>
@@ -167,19 +189,11 @@ export default function ParticipantDetailPage() {
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp} className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="min-h-10 min-w-10"
-          onClick={() => router.back()}
-          aria-label="뒤로 가기"
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-        <h1 className="text-xl font-bold text-foreground">참가자 정보</h1>
-      </motion.div>
+      <PageHeader
+        title={participant?.name ?? '참가자 정보'}
+        backHref="/participants"
+        backLabel="참가자 목록으로"
+      />
 
       <LoadingSkeleton isLoading={isLoading} skeleton={<DetailSkeleton />}>
         {!participant ? (
@@ -197,7 +211,7 @@ export default function ParticipantDetailPage() {
             {/* Profile header */}
             <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
               <div className="flex items-center gap-4 px-4 py-5 md:px-6">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-primary/20">
                   <span className="text-xl font-bold">
                     {participant.name.charAt(0)}
                   </span>
@@ -244,7 +258,7 @@ export default function ParticipantDetailPage() {
                   <Button
                     variant="outline"
                     className={cn(
-                      'min-h-12 w-full gap-2',
+                      'min-h-12 w-full gap-2 rounded-xl',
                       participant.fee_paid
                         ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
                         : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
@@ -259,119 +273,76 @@ export default function ParticipantDetailPage() {
             )}
 
             {/* Basic Info */}
-            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-              <div className="px-4 py-4 md:px-6">
-                <h3 className="flex items-center gap-2 text-base font-semibold">
-                  <User className="size-4 text-muted-foreground" />
-                  기본 정보
-                </h3>
-              </div>
-              <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
-                <InfoRow label="이름" value={participant.name} />
-                <InfoRow
-                  label="생년월일"
-                  value={participant.birth_date}
-                />
-                <InfoRow
-                  label="성별"
-                  value={
-                    participant.gender === 'male'
-                      ? '남자'
-                      : participant.gender === 'female'
-                        ? '여자'
-                        : null
-                  }
-                />
-                <InfoRow
-                  label="학년"
-                  value={
-                    participant.grade
-                      ? GRADE_LABELS[participant.grade] ?? participant.grade
+            <GlassSection icon={User} title="기본 정보">
+              <InfoRow label="이름" value={participant.name} />
+              <InfoRow label="생년월일" value={participant.birth_date} />
+              <InfoRow
+                label="성별"
+                value={
+                  participant.gender === 'male'
+                    ? '남자'
+                    : participant.gender === 'female'
+                      ? '여자'
                       : null
-                  }
-                />
-              </div>
-            </motion.div>
+                }
+              />
+              <InfoRow
+                label="학년"
+                value={
+                  participant.grade
+                    ? GRADE_LABELS[participant.grade] ?? participant.grade
+                    : null
+                }
+              />
+            </GlassSection>
 
             {/* Contact Info */}
-            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-              <div className="px-4 py-4 md:px-6">
-                <h3 className="flex items-center gap-2 text-base font-semibold">
-                  <Phone className="size-4 text-muted-foreground" />
-                  연락처
-                </h3>
-              </div>
-              <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
-                <InfoRow label="본인 연락처" value={participant.phone} />
-                <InfoRow label="보호자 연락처" value={participant.parent_phone} />
-                <InfoRow label="비상연락처" value={participant.emergency_contact} />
-              </div>
-            </motion.div>
+            <GlassSection icon={Phone} title="연락처">
+              <InfoRow label="본인 연락처" value={participant.phone} />
+              <InfoRow label="보호자 연락처" value={participant.parent_phone} />
+              <InfoRow label="비상연락처" value={participant.emergency_contact} />
+            </GlassSection>
 
             {/* Health & Dietary */}
             {(healthNote || participant.dietary_restrictions) && (
-              <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-                <div className="px-4 py-4 md:px-6">
-                  <h3 className="flex items-center gap-2 text-base font-semibold">
-                    <Heart className="size-4 text-muted-foreground" />
-                    건강 및 식이
-                  </h3>
-                </div>
-                <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
-                  <InfoRow label="건강 정보" value={healthNote as string | null} />
-                  <InfoRow label="식이 제한" value={participant.dietary_restrictions} />
-                </div>
-              </motion.div>
+              <GlassSection icon={Heart} title="건강 및 식이">
+                <InfoRow label="건강 정보" value={healthNote as string | null} />
+                <InfoRow label="식이 제한" value={participant.dietary_restrictions} />
+              </GlassSection>
             )}
 
             {/* Transportation */}
             {participant.transportation && (
-              <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-                <div className="px-4 py-4 md:px-6">
-                  <h3 className="flex items-center gap-2 text-base font-semibold">
-                    <Bus className="size-4 text-muted-foreground" />
-                    교통편
-                  </h3>
-                </div>
-                <div className="px-4 pb-4 pt-0 md:px-6">
-                  <InfoRow
-                    label="교통편"
-                    value={
-                      TRANSPORTATION_LABELS[participant.transportation] ??
-                      participant.transportation
-                    }
-                  />
-                </div>
-              </motion.div>
+              <GlassSection icon={Bus} title="교통편">
+                <InfoRow
+                  label="교통편"
+                  value={
+                    TRANSPORTATION_LABELS[participant.transportation] ??
+                    participant.transportation
+                  }
+                />
+              </GlassSection>
             )}
 
             {/* Consent Status */}
-            <motion.div variants={fadeUp} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-              <div className="px-4 py-4 md:px-6">
-                <h3 className="flex items-center gap-2 text-base font-semibold">
-                  <ShieldCheck className="size-4 text-muted-foreground" />
-                  동의 현황
-                </h3>
-              </div>
-              <div className="divide-y divide-white/[0.06] px-4 pb-4 pt-0 md:px-6">
-                <ConsentBadge
-                  label="개인정보 수집 및 이용"
-                  consented={participant.consent_personal_info}
-                />
-                <ConsentBadge
-                  label="민감정보 수집 및 이용"
-                  consented={participant.consent_sensitive_info}
-                />
-                <ConsentBadge
-                  label="사진/영상 촬영 및 활용"
-                  consented={participant.consent_photo_video}
-                />
-                <ConsentBadge
-                  label="개인정보 국외 이전"
-                  consented={participant.consent_overseas_transfer}
-                />
-              </div>
-            </motion.div>
+            <GlassSection icon={ShieldCheck} title="동의 현황">
+              <ConsentBadge
+                label="개인정보 수집 및 이용"
+                consented={participant.consent_personal_info}
+              />
+              <ConsentBadge
+                label="민감정보 수집 및 이용"
+                consented={participant.consent_sensitive_info}
+              />
+              <ConsentBadge
+                label="사진/영상 촬영 및 활용"
+                consented={participant.consent_photo_video}
+              />
+              <ConsentBadge
+                label="개인정보 국외 이전"
+                consented={participant.consent_overseas_transfer}
+              />
+            </GlassSection>
           </>
         )}
       </LoadingSkeleton>

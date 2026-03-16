@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 import { LeaderboardTable } from '@/components/dashboard/LeaderboardTable'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
@@ -22,7 +23,7 @@ function LeaderboardSkeleton() {
   return (
     <div className="space-y-2">
       {Array.from({ length: 6 }).map((_, i) => (
-        <SkeletonBox key={i} className="h-16 rounded-xl" />
+        <SkeletonBox key={i} className="h-16 rounded-2xl" />
       ))}
     </div>
   )
@@ -65,28 +66,26 @@ export default function LeaderboardPage() {
 
   return (
     <motion.div
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp}>
-        <h1 className="text-xl font-bold text-foreground md:text-2xl">순위표</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          조별, 개인별 포인트 순위를 확인해 보세요
-        </p>
-      </motion.div>
+      <PageHeader
+        title="리더보드"
+        description="조별/개인 순위를 확인해요"
+        backHref="/dashboard"
+      />
 
       {/* Tabs */}
       <motion.div variants={fadeUp}>
       <Tabs defaultValue="group" className="space-y-4">
-        <TabsList className="w-full">
-          <TabsTrigger value="group" className="flex-1 gap-1.5">
+        <TabsList className="w-full rounded-full border border-white/[0.08] bg-white/[0.04] p-1 backdrop-blur-xl">
+          <TabsTrigger value="group" className="flex-1 gap-1.5 rounded-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
             <Users className="size-4" />
             조별 순위
           </TabsTrigger>
-          <TabsTrigger value="individual" className="flex-1 gap-1.5">
+          <TabsTrigger value="individual" className="flex-1 gap-1.5 rounded-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
             <User className="size-4" />
             개인 순위
           </TabsTrigger>

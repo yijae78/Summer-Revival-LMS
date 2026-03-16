@@ -2,7 +2,7 @@
 
 import { use } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Camera, ImagePlus } from 'lucide-react'
+import { Camera, ImagePlus } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { PhotoGrid } from '@/components/dashboard/PhotoGrid'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { usePhotos } from '@/hooks/useGallery'
 import { useUser } from '@/hooks/useUser'
@@ -25,7 +26,7 @@ function PhotoSkeletons() {
   return (
     <div className="grid grid-cols-3 gap-1 md:gap-2 lg:grid-cols-4">
       {Array.from({ length: 12 }).map((_, i) => (
-        <SkeletonBox key={i} className="aspect-square rounded-lg" />
+        <SkeletonBox key={i} className="aspect-square rounded-xl" />
       ))}
     </div>
   )
@@ -42,49 +43,32 @@ export default function AlbumDetailPage({ params }: AlbumDetailPageProps) {
 
   return (
     <motion.div
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp} className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/gallery')}
-          className="h-12 w-12 shrink-0"
-          aria-label="갤러리로 돌아가기"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-bold text-foreground md:text-2xl">
-            앨범 상세
-          </h1>
-          {hasPhotos && (
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">
-                <Camera className="mr-1 h-3 w-3" />
-                {photos.length}장
-              </Badge>
-            </div>
-          )}
-        </div>
-        {isAdminOrStaff && (
-          <Button
-            size="lg"
-            className="h-12 shrink-0 gap-2"
-            onClick={() => {
-              // Placeholder: open add photo dialog / upload flow
-            }}
-          >
-            <ImagePlus className="h-4 w-4" />
-            <span className="hidden sm:inline">사진 추가</span>
-            <span className="sm:hidden">추가</span>
-          </Button>
-        )}
-      </motion.div>
+      <PageHeader
+        title="앨범"
+        backHref="/gallery"
+        backLabel="갤러리로"
+        description={hasPhotos ? `${photos.length}장의 사진` : undefined}
+        action={
+          isAdminOrStaff ? (
+            <Button
+              size="lg"
+              className="h-12 shrink-0 gap-2"
+              onClick={() => {
+                // Placeholder: open add photo dialog / upload flow
+              }}
+            >
+              <ImagePlus className="h-4 w-4" />
+              <span className="hidden sm:inline">사진 추가</span>
+              <span className="sm:hidden">추가</span>
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Content */}
       <motion.div variants={fadeUp}>

@@ -19,10 +19,10 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useMaterials } from '@/hooks/useMaterials'
@@ -30,7 +30,6 @@ import { useUser } from '@/hooks/useUser'
 import { deleteMaterial } from '@/actions/materials'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
-import { formatRelativeTime } from '@/lib/utils/format-date'
 
 import type { Material, MaterialCategory } from '@/types'
 
@@ -114,8 +113,15 @@ function MaterialCard({
   const FileIcon = getFileIcon(material.file_type)
 
   return (
-    <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
-      <CardContent className="flex items-center gap-4 px-4 py-4 md:px-6">
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'transition-all duration-300',
+        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]'
+      )}
+    >
+      <div className="flex items-center gap-4 px-4 py-4 md:px-6">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/[0.06]">
           <FileIcon className="size-5 text-muted-foreground" />
         </div>
@@ -173,8 +179,8 @@ function MaterialCard({
             </Button>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </motion.div>
   )
 }
 
@@ -182,7 +188,7 @@ function MaterialSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
+        <div key={i} className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
           <SkeletonBox className="h-12 w-12 rounded-xl" />
           <div className="flex-1 space-y-2">
             <SkeletonBox className="h-4 w-48" />
@@ -222,7 +228,12 @@ function MaterialList({
   }
 
   return (
-    <div className="space-y-3">
+    <motion.div
+      className="space-y-3"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {filtered.map((material) => (
         <MaterialCard
           key={material.id}
@@ -231,7 +242,7 @@ function MaterialList({
           onDelete={onDelete}
         />
       ))}
-    </div>
+    </motion.div>
   )
 }
 
@@ -269,20 +280,19 @@ export default function MaterialsPage() {
       initial="hidden"
       animate="show"
     >
-      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">자료실</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            행사에 필요한 자료를 확인해 보세요
-          </p>
-        </div>
-        {canManage && (
-          <Button className="min-h-12 gap-2" disabled>
-            <Upload />
-            자료 업로드
-          </Button>
-        )}
-      </motion.div>
+      <PageHeader
+        title="자료실"
+        description="행사 자료를 다운받아요"
+        backHref="/dashboard"
+        action={
+          canManage ? (
+            <Button className="min-h-12 gap-2" disabled>
+              <Upload />
+              자료 업로드
+            </Button>
+          ) : undefined
+        }
+      />
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<MaterialSkeleton />}>
@@ -294,9 +304,9 @@ export default function MaterialsPage() {
             />
           ) : (
             <Tabs defaultValue="all">
-              <TabsList className="w-full overflow-x-auto md:w-auto">
+              <TabsList className="w-full overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.04] p-1 backdrop-blur-xl md:w-auto">
                 {TABS.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9">
+                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9 rounded-full data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
                     {tab.label}
                   </TabsTrigger>
                 ))}

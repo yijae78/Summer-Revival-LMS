@@ -5,13 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 
 import {
-  ArrowLeft,
   Users,
   Star,
   UserPlus,
   UserMinus,
   Search,
-  Trash2,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -19,17 +17,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useGroup, useGroupMembers } from '@/hooks/useGroups'
 import { usePointHistory } from '@/hooks/usePoints'
@@ -78,7 +75,7 @@ function MemberListSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
+        <div key={i} className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
           <SkeletonBox className="h-10 w-10 rounded-full" />
           <SkeletonBox className="h-4 w-24" />
         </div>
@@ -154,62 +151,17 @@ export default function GroupDetailPage() {
 
   return (
     <motion.div
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Back navigation */}
-      <motion.div variants={fadeUp}>
-      <button
-        type="button"
-        onClick={() => router.push('/groups')}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        조 목록으로
-      </button>
-      </motion.div>
-
-      {/* Group Header */}
-      <motion.div variants={fadeUp}>
-      <LoadingSkeleton
-        isLoading={groupLoading}
-        skeleton={<SkeletonBox className="h-24 rounded-xl" />}
-      >
-        {group && (
-          <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0">
-            <CardContent className="flex items-center gap-4 px-5 py-5">
-              <div
-                className="size-12 shrink-0 rounded-xl"
-                style={{ backgroundColor: group.color ?? '#6b7280' }}
-                aria-hidden="true"
-              />
-              <div className="flex-1">
-                <h1 className="text-xl font-bold text-foreground">{group.name}</h1>
-                <div className="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <Users className="size-3.5" />
-                    {members?.length ?? 0}명
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Star className="size-3.5" />
-                    {group.total_points}점
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </LoadingSkeleton>
-      </motion.div>
-
-      {/* Members Section */}
-      <motion.div variants={fadeUp}>
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">조원 목록</h2>
-          {isAdmin && (
+      <PageHeader
+        title={group?.name ?? '조 상세'}
+        backHref="/groups"
+        backLabel="조 목록으로"
+        action={
+          isAdmin ? (
             <Button
               variant="outline"
               size="sm"
@@ -222,16 +174,74 @@ export default function GroupDetailPage() {
               <UserPlus className="size-4" />
               조원 추가
             </Button>
-          )}
-        </div>
+          ) : undefined
+        }
+      />
+
+      {/* Group Header Card */}
+      <motion.div variants={fadeUp}>
+      <LoadingSkeleton
+        isLoading={groupLoading}
+        skeleton={<SkeletonBox className="h-24 rounded-2xl" />}
+      >
+        {group && (
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+            <div className="flex items-center gap-4 px-5 py-5">
+              <div
+                className="size-14 shrink-0 rounded-xl"
+                style={{
+                  backgroundColor: group.color ?? '#6b7280',
+                  boxShadow: `0 0 20px ${group.color ?? '#6b7280'}30`,
+                }}
+                aria-hidden="true"
+              />
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-foreground">{group.name}</h2>
+                <div className="mt-1.5 flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Users className="size-3.5" />
+                    {members?.length ?? 0}명
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Star className="size-3.5 text-amber-400" />
+                    <span className="font-semibold text-foreground">{group.total_points}점</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </LoadingSkeleton>
+      </motion.div>
+
+      {/* Members Section */}
+      <motion.div variants={fadeUp}>
+      <section className="space-y-3">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <Users className="size-4 text-primary" />
+          조원 목록
+        </h2>
 
         <LoadingSkeleton isLoading={membersLoading} skeleton={<MemberListSkeleton />}>
           {members && members.length > 0 ? (
-            <div className="space-y-2">
+            <motion.div
+              className="space-y-2"
+              variants={stagger}
+              initial="hidden"
+              animate="show"
+            >
               {members.map((member) => (
-                <Card key={member.id} className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
-                  <CardContent className="flex items-center gap-3 px-4 py-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <motion.div
+                  key={member.id}
+                  variants={fadeUp}
+                  className={cn(
+                    'rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+                    'transition-all duration-300',
+                    'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]'
+                  )}
+                >
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-primary/20">
                       <span className="text-sm font-semibold">
                         {member.participant?.name?.charAt(0) ?? '?'}
                       </span>
@@ -258,10 +268,10 @@ export default function GroupDetailPage() {
                         <UserMinus className="size-4" />
                       </Button>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
             <EmptyState
               icon={Users}
@@ -284,7 +294,10 @@ export default function GroupDetailPage() {
       {/* Points History Section */}
       <motion.div variants={fadeUp}>
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground">포인트 내역</h2>
+        <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <Star className="size-4 text-amber-400" />
+          포인트 내역
+        </h2>
         {pointHistory && pointHistory.length > 0 ? (
           <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0">
             <CardContent className="divide-y divide-white/[0.06] px-4">

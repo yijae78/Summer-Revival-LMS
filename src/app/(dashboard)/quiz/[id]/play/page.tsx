@@ -40,7 +40,7 @@ function PlaySkeletons() {
   return (
     <div className="space-y-6">
       <SkeletonBox className="h-3 w-full rounded-full" />
-      <SkeletonBox className="h-40 rounded-xl" />
+      <SkeletonBox className="h-40 rounded-2xl" />
       <div className="grid grid-cols-2 gap-3">
         <SkeletonBox className="h-14 rounded-xl" />
         <SkeletonBox className="h-14 rounded-xl" />
@@ -81,7 +81,6 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
     if (!currentQuestion?.options) return []
     const opts = currentQuestion.options as Record<string, unknown>
     if (Array.isArray(opts)) return opts as string[]
-    // Handle { A: "...", B: "...", C: "...", D: "..." } format
     return Object.values(opts).map(String)
   })()
 
@@ -96,7 +95,6 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
       setTimeLeft((prev) => {
         if (prev === null || prev <= 1) {
           clearInterval(interval)
-          // Auto-submit when time runs out
           return 0
         }
         return prev - 1
@@ -111,8 +109,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
     if (timeLeft === 0 && phase === 'playing') {
       handleSubmitAnswer('')
     }
-    // eslint-disable-next-line -- only trigger on timeLeft change when it hits 0
-  }, [timeLeft])
+  }, [timeLeft]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset question start time when moving to next question
   useEffect(() => {
@@ -134,7 +131,6 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
         currentQuestion.correct_answer.trim().toLowerCase()
       const pointsEarned = isCorrect ? currentQuestion.points : 0
 
-      // Submit to server
       await submitAnswer({
         questionId: currentQuestion.id,
         participantId: user.id,
@@ -157,7 +153,6 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
       setPhase('answered')
       setIsSubmitting(false)
 
-      // Haptic feedback
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
         navigator.vibrate(isCorrect ? [30, 50, 30] : [50, 30, 50, 30, 50])
       }
@@ -180,59 +175,83 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
     const correctCount = answers.filter((a) => a.isCorrect).length
 
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
+      <motion.div
+        className="space-y-5"
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={fadeUp} className="flex items-center gap-3">
+          <button
+            type="button"
             onClick={() => router.push(`/quiz/${quizId}`)}
-            className="h-12 w-12 shrink-0"
-            aria-label="퀴즈 상세로 돌아가기"
+            className={cn(
+              'flex min-h-[40px] min-w-[40px] shrink-0 items-center justify-center',
+              'rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm',
+              'text-muted-foreground transition-all duration-300',
+              'hover:border-primary/20 hover:bg-white/[0.06] hover:text-foreground'
+            )}
+            aria-label="퀴즈 상세로"
           >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+            <ArrowLeft className="size-[18px]" />
+          </button>
           <h1 className="text-xl font-bold text-foreground md:text-2xl">
             퀴즈 완료!
           </h1>
-        </div>
+        </motion.div>
 
         {/* Quick Summary */}
-        <Card className="border-primary/30 bg-primary/5 backdrop-blur-xl">
-          <CardContent className="py-6 text-center">
-            <p className="text-4xl font-bold text-primary">{totalScore}점</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {totalQuestions}문제 중 {correctCount}문제 정답이에요
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div variants={fadeUp}>
+          <Card className="border-primary/30 bg-primary/5 backdrop-blur-xl">
+            <CardContent className="py-6 text-center">
+              <p className="text-4xl font-bold tabular-nums text-primary">{totalScore}점</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {totalQuestions}문제 중 {correctCount}문제 정답이에요
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Detailed results */}
-        <QuizResults quizId={quizId} participantId={user.id} />
+        <motion.div variants={fadeUp}>
+          <QuizResults quizId={quizId} participantId={user.id} />
+        </motion.div>
 
-        <Button
-          variant="outline"
-          className="h-12 w-full"
-          onClick={() => router.push('/quiz')}
-        >
-          퀴즈 목록으로 돌아가기
-        </Button>
-      </div>
+        <motion.div variants={fadeUp}>
+          <Button
+            variant="outline"
+            className="h-12 w-full"
+            onClick={() => router.push('/quiz')}
+          >
+            퀴즈 목록으로 돌아가기
+          </Button>
+        </motion.div>
+      </motion.div>
     )
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <motion.div
+      className="space-y-5"
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
+      <motion.div variants={fadeUp} className="flex items-center gap-3">
+        <button
+          type="button"
           onClick={() => router.push(`/quiz/${quizId}`)}
-          className="h-12 w-12 shrink-0"
+          className={cn(
+            'flex min-h-[40px] min-w-[40px] shrink-0 items-center justify-center',
+            'rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm',
+            'text-muted-foreground transition-all duration-300',
+            'hover:border-primary/20 hover:bg-white/[0.06] hover:text-foreground'
+          )}
           aria-label="퀴즈로 돌아가기"
         >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+          <ArrowLeft className="size-[18px]" />
+        </button>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-bold text-foreground">
             {quiz?.title ?? '퀴즈'}
@@ -241,52 +260,61 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
         {timeLeft !== null && timeLeft > 0 && phase === 'playing' && (
           <div
             className={cn(
-              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium',
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium',
               timeLeft <= 5
-                ? 'bg-destructive/10 text-destructive'
-                : 'bg-white/[0.06] text-muted-foreground'
+                ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground'
             )}
           >
             <Clock className="h-4 w-4" />
             {timeLeft}초
           </div>
         )}
-      </div>
+      </motion.div>
 
       <LoadingSkeleton isLoading={isLoading} skeleton={<PlaySkeletons />}>
         {currentQuestion && (
           <>
             {/* Progress Bar */}
-            <div className="space-y-2">
+            <motion.div variants={fadeUp} className="space-y-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
                   {currentIndex + 1} / {totalQuestions}
                 </span>
                 <span>{progressPercent}%</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                <motion.div
+                  className="h-full rounded-full bg-primary"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 0.3 }}
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Question */}
-            <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-              <CardContent className="py-6">
-                <p className="text-center text-lg font-semibold leading-relaxed text-foreground">
-                  <span className="mr-2 text-primary">
-                    Q{currentIndex + 1}.
-                  </span>
-                  {currentQuestion.question}
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div variants={fadeUp}>
+              <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+                <CardContent className="py-6">
+                  <p className="text-center text-lg font-semibold leading-relaxed text-foreground">
+                    <span className="mr-2 text-primary">
+                      Q{currentIndex + 1}.
+                    </span>
+                    {currentQuestion.question}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Answer Area */}
             {currentQuestion.type === 'multiple_choice' && (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <motion.div
+                className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+                variants={stagger}
+                initial="hidden"
+                animate="show"
+              >
                 {options.map((option, index) => {
                   const label = optionLabels[index] ?? String(index + 1)
                   const isSelected = selectedAnswer === option
@@ -298,15 +326,17 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                     phase === 'answered' && isSelected && !isCorrectAnswer
 
                   return (
-                    <button
+                    <motion.button
                       key={index}
+                      variants={fadeUp}
                       type="button"
                       disabled={phase !== 'playing' || isSubmitting}
                       onClick={() => handleSubmitAnswer(option)}
+                      whileTap={phase === 'playing' ? { scale: 0.97 } : undefined}
                       className={cn(
-                        'flex min-h-[56px] items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all active:scale-[0.98]',
+                        'flex min-h-[56px] items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all',
                         phase === 'playing' &&
-                          'border-white/[0.08] hover:border-primary/50 hover:bg-primary/5',
+                          'border-white/[0.08] bg-white/[0.03] hover:border-primary/50 hover:bg-primary/5',
                         isCorrectAnswer &&
                           'border-emerald-500 bg-emerald-500/10',
                         isWrongSelected &&
@@ -337,14 +367,19 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                         )}
                       </span>
                       <span className="flex-1">{option}</span>
-                    </button>
+                    </motion.button>
                   )
                 })}
-              </div>
+              </motion.div>
             )}
 
             {currentQuestion.type === 'ox' && (
-              <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                className="grid grid-cols-2 gap-4"
+                variants={stagger}
+                initial="hidden"
+                animate="show"
+              >
                 {[
                   { label: 'O', value: 'O', subtext: '맞아요' },
                   { label: 'X', value: 'X', subtext: '틀려요' },
@@ -359,15 +394,17 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                     !isCorrectAnswer
 
                   return (
-                    <button
+                    <motion.button
                       key={item.value}
+                      variants={fadeUp}
                       type="button"
                       disabled={phase !== 'playing' || isSubmitting}
                       onClick={() => handleSubmitAnswer(item.value)}
+                      whileTap={phase === 'playing' ? { scale: 0.97 } : undefined}
                       className={cn(
-                        'flex min-h-[100px] flex-col items-center justify-center gap-2 rounded-2xl border-2 text-center transition-all active:scale-[0.97]',
+                        'flex min-h-[100px] flex-col items-center justify-center gap-2 rounded-2xl border-2 text-center transition-all',
                         phase === 'playing' &&
-                          'border-white/[0.08] hover:border-primary/50 hover:bg-primary/5',
+                          'border-white/[0.08] bg-white/[0.03] hover:border-primary/50 hover:bg-primary/5',
                         isCorrectAnswer &&
                           'border-emerald-500 bg-emerald-500/10',
                         isWrongSelected &&
@@ -391,14 +428,14 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       <span className="text-sm text-muted-foreground">
                         {item.subtext}
                       </span>
-                    </button>
+                    </motion.button>
                   )
                 })}
-              </div>
+              </motion.div>
             )}
 
             {currentQuestion.type === 'fill_blank' && (
-              <div className="space-y-4">
+              <motion.div variants={fadeUp} className="space-y-4">
                 {phase === 'playing' ? (
                   <form
                     onSubmit={(e) => {
@@ -413,7 +450,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       value={fillAnswer}
                       onChange={(e) => setFillAnswer(e.target.value)}
                       placeholder="정답을 입력해 주세요"
-                      className="h-14 text-center text-lg"
+                      className="h-14 rounded-xl border-white/[0.08] bg-white/[0.03] text-center text-lg"
                       autoFocus
                       disabled={isSubmitting}
                     />
@@ -455,12 +492,17 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                     )}
                   </div>
                 )}
-              </div>
+              </motion.div>
             )}
 
             {/* Answered feedback & Next button */}
             {phase === 'answered' && (
-              <div className="space-y-4">
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                animate="show"
+                className="space-y-4"
+              >
                 <div
                   className={cn(
                     'flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium',
@@ -472,14 +514,12 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                   {answers[answers.length - 1]?.isCorrect ? (
                     <>
                       <CheckCircle2 className="h-5 w-5" />
-                      정답이에요! +{answers[answers.length - 1]?.pointsEarned}
-                      점
+                      정답이에요! +{answers[answers.length - 1]?.pointsEarned}점
                     </>
                   ) : (
                     <>
                       <XCircle className="h-5 w-5" />
-                      아쉬워요! 정답은 &ldquo;
-                      {currentQuestion.correct_answer}&rdquo;이에요
+                      아쉬워요! 정답은 &ldquo;{currentQuestion.correct_answer}&rdquo;이에요
                     </>
                   )}
                 </div>
@@ -492,11 +532,11 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                     ? '다음 문제'
                     : '결과 보기'}
                 </Button>
-              </div>
+              </motion.div>
             )}
           </>
         )}
       </LoadingSkeleton>
-    </div>
+    </motion.div>
   )
 }

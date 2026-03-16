@@ -1,6 +1,17 @@
 'use client'
 
-import { Users, ClipboardCheck, Calendar } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import {
+  Users,
+  ClipboardCheck,
+  Calendar,
+  Trophy,
+  Megaphone,
+  Camera,
+  HelpCircle,
+  FolderOpen,
+  Settings,
+} from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { EventBanner } from '@/components/dashboard/EventBanner'
@@ -12,9 +23,22 @@ import { useEvents } from '@/hooks/useEvents'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useSchedules } from '@/hooks/useSchedules'
 import { useEventStore } from '@/stores/eventStore'
+import { cn } from '@/lib/utils'
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
+
+const QUICK_ACTIONS = [
+  { href: '/participants', icon: Users, label: '참가자', color: 'text-sky-400' },
+  { href: '/schedule', icon: Calendar, label: '일정', color: 'text-violet-400' },
+  { href: '/attendance', icon: ClipboardCheck, label: '출석', color: 'text-emerald-400' },
+  { href: '/quiz', icon: HelpCircle, label: '퀴즈', color: 'text-amber-400' },
+  { href: '/announcements', icon: Megaphone, label: '공지', color: 'text-rose-400' },
+  { href: '/gallery', icon: Camera, label: '갤러리', color: 'text-cyan-400' },
+  { href: '/groups', icon: Trophy, label: '조/반', color: 'text-orange-400' },
+  { href: '/materials', icon: FolderOpen, label: '자료실', color: 'text-indigo-400' },
+  { href: '/settings', icon: Settings, label: '설정', color: 'text-slate-400' },
+]
 
 function EventSelector() {
   const { events, isLoading } = useEvents()
@@ -40,8 +64,8 @@ function EventSelector() {
         animate="show"
       >
         <motion.div variants={fadeUp}>
-          <h1 className="text-xl font-bold text-white">환영해요!</h1>
-          <p className="mt-1 text-sm text-[#8892a8]">
+          <h1 className="text-xl font-bold text-foreground">환영해요!</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             아직 등록된 행사가 없어요. 새 행사를 만들어 시작해 보세요.
           </p>
         </motion.div>
@@ -64,45 +88,55 @@ function EventSelector() {
       animate="show"
     >
       <motion.div variants={fadeUp}>
-        <h1 className="text-xl font-bold text-white">행사를 선택해 주세요</h1>
-        <p className="mt-1 text-sm text-[#8892a8]">
+        <h1 className="text-xl font-bold text-foreground">행사를 선택해 주세요</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           관리할 행사를 선택하면 대시보드가 표시돼요
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <motion.div
+        className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+      >
         {events.map((event) => (
           <motion.button
             key={event.id}
             variants={fadeUp}
             type="button"
             onClick={() => handleSelectEvent(event.id)}
-            className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-5 text-left transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] hover:-translate-y-0.5"
+            className={cn(
+              'group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+              'p-5 text-left transition-all duration-300',
+              'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] hover:-translate-y-0.5'
+            )}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             <div className="relative z-10 space-y-3">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
                 {event.type === 'retreat' ? '수련회' : event.type === 'vbs' ? 'VBS' : '캠프'}
               </div>
-              <h3 className="text-lg font-bold text-white">{event.name}</h3>
-              <div className="flex items-center gap-2 text-sm text-[#8892a8]">
+              <h3 className="text-lg font-bold text-foreground">{event.name}</h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>
                   {event.start_date} ~ {event.end_date}
                 </span>
               </div>
               {event.location && (
-                <p className="text-xs text-[#5c6478]">{event.location}</p>
+                <p className="text-xs text-muted-foreground/60">{event.location}</p>
               )}
             </div>
           </motion.button>
         ))}
-      </div>
+      </motion.div>
     </motion.div>
   )
 }
 
 function DashboardContent() {
+  const router = useRouter()
   const { event, isLoading: isEventLoading, eventId } = useCurrentEvent()
   const { data: participants, isLoading: isParticipantsLoading } = useParticipants(eventId)
   const { data: schedules, isLoading: isSchedulesLoading } = useSchedules(eventId)
@@ -139,22 +173,30 @@ function DashboardContent() {
       initial="hidden"
       animate="show"
     >
+      {/* Welcome */}
       <motion.div variants={fadeUp} className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">안녕하세요!</h1>
-          <p className="mt-1 text-sm text-[#8892a8]">
+          <h1 className="text-xl font-bold text-foreground">
+            안녕하세요!
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {hasData ? '오늘도 행사 준비를 함께해요' : '여름행사를 준비해 볼까요?'}
           </p>
         </div>
         <button
           type="button"
           onClick={clearCurrentEvent}
-          className="rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs text-[#8892a8] transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:text-white"
+          className={cn(
+            'rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs',
+            'text-muted-foreground transition-all duration-300',
+            'hover:border-primary/20 hover:bg-white/[0.06] hover:text-foreground'
+          )}
         >
           행사 변경
         </button>
       </motion.div>
 
+      {/* Event banner + Stats */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <motion.div variants={fadeUp} className="md:col-span-2">
           <EventBanner
@@ -174,7 +216,7 @@ function DashboardContent() {
         </motion.div>
         <motion.div variants={fadeUp}>
           <StatCard
-            value={isSchedulesLoading ? '...' : hasSchedule ? scheduleCount : '—'}
+            value={isSchedulesLoading ? '...' : hasSchedule ? scheduleCount : '\u2014'}
             label={hasSchedule ? '일정' : '출석률'}
             icon={hasSchedule ? Calendar : ClipboardCheck}
             color="secondary"
@@ -182,6 +224,46 @@ function DashboardContent() {
           />
         </motion.div>
       </div>
+
+      {/* Quick Actions Grid */}
+      <motion.div variants={fadeUp}>
+        <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
+          빠른 이동
+        </h2>
+        <motion.div
+          className="grid grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-5"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
+          {QUICK_ACTIONS.map((action) => {
+            const Icon = action.icon
+            return (
+              <motion.button
+                key={action.href}
+                variants={fadeUp}
+                type="button"
+                onClick={() => router.push(action.href)}
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-2 rounded-2xl',
+                  'border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+                  'px-3 py-4 transition-all duration-300',
+                  'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+                  'active:scale-[0.97]'
+                )}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.06]">
+                  <Icon className={cn('size-5', action.color)} />
+                </div>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {action.label}
+                </span>
+              </motion.button>
+            )
+          })}
+        </motion.div>
+      </motion.div>
 
       {!hasData && (
         <motion.div variants={fadeUp}>

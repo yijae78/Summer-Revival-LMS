@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useParticipants } from '@/hooks/useParticipants'
@@ -48,8 +49,14 @@ function ParticipantCard({
   const gradeLabel = participant.grade ? GRADE_LABELS[participant.grade] ?? participant.grade : null
 
   return (
-    <div
-      className="cursor-pointer rounded-xl border border-white/[0.06] bg-white/[0.02] transition-all duration-300 hover:border-primary/15 hover:bg-white/[0.04] active:scale-[0.99]"
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'transition-all duration-300',
+        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+        'active:scale-[0.99]'
+      )}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -61,19 +68,19 @@ function ParticipantCard({
       }}
     >
       <div className="flex items-center gap-4 px-4 py-4 md:px-6">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-2 ring-primary/20">
           <span className="text-base font-semibold">
             {participant.name.charAt(0)}
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <p className="truncate text-[0.9375rem] font-medium text-foreground">
+            <p className="truncate text-[0.9375rem] font-semibold text-foreground">
               {participant.name}
             </p>
             {gradeLabel && (
-              <span className="shrink-0 text-xs text-muted-foreground">
+              <span className="shrink-0 rounded-full bg-white/[0.06] px-2 py-0.5 text-xs text-muted-foreground">
                 {gradeLabel}
               </span>
             )}
@@ -109,7 +116,7 @@ function ParticipantCard({
 
         <ChevronRight className="size-4 shrink-0 text-muted-foreground/40" />
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -117,7 +124,7 @@ function ParticipantSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 md:p-6">
+        <div key={i} className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 md:p-6">
           <SkeletonBox className="h-11 w-11 rounded-full" />
           <div className="flex-1 space-y-2">
             <SkeletonBox className="h-4 w-32" />
@@ -169,20 +176,15 @@ export default function ParticipantsPage() {
       initial="hidden"
       animate="show"
     >
-      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">참가자 관리</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {participants
-              ? `총 ${participants.length}명 (납부 ${paidCount}명)`
-              : '참가자 목록을 불러오고 있어요'}
-          </p>
-        </div>
-      </motion.div>
+      <PageHeader
+        title="참가자"
+        description="행사 참가자를 관리해요"
+        backHref="/dashboard"
+      />
 
       {/* Search */}
       <motion.div variants={fadeUp} className="relative">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="이름으로 검색해 주세요"
           value={searchQuery}
@@ -190,6 +192,28 @@ export default function ParticipantsPage() {
           className="h-12 pl-10 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
         />
       </motion.div>
+
+      {/* Summary bar */}
+      {participants && participants.length > 0 && (
+        <motion.div
+          variants={fadeUp}
+          className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-3 backdrop-blur-xl"
+        >
+          <div className="flex items-center gap-2 text-sm">
+            <Users className="size-4 text-primary" />
+            <span className="font-medium text-foreground">
+              총 {participants.length}명
+            </span>
+          </div>
+          <div className="h-4 w-px bg-white/[0.08]" />
+          <div className="flex items-center gap-2 text-sm">
+            <DollarSign className="size-4 text-emerald-400" />
+            <span className="text-muted-foreground">
+              납부 {paidCount}명
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<ParticipantSkeleton />}>
@@ -208,7 +232,12 @@ export default function ParticipantsPage() {
               />
             )
           ) : (
-            <div className="space-y-3">
+            <motion.div
+              className="space-y-3"
+              variants={stagger}
+              initial="hidden"
+              animate="show"
+            >
               {filteredParticipants.map((participant) => (
                 <ParticipantCard
                   key={participant.id}
@@ -216,7 +245,7 @@ export default function ParticipantsPage() {
                   onClick={() => handleNavigateToDetail(participant.id)}
                 />
               ))}
-            </div>
+            </motion.div>
           )}
         </LoadingSkeleton>
       </motion.div>

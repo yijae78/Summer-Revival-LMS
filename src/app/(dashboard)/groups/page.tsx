@@ -8,7 +8,6 @@ import { Users, Plus, ChevronRight, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -21,6 +20,7 @@ import {
 } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useGroups } from '@/hooks/useGroups'
@@ -57,8 +57,14 @@ function GroupCard({
   onClick: () => void
 }) {
   return (
-    <Card
-      className="cursor-pointer gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] active:scale-[0.98]"
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'transition-all duration-300',
+        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+        'active:scale-[0.98]'
+      )}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -69,11 +75,14 @@ function GroupCard({
         }
       }}
     >
-      <CardContent className="flex flex-col gap-3 px-5 py-5">
+      <div className="flex flex-col gap-3 px-5 py-5">
         <div className="flex items-center gap-3">
           <div
             className="size-4 shrink-0 rounded-full"
-            style={{ backgroundColor: color ?? '#6b7280' }}
+            style={{
+              backgroundColor: color ?? '#6b7280',
+              boxShadow: `0 0 8px ${color ?? '#6b7280'}40, 0 0 0 2px ${color ?? '#6b7280'}30`,
+            }}
             aria-hidden="true"
           />
           <h3 className="truncate text-base font-semibold text-foreground">{name}</h3>
@@ -85,12 +94,17 @@ function GroupCard({
             {memberCount}명
           </span>
           <span className="flex items-center gap-1.5">
-            <Star className="size-3.5" />
+            <Star className="size-3.5 text-amber-400" />
             {totalPoints}점
           </span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      {/* Colored left border accent */}
+      <div
+        className="h-1 w-full rounded-b-2xl"
+        style={{ backgroundColor: `${color ?? '#6b7280'}60` }}
+      />
+    </motion.div>
   )
 }
 
@@ -98,7 +112,7 @@ function GroupsSkeletons() {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <SkeletonBox key={i} className="min-h-[100px] rounded-xl" />
+        <SkeletonBox key={i} className="min-h-[120px] rounded-2xl" />
       ))}
     </div>
   )
@@ -141,39 +155,40 @@ export default function GroupsPage() {
 
   return (
     <motion.div
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-foreground md:text-2xl">조 관리</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {hasGroups
-              ? `총 ${groups.length}개 조`
-              : '조를 만들어 참가자를 배정해 보세요'}
-          </p>
-        </div>
-        {isAdmin && (
-          <Button
-            size="lg"
-            className="h-12 gap-2"
-            onClick={() => setDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">조 만들기</span>
-            <span className="sm:hidden">추가</span>
-          </Button>
-        )}
-      </motion.div>
+      <PageHeader
+        title="조/반 관리"
+        description="조별 활동을 관리해요"
+        backHref="/dashboard"
+        action={
+          isAdmin ? (
+            <Button
+              size="lg"
+              className="h-12 gap-2"
+              onClick={() => setDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">조 만들기</span>
+              <span className="sm:hidden">추가</span>
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Group Grid */}
       <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<GroupsSkeletons />}>
         {hasGroups ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <motion.div
+            className="grid grid-cols-2 gap-3 md:grid-cols-3"
+            variants={stagger}
+            initial="hidden"
+            animate="show"
+          >
             {groups.map((group) => (
               <GroupCard
                 key={group.id}
@@ -184,7 +199,7 @@ export default function GroupsPage() {
                 onClick={() => router.push(`/groups/${group.id}`)}
               />
             ))}
-          </div>
+          </motion.div>
         ) : (
           <EmptyState
             icon={Users}

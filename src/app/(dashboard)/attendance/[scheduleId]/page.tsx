@@ -1,15 +1,15 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
-import { ArrowLeft, Search, Users, ClipboardCheck } from 'lucide-react'
+import { Search, Users, ClipboardCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 import { AttendanceChecker } from '@/components/dashboard/AttendanceChecker'
 import { AttendanceStats } from '@/components/dashboard/AttendanceStats'
 
@@ -25,19 +25,10 @@ const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 function AttendanceDetailSkeleton() {
   return (
     <div className="space-y-4">
-      {/* Header skeleton */}
-      <div className="flex items-center gap-3">
-        <SkeletonBox className="size-9 rounded-lg" />
-        <div className="space-y-1">
-          <SkeletonBox className="h-5 w-32" />
-          <SkeletonBox className="h-3 w-20" />
-        </div>
-      </div>
-
       {/* Stats skeleton */}
-      <div className="space-y-2">
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
         <SkeletonBox className="h-2.5 w-full rounded-full" />
-        <div className="flex gap-4">
+        <div className="mt-3 flex gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <SkeletonBox key={i} className="h-4 w-14" />
           ))}
@@ -45,11 +36,11 @@ function AttendanceDetailSkeleton() {
       </div>
 
       {/* Search skeleton */}
-      <SkeletonBox className="h-10 w-full rounded-lg" />
+      <SkeletonBox className="h-12 w-full rounded-xl" />
 
       {/* List skeleton */}
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-3">
+        <div key={i} className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-3">
           <SkeletonBox className="h-4 w-20 flex-1" />
           <div className="flex gap-1.5">
             {Array.from({ length: 4 }).map((_, j) => (
@@ -63,7 +54,6 @@ function AttendanceDetailSkeleton() {
 }
 
 export default function AttendanceDetailPage() {
-  const router = useRouter()
   const params = useParams()
   const scheduleId = params.scheduleId as string
 
@@ -142,24 +132,12 @@ export default function AttendanceDetailPage() {
       initial="hidden"
       animate="show"
     >
-      {/* Header with back button */}
-      <motion.div variants={fadeUp} className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/attendance')}
-          aria-label="출석 목록으로 돌아가기"
-          className="shrink-0"
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-        <div>
-          <h1 className="text-xl font-bold text-foreground">출석 체크</h1>
-          <p className="text-sm text-muted-foreground">
-            참가자의 출석 상태를 체크하세요
-          </p>
-        </div>
-      </motion.div>
+      <PageHeader
+        title="출석 체크"
+        description="참가자의 출석 상태를 체크하세요"
+        backHref="/attendance"
+        backLabel="출석 목록으로"
+      />
 
       <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<AttendanceDetailSkeleton />}>
@@ -171,14 +149,16 @@ export default function AttendanceDetailPage() {
           />
         ) : (
           <div className="space-y-4">
-            {/* Summary stats */}
-            <AttendanceStats
-              present={stats.present}
-              late={stats.late}
-              absent={stats.absent}
-              excused={stats.excused}
-              total={stats.total}
-            />
+            {/* Summary stats in glass card */}
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl">
+              <AttendanceStats
+                present={stats.present}
+                late={stats.late}
+                absent={stats.absent}
+                excused={stats.excused}
+                total={stats.total}
+              />
+            </div>
 
             {/* Checked count */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -190,14 +170,14 @@ export default function AttendanceDetailPage() {
               </span>
             </div>
 
-            {/* Search */}
+            {/* Search - glass input */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="참가자 이름으로 검색"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 pl-9"
+                className="h-12 pl-10 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
               />
             </div>
 

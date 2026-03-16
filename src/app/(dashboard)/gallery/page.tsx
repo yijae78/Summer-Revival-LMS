@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { AlbumCard } from '@/components/dashboard/AlbumCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useAlbums } from '@/hooks/useGallery'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
@@ -20,7 +21,7 @@ function GallerySkeletons() {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <SkeletonBox key={i} className="min-h-[160px] rounded-xl" />
+        <SkeletonBox key={i} className="aspect-square rounded-2xl" />
       ))}
     </div>
   )
@@ -37,49 +38,51 @@ export default function GalleryPage() {
 
   return (
     <motion.div
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-foreground md:text-2xl">
-            사진 갤러리
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            행사의 소중한 순간들을 확인해보세요
-          </p>
-        </div>
-        {isAdminOrStaff && (
-          <Button
-            size="lg"
-            className="h-12 gap-2"
-            onClick={() => {
-              // Placeholder: open create album dialog
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">앨범 만들기</span>
-            <span className="sm:hidden">추가</span>
-          </Button>
-        )}
-      </motion.div>
+      <PageHeader
+        title="사진 갤러리"
+        description="소중한 순간들을 확인해요"
+        backHref="/dashboard"
+        action={
+          isAdminOrStaff ? (
+            <Button
+              size="lg"
+              className="h-12 gap-2"
+              onClick={() => {
+                // Placeholder: open create album dialog
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">앨범 만들기</span>
+              <span className="sm:hidden">추가</span>
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Content */}
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<GallerySkeletons />}>
           {hasAlbums ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+            <motion.div
+              className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4"
+              variants={stagger}
+              initial="hidden"
+              animate="show"
+            >
               {albums.map((album) => (
-                <AlbumCard
-                  key={album.id}
-                  album={album}
-                  onClick={() => router.push(`/gallery/${album.id}`)}
-                />
+                <motion.div key={album.id} variants={fadeUp}>
+                  <AlbumCard
+                    album={album}
+                    onClick={() => router.push(`/gallery/${album.id}`)}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
             <EmptyState
               icon={Camera}

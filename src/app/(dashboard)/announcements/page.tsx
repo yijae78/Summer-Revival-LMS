@@ -9,7 +9,6 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -32,6 +31,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useAnnouncements } from '@/hooks/useAnnouncements'
@@ -71,15 +71,25 @@ function AnnouncementCard({
   onDelete: (id: string) => void
 }) {
   const typeConfig = TYPE_CONFIG[announcement.type as AnnouncementType] ?? TYPE_CONFIG.general
+  const isPinned = announcement.is_pinned
 
   return (
-    <Card className="gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
-      <CardHeader className="gap-3 px-4 py-4 md:px-6">
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'rounded-2xl border backdrop-blur-xl transition-all duration-300',
+        isPinned
+          ? 'border-amber-500/20 bg-amber-500/[0.03] shadow-[0_0_20px_rgba(245,158,11,0.06)]'
+          : 'border-white/[0.08] bg-white/[0.04]',
+        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]'
+      )}
+    >
+      <div className="px-4 py-4 md:px-6">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-1 flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              {announcement.is_pinned && (
-                <Pin className="size-3.5 text-primary" />
+              {isPinned && (
+                <Pin className="size-3.5 text-amber-400" />
               )}
               <Badge
                 variant="outline"
@@ -88,9 +98,9 @@ function AnnouncementCard({
                 {typeConfig.label}
               </Badge>
             </div>
-            <CardTitle className="text-base leading-snug">
+            <h3 className="text-base font-semibold leading-snug text-foreground">
               {announcement.title}
-            </CardTitle>
+            </h3>
           </div>
           {canManage && (
             <Button
@@ -104,16 +114,16 @@ function AnnouncementCard({
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="px-4 pb-4 md:px-6">
-        <p className="whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-muted-foreground">
+      </div>
+      <div className="px-4 pb-4 md:px-6">
+        <p className="line-clamp-2 whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-muted-foreground">
           {announcement.content}
         </p>
         <p className="mt-3 text-xs text-muted-foreground/60">
           {formatRelativeTime(announcement.created_at)}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </motion.div>
   )
 }
 
@@ -121,7 +131,7 @@ function AnnouncementSkeleton() {
   return (
     <div className="space-y-4">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
+        <div key={i} className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
           <div className="flex items-center gap-2">
             <SkeletonBox className="h-5 w-12" />
             <SkeletonBox className="h-5 w-48" />
@@ -297,20 +307,19 @@ export default function AnnouncementsPage() {
       initial="hidden"
       animate="show"
     >
-      <motion.div variants={fadeUp} className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">공지사항</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            행사 관련 공지사항을 확인해 보세요
-          </p>
-        </div>
-        {canManage && eventId && (
-          <CreateAnnouncementDialog
-            eventId={eventId}
-            onCreated={handleRefresh}
-          />
-        )}
-      </motion.div>
+      <PageHeader
+        title="공지사항"
+        description="중요한 소식을 확인해요"
+        backHref="/dashboard"
+        action={
+          canManage && eventId ? (
+            <CreateAnnouncementDialog
+              eventId={eventId}
+              onCreated={handleRefresh}
+            />
+          ) : undefined
+        }
+      />
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<AnnouncementSkeleton />}>
@@ -321,7 +330,12 @@ export default function AnnouncementsPage() {
               description="행사 관련 공지가 등록되면 여기에 표시돼요."
             />
           ) : (
-            <div className="space-y-3">
+            <motion.div
+              className="space-y-3"
+              variants={stagger}
+              initial="hidden"
+              animate="show"
+            >
               {announcements.map((announcement) => (
                 <AnnouncementCard
                   key={announcement.id}
@@ -330,7 +344,7 @@ export default function AnnouncementsPage() {
                   onDelete={handleDelete}
                 />
               ))}
-            </div>
+            </motion.div>
           )}
         </LoadingSkeleton>
       </motion.div>

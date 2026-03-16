@@ -3,7 +3,6 @@
 import { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ArrowLeft,
   HelpCircle,
   PlayCircle,
   Plus,
@@ -20,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { QuizResults } from '@/components/dashboard/QuizResults'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useQuiz, useQuizResponses } from '@/hooks/useQuiz'
 import { useUser } from '@/hooks/useUser'
@@ -37,9 +37,9 @@ interface QuizDetailPageProps {
 function DetailSkeletons() {
   return (
     <div className="space-y-4">
-      <SkeletonBox className="h-32 rounded-xl" />
-      <SkeletonBox className="h-24 rounded-xl" />
-      <SkeletonBox className="h-20 rounded-xl" />
+      <SkeletonBox className="h-32 rounded-2xl" />
+      <SkeletonBox className="h-24 rounded-2xl" />
+      <SkeletonBox className="h-20 rounded-2xl" />
     </div>
   )
 }
@@ -87,33 +87,16 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
 
   return (
     <motion.div
-      className="space-y-6 p-4 md:p-6"
+      className="space-y-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp} className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/quiz')}
-          className="h-12 w-12 shrink-0"
-          aria-label="퀴즈 목록으로 돌아가기"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="min-w-0 flex-1">
-          <LoadingSkeleton
-            isLoading={isLoading}
-            skeleton={<SkeletonBox className="h-7 w-48 rounded-lg" />}
-          >
-            <h1 className="truncate text-xl font-bold text-foreground md:text-2xl">
-              {quiz?.title ?? '퀴즈'}
-            </h1>
-          </LoadingSkeleton>
-        </div>
-      </motion.div>
+      <PageHeader
+        title={quiz?.title ?? '퀴즈'}
+        backHref="/quiz"
+        backLabel="퀴즈 목록으로"
+      />
 
       <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<DetailSkeletons />}>
@@ -165,7 +148,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
 
             {/* Admin Controls */}
             {isAdminOrStaff && (
-              <Card className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
+              <Card className="mt-4 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Settings className="h-4 w-4" />
@@ -208,37 +191,39 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
 
             {/* Questions Preview (Admin) */}
             {isAdminOrStaff && hasQuestions && (
-              <div className="space-y-3">
+              <div className="mt-4 space-y-3">
                 <h2 className="text-base font-semibold text-foreground">
                   문제 목록
                 </h2>
                 {quiz.questions.map(
                   (question: QuizQuestion, index: number) => (
-                    <Card key={question.id} className="border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
-                      <CardContent className="py-3">
-                        <div className="flex items-start gap-3">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                            {index + 1}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-foreground">
-                              {question.question}
-                            </p>
-                            <div className="mt-1 flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">
-                                {getTypeLabel(question.type)}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {question.points}점
-                              </span>
-                              <span className="text-xs text-emerald-500">
-                                정답: {question.correct_answer}
-                              </span>
-                            </div>
+                    <motion.div
+                      key={question.id}
+                      variants={fadeUp}
+                      className="rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.12]"
+                    >
+                      <div className="flex items-start gap-3 px-4 py-3">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                          {index + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground">
+                            {question.question}
+                          </p>
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {getTypeLabel(question.type)}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {question.points}점
+                            </span>
+                            <span className="text-xs text-emerald-500">
+                              정답: {question.correct_answer}
+                            </span>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </motion.div>
                   )
                 )}
               </div>
@@ -246,7 +231,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
 
             {/* Student: Start Quiz / View Results */}
             {!isAdminOrStaff && (
-              <>
+              <div className="mt-4">
                 {hasAnswered ? (
                   <div className="space-y-4">
                     <h2 className="text-base font-semibold text-foreground">
@@ -260,7 +245,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
                 ) : quiz.is_active && hasQuestions ? (
                   <Button
                     size="lg"
-                    className="h-14 w-full gap-2 text-base"
+                    className="h-14 w-full gap-2 text-base shadow-[0_0_30px_rgba(56,189,248,0.25)]"
                     onClick={() => router.push(`/quiz/${quizId}/play`)}
                   >
                     <PlayCircle className="h-5 w-5" />
@@ -281,7 +266,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
                     }
                   />
                 )}
-              </>
+              </div>
             )}
           </>
         )}

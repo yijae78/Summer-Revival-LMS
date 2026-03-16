@@ -3,13 +3,12 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { ClipboardCheck, Clock, ChevronRight } from 'lucide-react'
+import { ClipboardCheck, Clock, ChevronRight, CalendarDays } from 'lucide-react'
 import { motion } from 'framer-motion'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
+import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useSchedules } from '@/hooks/useSchedules'
@@ -37,8 +36,14 @@ interface ScheduleAttendanceCardProps {
 
 function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCardProps) {
   return (
-    <Card
-      className="cursor-pointer gap-0 border-white/[0.08] bg-white/[0.04] backdrop-blur-xl py-0 transition-all duration-300 hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] active:scale-[0.99]"
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'cursor-pointer rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+        'transition-all duration-300',
+        'hover:border-primary/20 hover:bg-white/[0.06] hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]',
+        'active:scale-[0.99]'
+      )}
       onClick={() => onNavigate(schedule.id)}
       role="button"
       tabIndex={0}
@@ -49,9 +54,9 @@ function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCard
         }
       }}
     >
-      <CardContent className="flex items-center gap-3 px-4 py-3.5 md:px-6">
+      <div className="flex items-center gap-3 px-4 py-4 md:px-6">
         {/* Icon */}
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
           <ClipboardCheck className="size-5 text-primary" />
         </div>
 
@@ -60,7 +65,7 @@ function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCard
           <p className="truncate text-[0.9375rem] font-medium text-foreground">
             {schedule.title}
           </p>
-          <div className="mt-0.5 flex items-center gap-2">
+          <div className="mt-1 flex items-center gap-2">
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="size-3" />
               {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
@@ -75,8 +80,8 @@ function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCard
 
         {/* Arrow */}
         <ChevronRight className="size-5 shrink-0 text-muted-foreground/50" />
-      </CardContent>
-    </Card>
+      </div>
+    </motion.div>
   )
 }
 
@@ -86,14 +91,14 @@ function AttendanceSkeleton() {
       {/* Day tabs skeleton */}
       <div className="flex gap-2">
         {Array.from({ length: 3 }).map((_, i) => (
-          <SkeletonBox key={i} className="h-9 w-16 rounded-lg" />
+          <SkeletonBox key={i} className="h-9 w-20 rounded-full" />
         ))}
       </div>
 
       {/* Cards skeleton */}
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
-          <SkeletonBox className="size-10 rounded-lg" />
+        <div key={i} className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
+          <SkeletonBox className="size-11 rounded-xl" />
           <div className="flex-1 space-y-1.5">
             <SkeletonBox className="h-4 w-32" />
             <SkeletonBox className="h-3 w-48" />
@@ -138,13 +143,11 @@ export default function AttendancePage() {
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
-      <motion.div variants={fadeUp}>
-        <h1 className="text-xl font-bold text-foreground">출석 체크</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          세션별 출석을 체크해 보세요
-        </p>
-      </motion.div>
+      <PageHeader
+        title="출석 체크"
+        description="세션별 출석을 관리해요"
+        backHref="/dashboard"
+      />
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<AttendanceSkeleton />}>
@@ -156,21 +159,23 @@ export default function AttendancePage() {
             />
           ) : (
             <div className="space-y-4">
-              {/* Day selector tabs */}
+              {/* Day selector tabs - glass pill style */}
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {dayNumbers.map((day) => (
-                  <Button
+                  <button
                     key={day}
-                    variant={activeDay === day ? 'default' : 'outline'}
-                    size="sm"
+                    type="button"
                     onClick={() => setSelectedDay(day)}
                     className={cn(
-                      'shrink-0 px-4',
-                      activeDay === day && 'shadow-sm'
+                      'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-300',
+                      activeDay === day
+                        ? 'border-primary/30 bg-primary/10 text-primary shadow-[0_0_16px_rgba(56,189,248,0.15)]'
+                        : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:border-primary/20 hover:bg-white/[0.06]'
                     )}
                   >
+                    <CalendarDays className="size-3.5" />
                     {day}일차
-                  </Button>
+                  </button>
                 ))}
               </div>
 
@@ -183,7 +188,12 @@ export default function AttendancePage() {
                   className="py-12"
                 />
               ) : (
-                <div className="space-y-2">
+                <motion.div
+                  className="space-y-3"
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                >
                   {filteredSchedules.map((schedule) => (
                     <ScheduleAttendanceCard
                       key={schedule.id}
@@ -191,7 +201,7 @@ export default function AttendancePage() {
                       onNavigate={handleNavigate}
                     />
                   ))}
-                </div>
+                </motion.div>
               )}
             </div>
           )}
