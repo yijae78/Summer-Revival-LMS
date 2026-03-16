@@ -3,9 +3,12 @@ import { persist } from 'zustand/middleware'
 
 interface AdminAuthState {
   passwordHash: string | null
+  recoveryPhone: string | null
   isAuthenticated: boolean
   setPassword: (password: string) => void
+  setRecoveryPhone: (phone: string) => void
   changePassword: (oldPassword: string, newPassword: string) => boolean
+  resetPasswordWithPhone: (phone: string, newPassword: string) => boolean
   verifyPassword: (input: string) => boolean
   authenticate: () => void
   lock: () => void
@@ -25,10 +28,24 @@ export const useAdminAuthStore = create<AdminAuthState>()(
   persist(
     (set, get) => ({
       passwordHash: null,
+      recoveryPhone: null,
       isAuthenticated: false,
 
       setPassword: (password: string) => {
         set({ passwordHash: simpleHash(password) })
+      },
+
+      setRecoveryPhone: (phone: string) => {
+        set({ recoveryPhone: phone.replace(/[^0-9]/g, '') })
+      },
+
+      resetPasswordWithPhone: (phone: string, newPassword: string) => {
+        const { recoveryPhone } = get()
+        if (!recoveryPhone) return false
+        const cleaned = phone.replace(/[^0-9]/g, '')
+        if (cleaned !== recoveryPhone) return false
+        set({ passwordHash: simpleHash(newPassword) })
+        return true
       },
 
       changePassword: (oldPassword: string, newPassword: string) => {
@@ -55,7 +72,7 @@ export const useAdminAuthStore = create<AdminAuthState>()(
     }),
     {
       name: 'admin-auth',
-      partialize: (state) => ({ passwordHash: state.passwordHash }),
+      partialize: (state) => ({ passwordHash: state.passwordHash, recoveryPhone: state.recoveryPhone }),
     }
   )
 )

@@ -15,6 +15,7 @@ import { useOfflineSync } from '@/hooks/useOfflineSync'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 import { useAdminAuthStore } from '@/stores/adminAuthStore'
+import { AdminGate } from '@/components/shared/AdminGate'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -207,6 +208,7 @@ export default function SettingsPage() {
   }
 
   return (
+    <AdminGate>
     <motion.div
       className="space-y-5"
       variants={stagger}
@@ -347,5 +349,6 @@ export default function SettingsPage() {
         </Button>
       </motion.div>
     </motion.div>
+    </AdminGate>
   )
 }

@@ -853,6 +853,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 export default function LocalSetupPage() {
   const router = useRouter()
   const setPassword = useAdminAuthStore((s) => s.setPassword)
+  const setRecoveryPhone = useAdminAuthStore((s) => s.setRecoveryPhone)
   const authenticate = useAdminAuthStore((s) => s.authenticate)
   const setMode = useAppModeStore((s) => s.setMode)
   const setCurrentEventId = useEventStore((s) => s.setCurrentEventId)
@@ -1052,8 +1053,11 @@ export default function LocalSetupPage() {
       insert<Group>('groups', groupData)
     }
 
-    // 6. Set admin password
+    // 6. Set admin password + recovery phone
     setPassword(password)
+    if (adminPhone.trim()) {
+      setRecoveryPhone(adminPhone.trim())
+    }
     authenticate()
 
     // 7. Set app mode
