@@ -48,113 +48,87 @@ export function Header({ className }: HeaderProps) {
         className
       )}
     >
-      {/* Church name + Theme banner — 3D + flowing grace effect */}
+      {/* Church + Theme banner — 은혜가 퍼져나가는 효과 */}
       {(churchName || eventTheme) && (
-        <div className="relative overflow-hidden px-4 py-5"
-          style={{ background: 'linear-gradient(180deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 40%, rgba(232,121,249,0.06) 70%, transparent 100%)' }}>
+        <div className="relative overflow-hidden px-6 py-6"
+          style={{ background: 'linear-gradient(180deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.04) 50%, transparent 100%)' }}>
 
-          {/* Flowing grace ripples — 은혜가 중심에서 바깥으로 흘러가는 효과 */}
+          {/* 은혜 ripple — 중심에서 사방으로 퍼지는 빛 */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="absolute rounded-full border border-purple-400/10"
+                className="absolute rounded-full"
                 style={{
-                  width: `${i * 120}px`,
-                  height: `${i * 60}px`,
-                  animation: `graceRipple ${3 + i * 0.8}s ease-out infinite`,
-                  animationDelay: `${i * 0.6}s`,
+                  width: `${i * 180}px`,
+                  height: `${i * 80}px`,
+                  background: `radial-gradient(ellipse, rgba(139,92,246,${0.05 / i}) 0%, transparent 70%)`,
+                  animation: `graceRipple ${4 + i}s ease-out infinite`,
+                  animationDelay: `${i * 0.7}s`,
                 }}
               />
             ))}
           </div>
 
-          {/* Downward flowing particles */}
+          {/* 아래로 흐르는 은혜 빛줄기 */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            {[0, 1, 2, 3, 4].map((i) => (
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="absolute h-8 w-px rounded-full"
+                className="absolute w-px rounded-full"
                 style={{
-                  left: `${15 + i * 18}%`,
-                  background: 'linear-gradient(180deg, rgba(139,92,246,0.3), transparent)',
-                  animation: `graceFlow ${2.5 + i * 0.4}s ease-in infinite`,
-                  animationDelay: `${i * 0.5}s`,
+                  left: `${8 + i * 14}%`,
+                  height: `${14 + (i % 3) * 6}px`,
+                  background: `linear-gradient(180deg, rgba(${i % 2 === 0 ? '139,92,246' : '99,102,241'},0.2), transparent)`,
+                  animation: `graceFlow ${2 + i * 0.3}s ease-in infinite`,
+                  animationDelay: `${i * 0.35}s`,
                 }}
               />
             ))}
           </div>
 
-          {/* Content — 3D push/pull effect */}
+          {/* Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, z: -20 }}
-            animate={{ opacity: 1, scale: 1, z: 0 }}
-            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-            className="relative flex flex-col items-center gap-2 text-center"
-            style={{ perspective: '600px' }}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            className="relative flex flex-col items-center gap-2.5 text-center"
           >
-            {/* Church name — large, 3D breathing */}
+            {/* 교회명 — 크고 선명하게 */}
             {churchName && (
               <motion.h2
-                className="bg-clip-text text-lg font-black tracking-wide text-transparent md:text-xl"
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, #818cf8, #c084fc, #e879f9, #f0abfc, #e879f9, #c084fc, #818cf8)',
-                  backgroundSize: '300% auto',
-                  animation: 'waterFlow 6s linear infinite',
-                }}
-                animate={{
-                  scale: [1, 1.04, 1],
-                  rotateX: [0, 2, 0, -2, 0],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
+                className="text-[1.25rem] font-extrabold tracking-tight text-white md:text-[1.5rem]"
+                animate={{ scale: [1, 1.015, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
               >
                 {churchName}
               </motion.h2>
             )}
 
-            {/* Theme — medium, 3D pop */}
+            {/* 주제 — 보라빛 글로우, 잘 읽히게 */}
             {eventTheme && (
               <motion.p
-                className="bg-clip-text text-base font-bold text-transparent md:text-lg"
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #e879f9, #c084fc, #818cf8, #38bdf8)',
-                  backgroundSize: '200% auto',
-                  animation: 'textShimmer 5s linear infinite',
-                  textShadow: '0 0 30px rgba(139,92,246,0.3)',
-                }}
-                animate={{
-                  scale: [1, 1.06, 1],
-                  z: [0, 15, 0],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay: 0.5,
-                }}
+                className="text-[1.1rem] font-bold text-violet-300 md:text-[1.25rem]"
+                style={{ textShadow: '0 0 24px rgba(139,92,246,0.35), 0 0 48px rgba(139,92,246,0.12)' }}
+                animate={{ scale: [1, 1.02, 1] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
               >
-                &ldquo;{eventTheme}&rdquo;
+                {eventTheme}
               </motion.p>
             )}
 
-            {/* Verse — subtle glow */}
+            {/* 성구 — 밝고 또렷하게 */}
             {themeVerse && (
               <motion.p
-                className="text-sm text-purple-300/70"
-                animate={{ opacity: [0.5, 0.9, 0.5] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="text-[0.875rem] font-medium text-indigo-300/80 md:text-[0.9375rem]"
+                animate={{ opacity: [0.65, 1, 0.65] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
               >
                 {themeVerse}
               </motion.p>
             )}
           </motion.div>
-
-          {/* Bottom gradient fade */}
-          </div>
+        </div>
       )}
       {/* Main header row */}
       <div className="flex h-14 items-center justify-between px-4">
