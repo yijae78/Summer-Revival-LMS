@@ -388,6 +388,10 @@ function StepEvent({
   setEndDate,
   location,
   setLocation,
+  theme,
+  setTheme,
+  themeVerse,
+  setThemeVerse,
 }: {
   eventName: string
   setEventName: (v: string) => void
@@ -399,6 +403,10 @@ function StepEvent({
   setEndDate: (v: string) => void
   location: string
   setLocation: (v: string) => void
+  theme: string
+  setTheme: (v: string) => void
+  themeVerse: string
+  setThemeVerse: (v: string) => void
 }) {
   return (
     <GlassCard icon={CalendarDays} title="행사 정보">
@@ -476,6 +484,34 @@ function StepEvent({
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="예: 속초 은혜수련원"
+            className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-sky-500/30 focus:ring-2 focus:ring-sky-500/10"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="event-theme" className="text-sm font-medium text-foreground">
+            주제
+          </Label>
+          <Input
+            id="event-theme"
+            type="text"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            placeholder='예: "흘러넘치는 은혜"'
+            className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-sky-500/30 focus:ring-2 focus:ring-sky-500/10"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="event-theme-verse" className="text-sm font-medium text-foreground">
+            주제 말씀
+          </Label>
+          <Input
+            id="event-theme-verse"
+            type="text"
+            value={themeVerse}
+            onChange={(e) => setThemeVerse(e.target.value)}
+            placeholder='예: "요한복음 7:38 — 나를 믿는 자는..."'
             className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-sky-500/30 focus:ring-2 focus:ring-sky-500/10"
           />
         </div>
@@ -752,6 +788,8 @@ function StepComplete({
   startDate,
   endDate,
   location,
+  theme,
+  themeVerse,
   scheduleCount,
   groupCount,
 }: {
@@ -762,6 +800,8 @@ function StepComplete({
   startDate: string
   endDate: string
   location: string
+  theme: string
+  themeVerse: string
   scheduleCount: number
   groupCount: number
 }) {
@@ -778,6 +818,8 @@ function StepComplete({
           <SummaryRow label="관리자" value={adminName} />
           <SummaryRow label="교회" value={churchName} />
           <SummaryRow label="행사" value={`${eventName} (${typeLabel})`} />
+          {theme && <SummaryRow label="주제" value={theme} />}
+          {themeVerse && <SummaryRow label="주제 말씀" value={themeVerse} />}
           <SummaryRow
             label="기간"
             value={
@@ -836,6 +878,8 @@ export default function LocalSetupPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [location, setLocation] = useState('')
+  const [theme, setTheme] = useState('')
+  const [themeVerse, setThemeVerse] = useState('')
 
   // Step 4: Schedules
   const dayCount = useMemo(() => getDayCount(startDate, endDate), [startDate, endDate])
@@ -960,6 +1004,8 @@ export default function LocalSetupPage() {
       settings: {
         churchName: churchName.trim(),
         departments,
+        theme: theme.trim() || null,
+        themeVerse: themeVerse.trim() || null,
       },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -1060,6 +1106,10 @@ export default function LocalSetupPage() {
             setEndDate={setEndDate}
             location={location}
             setLocation={setLocation}
+            theme={theme}
+            setTheme={setTheme}
+            themeVerse={themeVerse}
+            setThemeVerse={setThemeVerse}
           />
         )
       case 4:
@@ -1087,6 +1137,8 @@ export default function LocalSetupPage() {
             startDate={startDate}
             endDate={endDate}
             location={location}
+            theme={theme}
+            themeVerse={themeVerse}
             scheduleCount={totalScheduleCount}
             groupCount={groups.length}
           />
