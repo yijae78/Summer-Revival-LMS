@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { LogOut, Moon, Sun, Monitor, RefreshCw, CloudOff, Info, User, Lock, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { LogOut, Moon, Sun, Monitor, RefreshCw, CloudOff, Info, User, Lock, Eye, EyeOff } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { useOfflineSync } from '@/hooks/useOfflineSync'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
-import { useAccountingAuthStore } from '@/stores/accountingAuthStore'
+import { useAdminAuthStore } from '@/stores/adminAuthStore'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -67,17 +67,18 @@ function GlassSection({
   )
 }
 
-function AccountingPasswordSection() {
-  const { passwordHash, setPassword, removePassword } = useAccountingAuthStore()
+function AdminPasswordSection() {
+  const { passwordHash, setPassword, changePassword } = useAdminAuthStore()
+  const [oldPw, setOldPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
   const [showPw, setShowPw] = useState(false)
   const hasPassword = !!passwordHash
 
-  function handleSetPassword(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!newPw.trim()) {
-      toast.error('비밀번호를 입력해 주세요')
+      toast.error('새 비밀번호를 입력해 주세요')
       return
     }
     if (newPw.length < 4) {
@@ -88,19 +89,30 @@ function AccountingPasswordSection() {
       toast.error('비밀번호가 일치하지 않아요')
       return
     }
-    setPassword(newPw)
+
+    if (hasPassword) {
+      if (!oldPw.trim()) {
+        toast.error('현재 비밀번호를 입력해 주세요')
+        return
+      }
+      const success = changePassword(oldPw, newPw)
+      if (!success) {
+        toast.error('현재 비밀번호가 일치하지 않아요')
+        return
+      }
+      toast.success('관리자 비밀번호가 변경되었어요')
+    } else {
+      setPassword(newPw)
+      toast.success('관리자 비밀번호가 설정되었어요')
+    }
+
+    setOldPw('')
     setNewPw('')
     setConfirmPw('')
-    toast.success(hasPassword ? '비밀번호가 변경되었어요' : '회계 비밀번호가 설정되었어요')
-  }
-
-  function handleRemovePassword() {
-    removePassword()
-    toast.success('회계 비밀번호가 해제되었어요')
   }
 
   return (
-    <GlassSection icon={Lock} title="회계 비밀번호" description="회계 페이지 접근 시 비밀번호를 요구해요">
+    <GlassSection icon={Lock} title="관리자 비밀번호" description="관리자 기능과 회계 페이지를 보호해요">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
@@ -108,7 +120,7 @@ function AccountingPasswordSection() {
               {hasPassword ? '비밀번호 설정됨' : '비밀번호 미설정'}
             </p>
             <p className="text-xs text-muted-foreground">
-              {hasPassword ? '회계 페이지 접근 시 비밀번호를 입력해야 해요' : '누구나 회계 페이지에 접근할 수 있어요'}
+              {hasPassword ? '관리자 기능 접근 시 비밀번호를 입력해야 해요' : '비밀번호를 설정하면 관리자 기능을 보호할 수 있어요'}
             </p>
           </div>
           <div className={cn(
@@ -117,22 +129,44 @@ function AccountingPasswordSection() {
           )} />
         </div>
 
-        <form onSubmit={handleSetPassword} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {hasPassword && (
+            <div className="relative">
+              <Input
+                type={showPw ? 'text' : 'password'}
+                value={oldPw}
+                onChange={(e) => setOldPw(e.target.value)}
+                placeholder="현재 비밀번호"
+                className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] pr-10 backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw(!showPw)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}
+              >
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          )}
           <div className="relative">
             <Input
               type={showPw ? 'text' : 'password'}
               value={newPw}
               onChange={(e) => setNewPw(e.target.value)}
-              placeholder={hasPassword ? '새 비밀번호' : '비밀번호 설정'}
+              placeholder={hasPassword ? '새 비밀번호' : '비밀번호 설정 (4자리 이상)'}
               className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] pr-10 backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10"
             />
-            <button
-              type="button"
-              onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+            {!hasPassword && (
+              <button
+                type="button"
+                onClick={() => setShowPw(!showPw)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}
+              >
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            )}
           </div>
           <Input
             type={showPw ? 'text' : 'password'}
@@ -141,26 +175,14 @@ function AccountingPasswordSection() {
             placeholder="비밀번호 확인"
             className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10"
           />
-          <div className="flex gap-2">
-            <Button
-              type="submit"
-              disabled={!newPw.trim() || !confirmPw.trim()}
-              className="min-h-[48px] flex-1 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 font-bold text-white"
-            >
-              <Lock className="mr-2 h-4 w-4" />
-              {hasPassword ? '비밀번호 변경' : '비밀번호 설정'}
-            </Button>
-            {hasPassword && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleRemovePassword}
-                className="min-h-[48px] rounded-xl border-red-500/20 text-red-400 hover:bg-red-500/10"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          <Button
+            type="submit"
+            disabled={!newPw.trim() || !confirmPw.trim() || (hasPassword && !oldPw.trim())}
+            className="min-h-[48px] w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 font-bold text-white"
+          >
+            <Lock className="mr-2 h-4 w-4" />
+            {hasPassword ? '비밀번호 변경' : '비밀번호 설정'}
+          </Button>
         </form>
       </div>
     </GlassSection>
@@ -287,9 +309,9 @@ export default function SettingsPage() {
         </div>
       </GlassSection>
 
-      {/* Accounting Password Section */}
+      {/* Admin Password Section */}
       {(user?.role === 'admin' || user?.role === 'staff') && (
-        <AccountingPasswordSection />
+        <AdminPasswordSection />
       )}
 
       {/* App Info Section */}

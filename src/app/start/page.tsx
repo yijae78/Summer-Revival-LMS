@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 import { useAppModeStore } from '@/stores/appModeStore'
 import { useDemoStore } from '@/stores/demoStore'
 import { useEventStore } from '@/stores/eventStore'
-import { seedLocalDatabase } from '@/lib/local-db/seed'
 
 import type { AppMode } from '@/stores/appModeStore'
 
@@ -27,7 +26,7 @@ const MODE_OPTIONS: ModeOption[] = [
     id: 'local',
     icon: Smartphone,
     title: '이 기기에서 바로 사용하기',
-    description: '설정 없이 바로 시작해요. 데이터는 이 기기에 저장돼요.',
+    description: '간단한 초기 설정 후 시작해요. 데이터는 이 기기에 저장돼요.',
     gradientFrom: 'rgba(56,189,248,0.15)',
     gradientTo: 'rgba(14,165,233,0.05)',
     glowColor: 'rgba(56,189,248,0.25)',
@@ -73,10 +72,7 @@ export default function StartPage() {
   function handleSelect(option: ModeOption) {
     switch (option.id) {
       case 'local': {
-        setMode('local')
-        seedLocalDatabase()
-        setCurrentEventId('demo-event-1')
-        router.push('/dashboard')
+        router.push('/local-setup')
         break
       }
       case 'cloud': {
