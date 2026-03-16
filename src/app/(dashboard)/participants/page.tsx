@@ -140,27 +140,65 @@ function ParticipantSkeleton() {
   )
 }
 
+const GRADE_FILTERS = [
+  { key: 'all', label: '전체' },
+  { key: 'elementary', label: '초등' },
+  { key: 'middle', label: '중등' },
+  { key: 'high', label: '고등' },
+  { key: 'college', label: '대학' },
+  { key: 'adult', label: '성인' },
+]
+
+function matchGradeFilter(grade: string | null, filter: string): boolean {
+  if (filter === 'all') return true
+  if (!grade) return false
+  if (filter === 'elementary') return grade.startsWith('elementary') || grade.startsWith('초')
+  if (filter === 'middle') return grade.startsWith('middle') || grade.startsWith('중')
+  if (filter === 'high') return grade.startsWith('high') || grade.startsWith('고')
+  if (filter === 'college') return grade === 'college' || grade === '대학생'
+  if (filter === 'adult') return grade === 'adult' || grade === '성인'
+  return false
+}
+
 export default function ParticipantsPage() {
   const router = useRouter()
   const { eventId } = useCurrentEvent()
   const [searchQuery, setSearchQuery] = useState('')
+  const [gradeFilter, setGradeFilter] = useState('all')
 
   const { data: participants, isLoading } = useParticipants(eventId ?? null)
 
   const filteredParticipants = useMemo(() => {
     if (!participants) return []
-    if (!searchQuery.trim()) return participants
+    let filtered = participants
 
-    const query = searchQuery.trim().toLowerCase()
-    return participants.filter((p) =>
-      p.name.toLowerCase().includes(query)
-    )
-  }, [participants, searchQuery])
+    // 학년 필터
+    if (gradeFilter !== 'all') {
+      filtered = filtered.filter((p) => matchGradeFilter(p.grade, gradeFilter))
+    }
+
+    // 검색 필터
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase()
+      filtered = filtered.filter((p) => p.name.toLowerCase().includes(query))
+    }
+
+    return filtered
+  }, [participants, searchQuery, gradeFilter])
 
   const paidCount = useMemo(
     () => participants?.filter((p) => p.fee_paid).length ?? 0,
     [participants]
   )
+
+  const gradeCountMap = useMemo(() => {
+    if (!participants) return {} as Record<string, number>
+    const map: Record<string, number> = { all: participants.length }
+    GRADE_FILTERS.slice(1).forEach((f) => {
+      map[f.key] = participants.filter((p) => matchGradeFilter(p.grade, f.key)).length
+    })
+    return map
+  }, [participants])
 
   const handleNavigateToDetail = useCallback(
     (id: string) => {
@@ -191,6 +229,37 @@ export default function ParticipantsPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="h-12 pl-10 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/10"
         />
+      </motion.div>
+
+      {/* Grade filter tabs */}
+      <motion.div variants={fadeUp} className="flex gap-1.5 overflow-x-auto pb-1">
+        {GRADE_FILTERS.map((f) => {
+          const count = gradeCountMap[f.key] ?? 0
+          const isActive = gradeFilter === f.key
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setGradeFilter(f.key)}
+              className={cn(
+                'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-all duration-200',
+                isActive
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-[0_0_16px_rgba(99,102,241,0.3)]'
+                  : 'border border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06] hover:text-foreground'
+              )}
+            >
+              {f.label}
+              {count > 0 && (
+                <span className={cn(
+                  'rounded-full px-1.5 py-0.5 text-[0.625rem]',
+                  isActive ? 'bg-white/20 text-white' : 'bg-white/[0.06] text-muted-foreground'
+                )}>
+                  {count}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </motion.div>
 
       {/* Summary bar */}
