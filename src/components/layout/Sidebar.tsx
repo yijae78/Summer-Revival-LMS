@@ -30,7 +30,9 @@ function SidebarTitle() {
   const eventName = event?.name
 
   if (eventName) {
-    const deptLabel = departments.length > 0 ? ` ${departments.join('·')}` : ''
+    const year = event?.start_date ? new Date(event.start_date).getFullYear() : ''
+    const deptLabel = departments.length > 0 ? `${departments.join('·')} ` : ''
+    const displayName = `${year ? year + ' ' : ''}${deptLabel}${eventName}`
     return (
       <span
         className="truncate bg-clip-text text-[0.8125rem] font-bold text-transparent"
@@ -38,7 +40,7 @@ function SidebarTitle() {
           backgroundImage: 'linear-gradient(90deg, #818cf8, #c084fc, #e879f9)',
         }}
       >
-        {eventName}{deptLabel}
+        {displayName}
       </span>
     )
   }
