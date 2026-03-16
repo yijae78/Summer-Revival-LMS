@@ -6,18 +6,36 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 import { queryKeys } from '@/lib/query-keys'
-import { useDemoStore } from '@/stores/demoStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { DEMO_ANNOUNCEMENTS } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
+import { getAll } from '@/lib/local-db'
 
 import type { Announcement } from '@/types'
 
+function sortAnnouncements(announcements: Announcement[]): Announcement[] {
+  return [...announcements].sort((a, b) => {
+    if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  })
+}
+
 export function useAnnouncements(eventId: string, type?: string) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.announcements(eventId, type),
     queryFn: async () => {
+      if (mode === 'local') {
+        let announcements = getAll<Announcement>('announcements').filter(
+          (a) => a.event_id === eventId
+        )
+        if (type) {
+          announcements = announcements.filter((a) => a.type === type)
+        }
+        return sortAnnouncements(announcements)
+      }
+
       const supabase = getSupabaseClient()!
       let q = supabase
         .from('announcements')
@@ -34,20 +52,15 @@ export function useAnnouncements(eventId: string, type?: string) {
       if (error) throw error
       return data as Announcement[]
     },
-    enabled: !!eventId && !isDemoMode && isSupabaseConfigured(),
+    enabled: !!eventId && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     let announcements = [...DEMO_ANNOUNCEMENTS]
     if (type) {
       announcements = announcements.filter((a) => a.type === type)
     }
-    // Sort: pinned first, then by created_at descending
-    announcements.sort((a, b) => {
-      if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    })
-    return createDemoQueryResult(announcements)
+    return createDemoQueryResult(sortAnnouncements(announcements))
   }
 
   return query

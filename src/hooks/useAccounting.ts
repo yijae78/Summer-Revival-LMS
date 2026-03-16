@@ -5,13 +5,14 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
-import { useDemoStore } from '@/stores/demoStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import {
   DEMO_BUDGET_CATEGORIES,
   DEMO_INCOME_RECORDS,
   DEMO_EXPENSE_RECORDS,
 } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
+import { getAll } from '@/lib/local-db'
 
 import type { BudgetCategory, IncomeRecord, ExpenseRecord } from '@/types'
 
@@ -42,11 +43,29 @@ function computeSummary(
 }
 
 export function useAccounting(eventId: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.accounting(eventId!),
     queryFn: async (): Promise<AccountingData> => {
+      if (mode === 'local') {
+        const budgetCategories = getAll<BudgetCategory>('budget_categories').filter(
+          (c) => c.event_id === eventId
+        )
+        const incomeRecords = getAll<IncomeRecord>('income_records').filter(
+          (r) => r.event_id === eventId
+        )
+        const expenseRecords = getAll<ExpenseRecord>('expense_records').filter(
+          (r) => r.event_id === eventId
+        )
+        return {
+          budgetCategories,
+          incomeRecords,
+          expenseRecords,
+          summary: computeSummary(budgetCategories, incomeRecords, expenseRecords),
+        }
+      }
+
       const supabase = getSupabaseClient()!
 
       const [budgetRes, incomeRes, expenseRes] = await Promise.all([
@@ -82,10 +101,10 @@ export function useAccounting(eventId: string | null) {
         summary: computeSummary(budgetCategories, incomeRecords, expenseRecords),
       }
     },
-    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const budgetCategories = DEMO_BUDGET_CATEGORIES
     const incomeRecords = DEMO_INCOME_RECORDS
     const expenseRecords = DEMO_EXPENSE_RECORDS

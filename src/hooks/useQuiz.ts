@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
-import { useDemoStore } from '@/stores/demoStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import {
   DEMO_QUIZZES,
   DEMO_QUIZ_QUESTIONS,
@@ -13,8 +13,9 @@ import {
   DEMO_PARTICIPANTS,
 } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
+import { getAll } from '@/lib/local-db'
 
-import type { Quiz, QuizQuestion, QuizResponse } from '@/types'
+import type { Quiz, QuizQuestion, QuizResponse, Participant } from '@/types'
 
 export interface QuizWithQuestionCount extends Quiz {
   questionCount: number
@@ -29,11 +30,20 @@ export interface QuizResponseWithParticipant extends QuizResponse {
 }
 
 export function useQuizzes(eventId: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.quizzes(eventId!),
     queryFn: async (): Promise<QuizWithQuestionCount[]> => {
+      if (mode === 'local') {
+        const quizzes = getAll<Quiz>('quizzes').filter((q) => q.event_id === eventId)
+        const questions = getAll<QuizQuestion>('quiz_questions')
+        return quizzes.map((quiz) => ({
+          ...quiz,
+          questionCount: questions.filter((q) => q.quiz_id === quiz.id).length,
+        }))
+      }
+
       const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('quizzes')
@@ -53,10 +63,10 @@ export function useQuizzes(eventId: string | null) {
 
       return quizzes
     },
-    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const quizzesWithCount: QuizWithQuestionCount[] = DEMO_QUIZZES.map((quiz) => ({
       ...quiz,
       questionCount: DEMO_QUIZ_QUESTIONS.filter((q) => q.quiz_id === quiz.id).length,
@@ -68,11 +78,21 @@ export function useQuizzes(eventId: string | null) {
 }
 
 export function useQuiz(quizId: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.quiz(quizId!),
     queryFn: async (): Promise<QuizWithQuestions> => {
+      if (mode === 'local') {
+        const quizzes = getAll<Quiz>('quizzes')
+        const quiz = quizzes.find((q) => q.id === quizId)
+        if (!quiz) throw new Error('Quiz not found')
+        const questions = getAll<QuizQuestion>('quiz_questions')
+          .filter((q) => q.quiz_id === quizId)
+          .sort((a, b) => a.order_index - b.order_index)
+        return { ...quiz, questions }
+      }
+
       const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('quizzes')
@@ -92,10 +112,10 @@ export function useQuiz(quizId: string | null) {
         questions: sorted,
       } as QuizWithQuestions
     },
-    enabled: quizId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: quizId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const quiz = DEMO_QUIZZES.find((q) => q.id === quizId)
     if (!quiz) return createDemoQueryResult(null)
 
@@ -112,12 +132,33 @@ export function useQuiz(quizId: string | null) {
   return query
 }
 
+function buildResponsesWithNames(
+  responses: QuizResponse[],
+  participants: Participant[]
+): QuizResponseWithParticipant[] {
+  const nameMap = new Map(participants.map((p) => [p.id, p.name]))
+  return responses.map((r) => ({
+    ...r,
+    participant_name: nameMap.get(r.participant_id ?? '') ?? '',
+  }))
+}
+
 export function useQuizResponses(quizId: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.quizResponses(quizId!),
     queryFn: async (): Promise<QuizResponseWithParticipant[]> => {
+      if (mode === 'local') {
+        const questions = getAll<QuizQuestion>('quiz_questions')
+          .filter((q) => q.quiz_id === quizId)
+        const questionIds = questions.map((q) => q.id)
+        const responses = getAll<QuizResponse>('quiz_responses')
+          .filter((r) => questionIds.includes(r.question_id ?? ''))
+        const participants = getAll<Participant>('participants')
+        return buildResponsesWithNames(responses, participants)
+      }
+
       const supabase = getSupabaseClient()!
 
       // First get all questions for this quiz
@@ -156,23 +197,18 @@ export function useQuizResponses(quizId: string | null) {
 
       return responses
     },
-    enabled: quizId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: quizId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const questionIds = DEMO_QUIZ_QUESTIONS
       .filter((q) => q.quiz_id === quizId)
       .map((q) => q.id)
 
-    const nameMap = new Map(DEMO_PARTICIPANTS.map((p) => [p.id, p.name]))
-    const responses: QuizResponseWithParticipant[] = DEMO_QUIZ_RESPONSES
+    const responses = DEMO_QUIZ_RESPONSES
       .filter((r) => questionIds.includes(r.question_id ?? ''))
-      .map((r) => ({
-        ...r,
-        participant_name: nameMap.get(r.participant_id ?? '') ?? '',
-      }))
 
-    return createDemoQueryResult(responses)
+    return createDemoQueryResult(buildResponsesWithNames(responses, DEMO_PARTICIPANTS))
   }
 
   return query
@@ -182,11 +218,23 @@ export function useMyQuizResponses(
   quizId: string | null,
   participantId: string | null
 ) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: ['quizResponses', quizId, participantId],
     queryFn: async (): Promise<QuizResponse[]> => {
+      if (mode === 'local') {
+        const questions = getAll<QuizQuestion>('quiz_questions')
+          .filter((q) => q.quiz_id === quizId)
+        const questionIds = questions.map((q) => q.id)
+        return getAll<QuizResponse>('quiz_responses')
+          .filter(
+            (r) =>
+              questionIds.includes(r.question_id ?? '') &&
+              r.participant_id === participantId
+          )
+      }
+
       const supabase = getSupabaseClient()!
 
       // Get questions for this quiz
@@ -213,10 +261,10 @@ export function useMyQuizResponses(
 
       return (data ?? []) as QuizResponse[]
     },
-    enabled: quizId !== null && participantId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: quizId !== null && participantId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const questionIds = DEMO_QUIZ_QUESTIONS
       .filter((q) => q.quiz_id === quizId)
       .map((q) => q.id)

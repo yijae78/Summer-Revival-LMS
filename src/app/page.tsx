@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { useDemoStore } from '@/stores/demoStore'
 import { useEventStore } from '@/stores/eventStore'
 
@@ -79,12 +80,14 @@ const stagger = {
 
 export default function LandingPage() {
   const router = useRouter()
-  const navigate = () => router.push('/dashboard')
+  const navigate = () => router.push('/start')
   const enableDemo = useDemoStore((s) => s.enableDemo)
+  const setMode = useAppModeStore((s) => s.setMode)
   const setCurrentEventId = useEventStore((s) => s.setCurrentEventId)
   const [viewport, setViewport] = useState<Viewport>('desktop')
 
   const handleDemoMode = () => {
+    setMode('demo')
     enableDemo()
     setCurrentEventId('demo-event-1')
     router.push('/dashboard')

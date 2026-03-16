@@ -6,18 +6,31 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 import { queryKeys } from '@/lib/query-keys'
-import { useDemoStore } from '@/stores/demoStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { DEMO_MATERIALS } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
+import { getAll } from '@/lib/local-db'
 
 import type { Material } from '@/types'
 
 export function useMaterials(eventId: string, category?: string) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.materials(eventId, category),
     queryFn: async () => {
+      if (mode === 'local') {
+        let materials = getAll<Material>('materials').filter(
+          (m) => m.event_id === eventId
+        )
+        if (category) {
+          materials = materials.filter((m) => m.category === category)
+        }
+        return materials.sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+      }
+
       const supabase = getSupabaseClient()!
       let q = supabase
         .from('materials')
@@ -33,10 +46,10 @@ export function useMaterials(eventId: string, category?: string) {
       if (error) throw error
       return data as Material[]
     },
-    enabled: !!eventId && !isDemoMode && isSupabaseConfigured(),
+    enabled: !!eventId && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     let materials = [...DEMO_MATERIALS]
     if (category) {
       materials = materials.filter((m) => m.category === category)

@@ -5,9 +5,10 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
-import { useDemoStore } from '@/stores/demoStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { DEMO_PARTICIPANTS } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
+import { getAll } from '@/lib/local-db'
 
 import type { Participant } from '@/types'
 
@@ -16,12 +17,30 @@ interface ParticipantFilters {
   feePaid?: boolean
 }
 
+function filterParticipants(participants: Participant[], filters?: ParticipantFilters): Participant[] {
+  let filtered = [...participants]
+  if (filters?.feePaid !== undefined) {
+    filtered = filtered.filter((p) => p.fee_paid === filters.feePaid)
+  }
+  if (filters?.search) {
+    const search = filters.search.toLowerCase()
+    filtered = filtered.filter((p) => p.name.toLowerCase().includes(search))
+  }
+  return filtered
+}
+
 export function useParticipants(eventId: string | null, filters?: ParticipantFilters) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.participants(eventId!, filters as Record<string, unknown>),
     queryFn: async (): Promise<Participant[]> => {
+      if (mode === 'local') {
+        const all = getAll<Participant>('participants')
+        const byEvent = all.filter((p) => p.event_id === eventId)
+        return filterParticipants(byEvent, filters)
+      }
+
       const supabase = getSupabaseClient()!
       let q = supabase
         .from('participants')
@@ -42,30 +61,33 @@ export function useParticipants(eventId: string | null, filters?: ParticipantFil
       if (error) throw error
       return (data ?? []) as Participant[]
     },
-    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
-    let filtered = [...DEMO_PARTICIPANTS]
-    if (filters?.feePaid !== undefined) {
-      filtered = filtered.filter((p) => p.fee_paid === filters.feePaid)
-    }
-    if (filters?.search) {
-      const search = filters.search.toLowerCase()
-      filtered = filtered.filter((p) => p.name.toLowerCase().includes(search))
-    }
-    return createDemoQueryResult(filtered)
+  if (mode === 'demo') {
+    return createDemoQueryResult(filterParticipants(DEMO_PARTICIPANTS, filters))
+  }
+
+  if (mode === 'none' || (mode === 'cloud' && !isSupabaseConfigured())) {
+    return createDemoQueryResult([])
   }
 
   return query
 }
 
 export function useParticipant(id: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.participant(id!),
     queryFn: async (): Promise<Participant> => {
+      if (mode === 'local') {
+        const all = getAll<Participant>('participants')
+        const found = all.find((p) => p.id === id)
+        if (!found) throw new Error('Participant not found')
+        return found
+      }
+
       const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('participants')
@@ -76,10 +98,10 @@ export function useParticipant(id: string | null) {
       if (error) throw error
       return data as Participant
     },
-    enabled: id !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: id !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const participant = DEMO_PARTICIPANTS.find((p) => p.id === id) ?? null
     return createDemoQueryResult(participant)
   }

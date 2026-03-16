@@ -5,18 +5,32 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
-import { useDemoStore } from '@/stores/demoStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { DEMO_ALBUMS, DEMO_PHOTOS } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
+import { getAll } from '@/lib/local-db'
 
 import type { GalleryAlbum, GalleryPhoto } from '@/types'
 
 export function useAlbums(eventId: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.albums(eventId!),
     queryFn: async () => {
+      if (mode === 'local') {
+        const albums = getAll<GalleryAlbum>('gallery_albums').filter(
+          (a) => a.event_id === eventId
+        )
+        const photos = getAll<GalleryPhoto>('gallery_photos')
+        return albums
+          .sort((a, b) => (a.day_number ?? 0) - (b.day_number ?? 0))
+          .map((album) => ({
+            ...album,
+            photoCount: photos.filter((p) => p.album_id === album.id).length,
+          }))
+      }
+
       const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('gallery_albums')
@@ -31,10 +45,10 @@ export function useAlbums(eventId: string | null) {
           : 0,
       })) as (GalleryAlbum & { photoCount: number })[]
     },
-    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const albumsWithCount = DEMO_ALBUMS.map((album) => ({
       ...album,
       photoCount: DEMO_PHOTOS.filter((p) => p.album_id === album.id).length,
@@ -46,11 +60,19 @@ export function useAlbums(eventId: string | null) {
 }
 
 export function usePhotos(albumId: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.photos(albumId!),
     queryFn: async () => {
+      if (mode === 'local') {
+        return getAll<GalleryPhoto>('gallery_photos')
+          .filter((p) => p.album_id === albumId)
+          .sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )
+      }
+
       const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('gallery_photos')
@@ -60,10 +82,10 @@ export function usePhotos(albumId: string | null) {
       if (error) throw error
       return (data ?? []) as GalleryPhoto[]
     },
-    enabled: albumId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: albumId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     const photos = DEMO_PHOTOS.filter((p) => p.album_id === albumId)
     return createDemoQueryResult(photos)
   }

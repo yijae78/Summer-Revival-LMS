@@ -5,11 +5,12 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 import { queryKeys } from '@/lib/query-keys'
-import { useDemoStore } from '@/stores/demoStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { DEMO_GROUPS, DEMO_POINTS, DEMO_PARTICIPANTS } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
+import { getAll } from '@/lib/local-db'
 
-import type { PointRecord } from '@/types'
+import type { PointRecord, Group, Participant } from '@/types'
 
 interface IndividualRankEntry {
   participantId: string
@@ -26,12 +27,53 @@ interface GroupRankEntry {
 
 export type RankEntry = IndividualRankEntry | GroupRankEntry
 
+function buildGroupRanking(groups: Group[]): GroupRankEntry[] {
+  return groups
+    .map((g) => ({
+      groupId: g.id,
+      name: g.name,
+      color: g.color,
+      totalPoints: g.total_points,
+    }))
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+}
+
+function buildIndividualRanking(
+  points: PointRecord[],
+  participants: Participant[]
+): IndividualRankEntry[] {
+  const totals = new Map<string, number>()
+  for (const pt of points) {
+    if (pt.participant_id) {
+      totals.set(pt.participant_id, (totals.get(pt.participant_id) ?? 0) + pt.amount)
+    }
+  }
+  const nameMap = new Map(participants.map((p) => [p.id, p.name]))
+  return Array.from(totals.entries())
+    .map(([pid, total]) => ({
+      participantId: pid,
+      name: nameMap.get(pid) ?? '',
+      totalPoints: total,
+    }))
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+}
+
 export function usePointsRanking(eventId: string | null, type: 'individual' | 'group') {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: queryKeys.points(eventId!, type),
     queryFn: async (): Promise<RankEntry[]> => {
+      if (mode === 'local') {
+        if (type === 'group') {
+          const groups = getAll<Group>('groups').filter((g) => g.event_id === eventId)
+          return buildGroupRanking(groups)
+        }
+        const points = getAll<PointRecord>('points').filter((p) => p.event_id === eventId)
+        const participants = getAll<Participant>('participants')
+        return buildIndividualRanking(points, participants)
+      }
+
       const supabase = getSupabaseClient()!
 
       if (type === 'group') {
@@ -90,51 +132,35 @@ export function usePointsRanking(eventId: string | null, type: 'individual' | 'g
 
       return entries
     },
-    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     if (type === 'group') {
-      const groupRanking: GroupRankEntry[] = DEMO_GROUPS
-        .map((g) => ({
-          groupId: g.id,
-          name: g.name,
-          color: g.color,
-          totalPoints: g.total_points,
-        }))
-        .sort((a, b) => b.totalPoints - a.totalPoints)
-      return createDemoQueryResult(groupRanking)
+      return createDemoQueryResult(buildGroupRanking(DEMO_GROUPS))
     }
-
-    // Individual ranking from demo points
-    const totals = new Map<string, number>()
-    for (const pt of DEMO_POINTS) {
-      if (pt.participant_id) {
-        totals.set(pt.participant_id, (totals.get(pt.participant_id) ?? 0) + pt.amount)
-      }
-    }
-
-    const nameMap = new Map(DEMO_PARTICIPANTS.map((p) => [p.id, p.name]))
-    const entries: IndividualRankEntry[] = Array.from(totals.entries())
-      .map(([pid, total]) => ({
-        participantId: pid,
-        name: nameMap.get(pid) ?? '',
-        totalPoints: total,
-      }))
-      .sort((a, b) => b.totalPoints - a.totalPoints)
-
-    return createDemoQueryResult(entries)
+    return createDemoQueryResult(buildIndividualRanking(DEMO_POINTS, DEMO_PARTICIPANTS))
   }
 
   return query
 }
 
 export function usePointHistory(eventId: string | null, groupId?: string | null) {
-  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+  const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
     queryKey: [...queryKeys.points(eventId!), 'history', groupId ?? 'all'],
     queryFn: async (): Promise<PointRecord[]> => {
+      if (mode === 'local') {
+        let points = getAll<PointRecord>('points').filter((p) => p.event_id === eventId)
+        if (groupId) {
+          points = points.filter((p) => p.group_id === groupId)
+        }
+        return points.sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+      }
+
       const supabase = getSupabaseClient()!
       let q = supabase
         .from('points')
@@ -151,10 +177,10 @@ export function usePointHistory(eventId: string | null, groupId?: string | null)
       if (error) throw error
       return (data ?? []) as PointRecord[]
     },
-    enabled: eventId !== null && !isDemoMode && isSupabaseConfigured(),
+    enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
-  if (isDemoMode) {
+  if (mode === 'demo') {
     let points = [...DEMO_POINTS]
     if (groupId) {
       points = points.filter((p) => p.group_id === groupId)

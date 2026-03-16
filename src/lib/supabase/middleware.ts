@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
 
 // Exact public paths (no prefix matching)
-const PUBLIC_PATHS = ['/', '/login', '/pin', '/setup', '/auth/callback', '/join', '/design-preview']
+const PUBLIC_PATHS = ['/', '/login', '/pin', '/setup', '/start', '/auth/callback', '/join', '/design-preview']
 
 // Public path prefixes (startsWith matching)
 const PUBLIC_PREFIXES = ['/join/', '/api/auth/']
