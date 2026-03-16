@@ -50,7 +50,7 @@ export function Header({ className }: HeaderProps) {
     >
       {/* Church name + Theme banner — 3D + flowing grace effect */}
       {(churchName || eventTheme) && (
-        <div className="relative overflow-hidden border-b border-white/[0.06] px-4 py-5"
+        <div className="relative overflow-hidden px-4 py-5"
           style={{ background: 'linear-gradient(180deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 40%, rgba(232,121,249,0.06) 70%, transparent 100%)' }}>
 
           {/* Flowing grace ripples — 은혜가 중심에서 바깥으로 흘러가는 효과 */}
@@ -154,9 +154,7 @@ export function Header({ className }: HeaderProps) {
           </motion.div>
 
           {/* Bottom gradient fade */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-4"
-            style={{ background: 'linear-gradient(to top, var(--card), transparent)' }} />
-        </div>
+          </div>
       )}
       {/* Main header row */}
       <div className="flex h-14 items-center justify-between px-4">
@@ -211,8 +209,6 @@ export function Header({ className }: HeaderProps) {
           aria-label="알림"
         >
           <Bell className="h-5 w-5" />
-          {/* Badge dot */}
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-destructive" />
         </Button>
 
         {/* User avatar */}
