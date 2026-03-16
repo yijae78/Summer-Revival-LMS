@@ -8,7 +8,7 @@ import {
   Calendar,
   ClipboardCheck,
   Gamepad2,
-  MoreHorizontal,
+  Settings,
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -27,25 +27,26 @@ const tabsByRole: Record<UserRole, NavTab[]> = {
     { label: '참가자', icon: Users, href: '/participants' },
     { label: '출석', icon: ClipboardCheck, href: '/attendance' },
     { label: '퀴즈', icon: Gamepad2, href: '/quiz' },
-    { label: '더보기', icon: MoreHorizontal, href: '/more' },
+    { label: '설정', icon: Settings, href: '/settings' },
   ],
   staff: [
     { label: '홈', icon: Home, href: '/dashboard' },
     { label: '출석', icon: ClipboardCheck, href: '/attendance' },
     { label: '조', icon: Users, href: '/groups' },
-    { label: '더보기', icon: MoreHorizontal, href: '/more' },
+    { label: '일정', icon: Calendar, href: '/schedule' },
+    { label: '설정', icon: Settings, href: '/settings' },
   ],
   student: [
     { label: '홈', icon: Home, href: '/dashboard' },
     { label: '일정', icon: Calendar, href: '/schedule' },
     { label: '퀴즈', icon: Gamepad2, href: '/quiz' },
-    { label: '더보기', icon: MoreHorizontal, href: '/more' },
+    { label: '설정', icon: Settings, href: '/settings' },
   ],
   parent: [
     { label: '홈', icon: Home, href: '/dashboard' },
     { label: '일정', icon: Calendar, href: '/schedule' },
     { label: '퀴즈', icon: Gamepad2, href: '/quiz' },
-    { label: '더보기', icon: MoreHorizontal, href: '/more' },
+    { label: '설정', icon: Settings, href: '/settings' },
   ],
 }
 
