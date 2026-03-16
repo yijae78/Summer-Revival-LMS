@@ -92,6 +92,8 @@ export default function LandingPage() {
 
   const isFramed = viewport !== 'desktop'
   const frameWidth = VIEWPORTS.find((v) => v.mode === viewport)?.width ?? '100%'
+  const isMobileFrame = viewport === 'mobile'
+  const isTabletFrame = viewport === 'tablet'
 
   return (
     <div className="relative min-h-dvh bg-background">
@@ -235,7 +237,10 @@ export default function LandingPage() {
             }}
           />
           <div
-            className="relative inline-flex items-center gap-2.5 rounded-full bg-[#0c0e14] px-5 py-2 backdrop-blur-md"
+            className={cn(
+              'relative inline-flex items-center rounded-full bg-[#0c0e14] backdrop-blur-md',
+              isMobileFrame ? 'gap-2 px-3.5 py-1.5' : 'gap-2.5 px-5 py-2'
+            )}
             style={{ animation: 'glowPulse 3s ease-in-out infinite' }}
           >
             <span className="relative flex h-2 w-2">
@@ -247,7 +252,10 @@ export default function LandingPage() {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
             </span>
             <span
-              className="bg-clip-text text-[0.75rem] font-bold uppercase tracking-[0.25em] text-transparent"
+              className={cn(
+                'bg-clip-text font-bold uppercase text-transparent',
+                isMobileFrame ? 'text-[0.6rem] tracking-[0.15em]' : 'text-[0.75rem] tracking-[0.25em]'
+              )}
               style={{
                 backgroundImage:
                   'linear-gradient(90deg, #8892a8, #38bdf8, #22d3ee, #a78bfa, #8892a8)',
@@ -264,7 +272,10 @@ export default function LandingPage() {
         <motion.p
           variants={fadeUp}
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-          className="mt-4 w-full text-center text-base font-semibold tracking-[0.08em] text-foreground/70 md:text-lg"
+          className={cn(
+            'mt-4 w-full text-center font-semibold tracking-[0.08em] text-foreground/70',
+            isMobileFrame ? 'text-xs' : isTabletFrame ? 'text-sm' : 'text-base md:text-lg'
+          )}
         >
           여름행사의 모든 것을{' '}
           <span
@@ -282,7 +293,10 @@ export default function LandingPage() {
         <motion.h1
           variants={fadeUp}
           transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-          className="bg-clip-text text-[4.5rem] font-black uppercase leading-none tracking-[-0.03em] text-transparent md:text-[6rem] lg:text-[7.5rem]"
+          className={cn(
+            'bg-clip-text font-black uppercase leading-none tracking-[-0.03em] text-transparent',
+            isMobileFrame ? 'text-[2.5rem]' : isTabletFrame ? 'text-[4rem]' : 'text-[4.5rem] md:text-[6rem] lg:text-[7.5rem]'
+          )}
           style={{
             backgroundImage:
               'linear-gradient(90deg, #075985, #0ea5e9, #38bdf8, #7dd3fc, #e0f2fe, #7dd3fc, #38bdf8, #0ea5e9, #075985)',
@@ -297,7 +311,10 @@ export default function LandingPage() {
         <motion.p
           variants={fadeUp}
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-          className="mt-1 text-[0.6875rem] uppercase tracking-[0.3em] text-muted-foreground/40"
+          className={cn(
+            'mt-1 uppercase text-muted-foreground/40',
+            isMobileFrame ? 'text-[0.5rem] tracking-[0.15em]' : 'text-[0.6875rem] tracking-[0.3em]'
+          )}
         >
           <span className="font-bold text-primary">L</span>earning{' '}
           <span className="font-bold text-primary">M</span>anagement{' '}
@@ -308,7 +325,10 @@ export default function LandingPage() {
         <motion.p
           variants={fadeUp}
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-          className="mt-6 max-w-sm text-sm leading-[1.7] text-muted-foreground"
+          className={cn(
+            'mt-6 max-w-sm leading-[1.7] text-muted-foreground',
+            isMobileFrame ? 'text-xs' : 'text-sm'
+          )}
         >
           수련회 · 성경학교 · 캠프 — 출석, 프로그램, 공지까지 하나로
         </motion.p>
@@ -321,7 +341,10 @@ export default function LandingPage() {
           whileTap={{ scale: 0.97 }}
           type="button"
           onClick={navigate}
-          className="mt-10 inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-8 text-sm font-bold text-primary-foreground shadow-[0_0_30px_rgba(56,189,248,0.25)] transition-shadow duration-300 hover:shadow-[0_0_40px_rgba(56,189,248,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className={cn(
+            'inline-flex items-center gap-2 rounded-xl bg-primary font-bold text-primary-foreground shadow-[0_0_30px_rgba(56,189,248,0.25)] transition-shadow duration-300 hover:shadow-[0_0_40px_rgba(56,189,248,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            isMobileFrame ? 'mt-6 h-10 px-6 text-xs' : 'mt-10 h-12 px-8 text-sm'
+          )}
         >
           시작하기
           <ArrowRight className="h-4 w-4" />
@@ -340,7 +363,7 @@ export default function LandingPage() {
       </motion.div>
 
       {/* ── Feature bar + detail ── */}
-      <FeatureBar />
+      <FeatureBar viewport={viewport} />
 
       {/* Footer */}
       <motion.p
@@ -435,13 +458,17 @@ export default function LandingPage() {
 }
 
 /* ── Feature bar component ── */
-function FeatureBar() {
+function FeatureBar({ viewport }: { viewport: Viewport }) {
   const [active, setActive] = useState<number | null>(null)
   const selected = active !== null ? FEATURES[active] : null
+  const isMobile = viewport === 'mobile'
 
   return (
     <motion.div
-      className="absolute bottom-40 z-10 flex w-full max-w-lg flex-col items-center gap-3 px-6"
+      className={cn(
+        'absolute z-10 flex w-full flex-col items-center gap-3 px-6',
+        isMobile ? 'bottom-28 max-w-xs gap-2 px-3' : 'bottom-40 max-w-lg'
+      )}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.9, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
@@ -455,17 +482,23 @@ function FeatureBar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 backdrop-blur-xl"
+            className={cn(
+              'w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+              isMobile ? 'p-3' : 'p-4'
+            )}
           >
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <selected.icon className="h-4.5 w-4.5 text-primary" />
+            <div className={cn('flex items-start', isMobile ? 'gap-2' : 'gap-3')}>
+              <div className={cn(
+                'shrink-0 items-center justify-center rounded-xl bg-primary/10 flex',
+                isMobile ? 'h-7 w-7' : 'h-9 w-9'
+              )}>
+                <selected.icon className={cn(isMobile ? 'h-3.5 w-3.5' : 'h-4.5 w-4.5', 'text-primary')} />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">
+                <p className={cn('font-semibold text-foreground', isMobile ? 'text-xs' : 'text-sm')}>
                   {selected.title}
                 </p>
-                <p className="mt-1 text-[0.8125rem] leading-[1.6] text-muted-foreground">
+                <p className={cn('mt-1 leading-[1.6] text-muted-foreground', isMobile ? 'text-[0.6875rem]' : 'text-[0.8125rem]')}>
                   {selected.description}
                 </p>
               </div>
@@ -475,7 +508,10 @@ function FeatureBar() {
       </AnimatePresence>
 
       {/* Icon bar */}
-      <div className="grid w-full grid-cols-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-2 py-2.5 backdrop-blur-md">
+      <div className={cn(
+        'grid w-full grid-cols-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md',
+        isMobile ? 'px-1 py-1.5' : 'px-2 py-2.5'
+      )}>
         {FEATURES.map((f, i) => {
           const isActive = active === i
           return (
@@ -492,13 +528,15 @@ function FeatureBar() {
             >
               <f.icon
                 className={cn(
-                  'h-[18px] w-[18px] transition-colors duration-200',
+                  'transition-colors duration-200',
+                  isMobile ? 'h-[14px] w-[14px]' : 'h-[18px] w-[18px]',
                   isActive ? 'text-primary' : 'text-primary/50'
                 )}
               />
               <span
                 className={cn(
-                  'text-[0.625rem] font-medium transition-colors duration-200',
+                  'font-medium transition-colors duration-200',
+                  isMobile ? 'text-[0.5rem]' : 'text-[0.625rem]',
                   isActive ? 'text-foreground' : 'text-muted-foreground'
                 )}
               >
