@@ -29,9 +29,14 @@ export const DEMO_EVENT: Event = {
   start_date: '2026-07-20',
   end_date: '2026-07-23',
   location: '속초 은혜수련원',
-  description: '사랑의교회 중고등부 여름 수련회',
+  description: '넘치는교회 중고등부 여름 수련회',
   invite_code: 'FLOW26',
-  settings: {},
+  settings: {
+    churchName: '넘치는교회',
+    departments: ['중등부', '고등부'],
+    theme: '주여 은혜를 주옵소서',
+    themeVerse: '고린도후서 9:8',
+  },
   created_at: '2026-06-01T00:00:00.000Z',
   updated_at: '2026-07-15T00:00:00.000Z',
 }
