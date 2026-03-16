@@ -4,10 +4,10 @@ import { getSupabaseConfig } from './config'
 
 let clientInstance: SupabaseClient | null = null
 
-export function getSupabaseClient(): SupabaseClient {
+export function getSupabaseClient(): SupabaseClient | null {
   const config = getSupabaseConfig()
   if (!config) {
-    throw new Error('Supabase is not configured. Please complete the setup wizard.')
+    return null
   }
 
   if (!clientInstance) {

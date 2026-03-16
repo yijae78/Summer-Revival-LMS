@@ -17,7 +17,7 @@ export function useAnnouncements(eventId: string, type?: string) {
   const query = useQuery({
     queryKey: queryKeys.announcements(eventId, type),
     queryFn: async () => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       let q = supabase
         .from('announcements')
         .select('*')

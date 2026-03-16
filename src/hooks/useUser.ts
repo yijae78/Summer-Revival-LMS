@@ -25,7 +25,7 @@ export function useUser() {
   const query = useQuery({
     queryKey: ['user', 'profile'],
     queryFn: async (): Promise<UserProfile | null> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const {
         data: { user },
       } = await supabase.auth.getUser()

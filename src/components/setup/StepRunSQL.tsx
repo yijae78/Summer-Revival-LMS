@@ -42,6 +42,11 @@ export function StepRunSQL({ onNext, onBack, supabaseUrl }: StepRunSQLProps) {
     setChecking(true)
     try {
       const supabase = getSupabaseClient()
+      if (!supabase) {
+        toast.error('Supabase 연결 정보가 없어요. 이전 단계를 확인해 주세요.')
+        setChecking(false)
+        return
+      }
       const result = await checkSchemaInitialized(supabase)
 
       if (result.initialized) {

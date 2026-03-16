@@ -13,6 +13,7 @@ export function useAuth() {
   const signInWithKakao = useCallback(async () => {
     if (isDemoMode) return
     const supabase = getSupabaseClient()
+    if (!supabase) return
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
@@ -23,6 +24,7 @@ export function useAuth() {
   const signInWithGoogle = useCallback(async () => {
     if (isDemoMode) return
     const supabase = getSupabaseClient()
+    if (!supabase) return
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback` },
@@ -37,6 +39,7 @@ export function useAuth() {
       return
     }
     const supabase = getSupabaseClient()
+    if (!supabase) return
     await supabase.auth.signOut()
     router.push('/login')
   }, [router, isDemoMode])

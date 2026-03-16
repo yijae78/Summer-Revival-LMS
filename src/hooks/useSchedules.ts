@@ -16,7 +16,7 @@ export function useSchedules(eventId: string | null, day?: number) {
   const query = useQuery({
     queryKey: queryKeys.schedules(eventId!, day),
     queryFn: async (): Promise<Schedule[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       let q = supabase
         .from('schedules')
         .select('*')

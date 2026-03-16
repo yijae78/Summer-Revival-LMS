@@ -16,7 +16,7 @@ export function useCurrentEvent() {
   const query = useQuery({
     queryKey: queryKeys.event(eventId!),
     queryFn: async () => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('events')
         .select('*')

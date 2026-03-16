@@ -21,7 +21,7 @@ export function useParticipants(eventId: string | null, filters?: ParticipantFil
   const query = useQuery({
     queryKey: queryKeys.participants(eventId!, filters as Record<string, unknown>),
     queryFn: async (): Promise<Participant[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       let q = supabase
         .from('participants')
         .select('*')
@@ -65,7 +65,7 @@ export function useParticipant(id: string | null) {
   const query = useQuery({
     queryKey: queryKeys.participant(id!),
     queryFn: async (): Promise<Participant> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('participants')
         .select('*')

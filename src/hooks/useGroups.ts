@@ -24,7 +24,7 @@ export function useGroups(eventId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.groups(eventId!),
     queryFn: async (): Promise<GroupWithMemberCount[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data: groups, error: groupsError } = await supabase
         .from('groups')
         .select('*')
@@ -78,7 +78,7 @@ export function useGroup(groupId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.group(groupId!),
     queryFn: async (): Promise<Group> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('groups')
         .select('*')
@@ -105,7 +105,7 @@ export function useGroupMembers(groupId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.groupMembers(groupId!),
     queryFn: async (): Promise<GroupMemberWithParticipant[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('group_members')
         .select('*, participant:participants(id, name, gender, grade)')

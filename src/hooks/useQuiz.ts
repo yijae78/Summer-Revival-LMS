@@ -33,7 +33,7 @@ export function useQuizzes(eventId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.quizzes(eventId!),
     queryFn: async (): Promise<QuizWithQuestionCount[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('quizzes')
         .select('*, quiz_questions(id)')
@@ -72,7 +72,7 @@ export function useQuiz(quizId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.quiz(quizId!),
     queryFn: async (): Promise<QuizWithQuestions> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('quizzes')
         .select('*, quiz_questions(*)')
@@ -117,7 +117,7 @@ export function useQuizResponses(quizId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.quizResponses(quizId!),
     queryFn: async (): Promise<QuizResponseWithParticipant[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
 
       // First get all questions for this quiz
       const { data: questions, error: questionsError } = await supabase
@@ -186,7 +186,7 @@ export function useMyQuizResponses(
   const query = useQuery({
     queryKey: ['quizResponses', quizId, participantId],
     queryFn: async (): Promise<QuizResponse[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
 
       // Get questions for this quiz
       const { data: questions, error: questionsError } = await supabase

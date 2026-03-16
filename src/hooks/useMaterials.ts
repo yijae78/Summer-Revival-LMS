@@ -17,7 +17,7 @@ export function useMaterials(eventId: string, category?: string) {
   const query = useQuery({
     queryKey: queryKeys.materials(eventId, category),
     queryFn: async () => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       let q = supabase
         .from('materials')
         .select('*')

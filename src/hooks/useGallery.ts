@@ -16,7 +16,7 @@ export function useAlbums(eventId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.albums(eventId!),
     queryFn: async () => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('gallery_albums')
         .select('*, gallery_photos(id)')
@@ -50,7 +50,7 @@ export function usePhotos(albumId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.photos(albumId!),
     queryFn: async () => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('gallery_photos')
         .select('*')

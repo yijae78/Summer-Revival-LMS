@@ -31,7 +31,7 @@ export function usePointsRanking(eventId: string | null, type: 'individual' | 'g
   const query = useQuery({
     queryKey: queryKeys.points(eventId!, type),
     queryFn: async (): Promise<RankEntry[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
 
       if (type === 'group') {
         const { data, error } = await supabase
@@ -134,7 +134,7 @@ export function usePointHistory(eventId: string | null, groupId?: string | null)
   const query = useQuery({
     queryKey: [...queryKeys.points(eventId!), 'history', groupId ?? 'all'],
     queryFn: async (): Promise<PointRecord[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       let q = supabase
         .from('points')
         .select('*')

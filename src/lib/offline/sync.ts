@@ -14,7 +14,7 @@ interface SyncResult {
 }
 
 async function executeAction(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: NonNullable<ReturnType<typeof getSupabaseClient>>,
   table: string,
   action: string,
   payload: Record<string, unknown>
@@ -42,11 +42,8 @@ export async function startSync(): Promise<SyncResult> {
     return { synced: 0, failed: 0, remaining: 0 }
   }
 
-  let supabase: ReturnType<typeof getSupabaseClient>
-  try {
-    supabase = getSupabaseClient()
-  } catch {
-    // Supabase not configured — cannot sync
+  const supabase = getSupabaseClient()
+  if (!supabase) {
     return { synced: 0, failed: 0, remaining: items.length }
   }
 

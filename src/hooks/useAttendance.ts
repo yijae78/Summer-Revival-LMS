@@ -20,7 +20,7 @@ export function useAttendance(scheduleId: string | null) {
   const query = useQuery({
     queryKey: queryKeys.attendance(scheduleId!),
     queryFn: async (): Promise<AttendanceWithParticipant[]> => {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient()!
       const { data, error } = await supabase
         .from('attendance')
         .select('*, participants(name)')
