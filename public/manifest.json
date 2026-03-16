@@ -1,11 +1,12 @@
 {
-  "name": "교회 여름행사 LMS",
-  "short_name": "여름행사 LMS",
-  "start_url": "/?source=pwa",
+  "name": "FLOWING - 여름행사 LMS",
+  "short_name": "FLOWING",
+  "description": "교회 여름행사 관리 시스템",
+  "start_url": "/dashboard",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#10B981",
+  "background_color": "#0c0e14",
+  "theme_color": "#0c0e14",
   "icons": [
     {
       "src": "/icons/icon-192.png",
