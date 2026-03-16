@@ -486,7 +486,7 @@ function FeatureBar({ viewport }: { viewport: Viewport }) {
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             className={cn(
-              'w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
+              'w-full rounded-2xl border border-white/[0.15] bg-white/[0.06] backdrop-blur-xl shadow-[0_0_16px_rgba(56,189,248,0.06)]',
               isMobile ? 'p-3' : 'p-4'
             )}
           >
@@ -512,7 +512,7 @@ function FeatureBar({ viewport }: { viewport: Viewport }) {
 
       {/* Icon bar */}
       <div className={cn(
-        'grid w-full grid-cols-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-md',
+        'grid w-full grid-cols-6 rounded-2xl border border-white/[0.15] bg-white/[0.05] backdrop-blur-xl shadow-[0_0_20px_rgba(56,189,248,0.08)]',
         isMobile ? 'px-1 py-1.5' : 'px-2 py-2.5'
       )}>
         {FEATURES.map((f, i) => {
