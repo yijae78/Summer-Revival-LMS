@@ -216,7 +216,7 @@ function DashboardContent() {
 
       {/* Event banner + Stats */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <motion.div variants={fadeUp} className="md:col-span-2">
+        <motion.div variants={fadeUp} className="md:col-span-2 [&>div]:h-full">
           <EventBanner
             eventName={event.name}
             startDate={startDate}
