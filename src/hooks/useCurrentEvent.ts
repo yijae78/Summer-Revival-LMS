@@ -6,11 +6,14 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 
 import { useEventStore } from '@/stores/eventStore'
 import { queryKeys } from '@/lib/query-keys'
+import { useDemoStore } from '@/stores/demoStore'
+import { DEMO_EVENT } from '@/lib/demo/data'
 
 export function useCurrentEvent() {
   const eventId = useEventStore((state) => state.currentEventId)
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
 
-  const { data: event, isLoading, error } = useQuery({
+  const query = useQuery({
     queryKey: queryKeys.event(eventId!),
     queryFn: async () => {
       const supabase = getSupabaseClient()
@@ -22,8 +25,17 @@ export function useCurrentEvent() {
       if (error) throw error
       return data
     },
-    enabled: eventId !== null,
+    enabled: eventId !== null && !isDemoMode,
   })
 
-  return { event, isLoading, error, eventId }
+  if (isDemoMode) {
+    return {
+      event: DEMO_EVENT,
+      isLoading: false,
+      error: null,
+      eventId: eventId ?? DEMO_EVENT.id,
+    }
+  }
+
+  return { event: query.data, isLoading: query.isLoading, error: query.error, eventId }
 }

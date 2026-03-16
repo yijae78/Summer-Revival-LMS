@@ -5,15 +5,20 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase/client'
 
 import { queryKeys } from '@/lib/query-keys'
+import { useDemoStore } from '@/stores/demoStore'
+import { DEMO_ANNOUNCEMENTS } from '@/lib/demo/data'
+import { createDemoQueryResult } from '@/lib/demo/hooks'
 
 import type { Announcement } from '@/types'
 
 export function useAnnouncements(eventId: string, type?: string) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.announcements(eventId, type),
     queryFn: async () => {
       const supabase = getSupabaseClient()
-      let query = supabase
+      let q = supabase
         .from('announcements')
         .select('*')
         .eq('event_id', eventId)
@@ -21,13 +26,28 @@ export function useAnnouncements(eventId: string, type?: string) {
         .order('created_at', { ascending: false })
 
       if (type) {
-        query = query.eq('type', type)
+        q = q.eq('type', type)
       }
 
-      const { data, error } = await query
+      const { data, error } = await q
       if (error) throw error
       return data as Announcement[]
     },
-    enabled: !!eventId,
+    enabled: !!eventId && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    let announcements = [...DEMO_ANNOUNCEMENTS]
+    if (type) {
+      announcements = announcements.filter((a) => a.type === type)
+    }
+    // Sort: pinned first, then by created_at descending
+    announcements.sort((a, b) => {
+      if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+    return createDemoQueryResult(announcements)
+  }
+
+  return query
 }

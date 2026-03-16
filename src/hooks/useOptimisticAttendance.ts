@@ -10,12 +10,14 @@ import { checkAttendance } from '@/actions/attendance'
 import { triggerHaptic } from '@/lib/utils/haptics'
 import { queueAttendanceCheck } from '@/lib/offline/attendance-queue'
 import { queryKeys } from '@/lib/query-keys'
+import { useDemoStore } from '@/stores/demoStore'
 
 import type { AttendanceStatus } from '@/types'
 import type { AttendanceWithParticipant } from '@/hooks/useAttendance'
 
 export function useOptimisticAttendance(scheduleId: string | null) {
   const queryClient = useQueryClient()
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
   const { data: serverRecords, isLoading } = useAttendance(scheduleId)
   const [optimisticUpdates, setOptimisticUpdates] = useState<
     Map<string, AttendanceStatus>
@@ -35,6 +37,18 @@ export function useOptimisticAttendance(scheduleId: string | null) {
   const updateStatus = useCallback(
     async (participantId: string, status: AttendanceStatus) => {
       if (!scheduleId) return
+
+      // In demo mode, just apply optimistic update without server call
+      if (isDemoMode) {
+        setOptimisticUpdates((prev) => {
+          const next = new Map(prev)
+          next.set(participantId, status)
+          return next
+        })
+        triggerHaptic('success')
+        toast.success('출석이 체크됐어요 (데모)')
+        return
+      }
 
       // Cancel any in-flight request for this participant
       const existingController = abortControllers.current.get(participantId)
@@ -109,7 +123,7 @@ export function useOptimisticAttendance(scheduleId: string | null) {
         }
       }
     },
-    [scheduleId, serverRecords, queryClient]
+    [scheduleId, serverRecords, queryClient, isDemoMode]
   )
 
   return {

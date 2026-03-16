@@ -4,6 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { queryKeys } from '@/lib/query-keys'
+import { useDemoStore } from '@/stores/demoStore'
+import { DEMO_PARTICIPANTS } from '@/lib/demo/data'
+import { createDemoQueryResult } from '@/lib/demo/hooks'
 
 import type { Participant } from '@/types'
 
@@ -13,35 +16,53 @@ interface ParticipantFilters {
 }
 
 export function useParticipants(eventId: string | null, filters?: ParticipantFilters) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.participants(eventId!, filters as Record<string, unknown>),
     queryFn: async (): Promise<Participant[]> => {
       const supabase = getSupabaseClient()
-      let query = supabase
+      let q = supabase
         .from('participants')
         .select('*')
         .eq('event_id', eventId!)
         .order('created_at', { ascending: false })
 
       if (filters?.feePaid !== undefined) {
-        query = query.eq('fee_paid', filters.feePaid)
+        q = q.eq('fee_paid', filters.feePaid)
       }
 
       if (filters?.search) {
-        query = query.ilike('name', `%${filters.search}%`)
+        q = q.ilike('name', `%${filters.search}%`)
       }
 
-      const { data, error } = await query
+      const { data, error } = await q
 
       if (error) throw error
       return (data ?? []) as Participant[]
     },
-    enabled: eventId !== null,
+    enabled: eventId !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    let filtered = [...DEMO_PARTICIPANTS]
+    if (filters?.feePaid !== undefined) {
+      filtered = filtered.filter((p) => p.fee_paid === filters.feePaid)
+    }
+    if (filters?.search) {
+      const search = filters.search.toLowerCase()
+      filtered = filtered.filter((p) => p.name.toLowerCase().includes(search))
+    }
+    return createDemoQueryResult(filtered)
+  }
+
+  return query
 }
 
 export function useParticipant(id: string | null) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.participant(id!),
     queryFn: async (): Promise<Participant> => {
       const supabase = getSupabaseClient()
@@ -54,6 +75,13 @@ export function useParticipant(id: string | null) {
       if (error) throw error
       return data as Participant
     },
-    enabled: id !== null,
+    enabled: id !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    const participant = DEMO_PARTICIPANTS.find((p) => p.id === id) ?? null
+    return createDemoQueryResult(participant)
+  }
+
+  return query
 }

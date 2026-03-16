@@ -4,6 +4,14 @@ import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { queryKeys } from '@/lib/query-keys'
+import { useDemoStore } from '@/stores/demoStore'
+import {
+  DEMO_QUIZZES,
+  DEMO_QUIZ_QUESTIONS,
+  DEMO_QUIZ_RESPONSES,
+  DEMO_PARTICIPANTS,
+} from '@/lib/demo/data'
+import { createDemoQueryResult } from '@/lib/demo/hooks'
 
 import type { Quiz, QuizQuestion, QuizResponse } from '@/types'
 
@@ -20,7 +28,9 @@ export interface QuizResponseWithParticipant extends QuizResponse {
 }
 
 export function useQuizzes(eventId: string | null) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.quizzes(eventId!),
     queryFn: async (): Promise<QuizWithQuestionCount[]> => {
       const supabase = getSupabaseClient()
@@ -42,12 +52,24 @@ export function useQuizzes(eventId: string | null) {
 
       return quizzes
     },
-    enabled: eventId !== null,
+    enabled: eventId !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    const quizzesWithCount: QuizWithQuestionCount[] = DEMO_QUIZZES.map((quiz) => ({
+      ...quiz,
+      questionCount: DEMO_QUIZ_QUESTIONS.filter((q) => q.quiz_id === quiz.id).length,
+    }))
+    return createDemoQueryResult(quizzesWithCount)
+  }
+
+  return query
 }
 
 export function useQuiz(quizId: string | null) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.quiz(quizId!),
     queryFn: async (): Promise<QuizWithQuestions> => {
       const supabase = getSupabaseClient()
@@ -69,12 +91,30 @@ export function useQuiz(quizId: string | null) {
         questions: sorted,
       } as QuizWithQuestions
     },
-    enabled: quizId !== null,
+    enabled: quizId !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    const quiz = DEMO_QUIZZES.find((q) => q.id === quizId)
+    if (!quiz) return createDemoQueryResult(null)
+
+    const questions = DEMO_QUIZ_QUESTIONS
+      .filter((q) => q.quiz_id === quizId)
+      .sort((a, b) => a.order_index - b.order_index)
+
+    return createDemoQueryResult({
+      ...quiz,
+      questions,
+    } as QuizWithQuestions)
+  }
+
+  return query
 }
 
 export function useQuizResponses(quizId: string | null) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.quizResponses(quizId!),
     queryFn: async (): Promise<QuizResponseWithParticipant[]> => {
       const supabase = getSupabaseClient()
@@ -115,15 +155,35 @@ export function useQuizResponses(quizId: string | null) {
 
       return responses
     },
-    enabled: quizId !== null,
+    enabled: quizId !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    const questionIds = DEMO_QUIZ_QUESTIONS
+      .filter((q) => q.quiz_id === quizId)
+      .map((q) => q.id)
+
+    const nameMap = new Map(DEMO_PARTICIPANTS.map((p) => [p.id, p.name]))
+    const responses: QuizResponseWithParticipant[] = DEMO_QUIZ_RESPONSES
+      .filter((r) => questionIds.includes(r.question_id ?? ''))
+      .map((r) => ({
+        ...r,
+        participant_name: nameMap.get(r.participant_id ?? '') ?? '',
+      }))
+
+    return createDemoQueryResult(responses)
+  }
+
+  return query
 }
 
 export function useMyQuizResponses(
   quizId: string | null,
   participantId: string | null
 ) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: ['quizResponses', quizId, participantId],
     queryFn: async (): Promise<QuizResponse[]> => {
       const supabase = getSupabaseClient()
@@ -152,6 +212,21 @@ export function useMyQuizResponses(
 
       return (data ?? []) as QuizResponse[]
     },
-    enabled: quizId !== null && participantId !== null,
+    enabled: quizId !== null && participantId !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    const questionIds = DEMO_QUIZ_QUESTIONS
+      .filter((q) => q.quiz_id === quizId)
+      .map((q) => q.id)
+
+    const responses = DEMO_QUIZ_RESPONSES.filter(
+      (r) =>
+        questionIds.includes(r.question_id ?? '') &&
+        r.participant_id === participantId
+    )
+    return createDemoQueryResult(responses)
+  }
+
+  return query
 }

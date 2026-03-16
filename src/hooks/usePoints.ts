@@ -4,6 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
 import { queryKeys } from '@/lib/query-keys'
+import { useDemoStore } from '@/stores/demoStore'
+import { DEMO_GROUPS, DEMO_POINTS, DEMO_PARTICIPANTS } from '@/lib/demo/data'
+import { createDemoQueryResult } from '@/lib/demo/hooks'
 
 import type { PointRecord } from '@/types'
 
@@ -23,7 +26,9 @@ interface GroupRankEntry {
 export type RankEntry = IndividualRankEntry | GroupRankEntry
 
 export function usePointsRanking(eventId: string | null, type: 'individual' | 'group') {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.points(eventId!, type),
     queryFn: async (): Promise<RankEntry[]> => {
       const supabase = getSupabaseClient()
@@ -84,30 +89,77 @@ export function usePointsRanking(eventId: string | null, type: 'individual' | 'g
 
       return entries
     },
-    enabled: eventId !== null,
+    enabled: eventId !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    if (type === 'group') {
+      const groupRanking: GroupRankEntry[] = DEMO_GROUPS
+        .map((g) => ({
+          groupId: g.id,
+          name: g.name,
+          color: g.color,
+          totalPoints: g.total_points,
+        }))
+        .sort((a, b) => b.totalPoints - a.totalPoints)
+      return createDemoQueryResult(groupRanking)
+    }
+
+    // Individual ranking from demo points
+    const totals = new Map<string, number>()
+    for (const pt of DEMO_POINTS) {
+      if (pt.participant_id) {
+        totals.set(pt.participant_id, (totals.get(pt.participant_id) ?? 0) + pt.amount)
+      }
+    }
+
+    const nameMap = new Map(DEMO_PARTICIPANTS.map((p) => [p.id, p.name]))
+    const entries: IndividualRankEntry[] = Array.from(totals.entries())
+      .map(([pid, total]) => ({
+        participantId: pid,
+        name: nameMap.get(pid) ?? '',
+        totalPoints: total,
+      }))
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+
+    return createDemoQueryResult(entries)
+  }
+
+  return query
 }
 
 export function usePointHistory(eventId: string | null, groupId?: string | null) {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: [...queryKeys.points(eventId!), 'history', groupId ?? 'all'],
     queryFn: async (): Promise<PointRecord[]> => {
       const supabase = getSupabaseClient()
-      let query = supabase
+      let q = supabase
         .from('points')
         .select('*')
         .eq('event_id', eventId!)
         .order('created_at', { ascending: false })
 
       if (groupId) {
-        query = query.eq('group_id', groupId)
+        q = q.eq('group_id', groupId)
       }
 
-      const { data, error } = await query
+      const { data, error } = await q
 
       if (error) throw error
       return (data ?? []) as PointRecord[]
     },
-    enabled: eventId !== null,
+    enabled: eventId !== null && !isDemoMode,
   })
+
+  if (isDemoMode) {
+    let points = [...DEMO_POINTS]
+    if (groupId) {
+      points = points.filter((p) => p.group_id === groupId)
+    }
+    return createDemoQueryResult(points)
+  }
+
+  return query
 }

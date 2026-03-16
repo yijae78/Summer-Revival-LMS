@@ -17,6 +17,8 @@ import {
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { useDemoStore } from '@/stores/demoStore'
+import { useEventStore } from '@/stores/eventStore'
 
 const FEATURES = [
   {
@@ -78,7 +80,15 @@ const stagger = {
 export default function LandingPage() {
   const router = useRouter()
   const navigate = () => router.push('/dashboard')
+  const enableDemo = useDemoStore((s) => s.enableDemo)
+  const setCurrentEventId = useEventStore((s) => s.setCurrentEventId)
   const [viewport, setViewport] = useState<Viewport>('desktop')
+
+  const handleDemoMode = () => {
+    enableDemo()
+    setCurrentEventId('demo-event-1')
+    router.push('/dashboard')
+  }
 
   const isFramed = viewport !== 'desktop'
   const frameWidth = VIEWPORTS.find((v) => v.mode === viewport)?.width ?? '100%'
@@ -315,6 +325,17 @@ export default function LandingPage() {
         >
           시작하기
           <ArrowRight className="h-4 w-4" />
+        </motion.button>
+
+        {/* Demo mode link */}
+        <motion.button
+          variants={fadeUp}
+          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+          type="button"
+          onClick={handleDemoMode}
+          className="mt-3 text-sm text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          데모로 둘러보기
         </motion.button>
       </motion.div>
 

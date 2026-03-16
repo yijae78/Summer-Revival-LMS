@@ -4,6 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 
 import { getSupabaseClient } from '@/lib/supabase/client'
 
+import { useDemoStore } from '@/stores/demoStore'
+import { DEMO_USER } from '@/lib/demo/data'
+import { createDemoQueryResult } from '@/lib/demo/hooks'
+
 import type { UserRole } from '@/types'
 
 interface UserProfile {
@@ -16,7 +20,9 @@ interface UserProfile {
 }
 
 export function useUser() {
-  return useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: ['user', 'profile'],
     queryFn: async (): Promise<UserProfile | null> => {
       const supabase = getSupabaseClient()
@@ -42,5 +48,12 @@ export function useUser() {
         hasSeenOnboarding: data.has_seen_onboarding,
       }
     },
+    enabled: !isDemoMode,
   })
+
+  if (isDemoMode) {
+    return createDemoQueryResult(DEMO_USER as UserProfile)
+  }
+
+  return query
 }

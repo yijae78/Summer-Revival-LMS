@@ -3,6 +3,7 @@
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { DemoBanner } from '@/components/shared/DemoBanner'
 
 import { useUser } from '@/hooks/useUser'
 
@@ -14,7 +15,9 @@ export default function DashboardLayout({
   const { data: user } = useUser()
 
   return (
-    <div className="flex h-dvh">
+    <div className="flex h-dvh flex-col">
+      <DemoBanner />
+      <div className="flex flex-1 overflow-hidden">
       {/* Desktop sidebar */}
       <Sidebar role={user?.role} />
 
@@ -50,6 +53,7 @@ export default function DashboardLayout({
 
         {/* Mobile bottom nav */}
         <BottomNav role={user?.role} />
+      </div>
       </div>
     </div>
   )

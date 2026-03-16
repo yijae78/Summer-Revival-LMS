@@ -5,9 +5,14 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '@/lib/supabase/client'
 
 import { queryKeys } from '@/lib/query-keys'
+import { useDemoStore } from '@/stores/demoStore'
+import { DEMO_EVENT } from '@/lib/demo/data'
+import { createDemoQueryResult } from '@/lib/demo/hooks'
 
 export function useEvents() {
-  const { data: events, isLoading, error } = useQuery({
+  const isDemoMode = useDemoStore((s) => s.isDemoMode)
+
+  const query = useQuery({
     queryKey: queryKeys.events(),
     queryFn: async () => {
       const supabase = getSupabaseClient()
@@ -18,7 +23,13 @@ export function useEvents() {
       if (error) throw error
       return data
     },
+    enabled: !isDemoMode,
   })
 
-  return { events, isLoading, error }
+  if (isDemoMode) {
+    const demoResult = createDemoQueryResult([DEMO_EVENT])
+    return { events: demoResult.data, isLoading: demoResult.isLoading, error: demoResult.error }
+  }
+
+  return { events: query.data, isLoading: query.isLoading, error: query.error }
 }

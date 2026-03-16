@@ -47,6 +47,10 @@ function buildCookieHeader(request: NextRequest): string {
     .join('; ')
 }
 
+function isDemoModeEnabled(request: NextRequest): boolean {
+  return request.cookies.get('demo-mode')?.value === 'true'
+}
+
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl
 
@@ -62,6 +66,19 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   // Allow non-protected API routes (e.g. /api/auth/*)
   if (pathname.startsWith('/api') && !isProtectedApi(pathname)) {
+    return NextResponse.next()
+  }
+
+  // --- Demo mode: allow all dashboard routes without authentication ---
+  if (isDemoModeEnabled(request)) {
+    // In demo mode, allow access to all dashboard routes
+    // But block protected APIs (chat requires real credentials)
+    if (isProtectedApi(pathname)) {
+      return NextResponse.json(
+        { error: 'AI 챗봇은 데모 모드에서 사용할 수 없어요.' },
+        { status: 403 }
+      )
+    }
     return NextResponse.next()
   }
 
