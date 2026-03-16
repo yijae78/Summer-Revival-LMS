@@ -30,6 +30,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { RoleGuard } from '@/components/shared/RoleGuard'
+import { AccountingGate } from '@/components/shared/AccountingGate'
 import { EmptyState } from '@/components/shared/EmptyState'
 
 import { useAccounting } from '@/hooks/useAccounting'
@@ -556,14 +557,16 @@ function AccountingContent() {
 export default function AccountingPage() {
   return (
     <RoleGuard allowedRoles={['admin', 'staff']}>
-      <div className="space-y-5">
-        <PageHeader
-          backHref="/dashboard"
-          title="회계 관리"
-          description="예산과 수입/지출을 관리해요"
-        />
-        <AccountingContent />
-      </div>
+      <AccountingGate>
+        <div className="space-y-5">
+          <PageHeader
+            backHref="/dashboard"
+            title="회계 관리"
+            description="예산과 수입/지출을 관리해요"
+          />
+          <AccountingContent />
+        </div>
+      </AccountingGate>
     </RoleGuard>
   )
 }
