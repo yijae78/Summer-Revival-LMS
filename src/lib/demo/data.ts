@@ -13,6 +13,9 @@ import type {
   PointRecord,
   GalleryAlbum,
   GalleryPhoto,
+  BudgetCategory,
+  IncomeRecord,
+  ExpenseRecord,
 } from '@/types'
 
 // ============================================
@@ -1229,3 +1232,59 @@ export const DEMO_USER = {
   hasSeenOnboarding: true,
   created_at: new Date().toISOString(),
 }
+
+// ============================================
+// Demo Budget Categories
+// ============================================
+
+export const DEMO_BUDGET_CATEGORIES: BudgetCategory[] = [
+  { id: 'bc1', event_id: 'demo-event-1', name: '식비', planned_amount: 800000, created_at: '2026-06-01T00:00:00.000Z' },
+  { id: 'bc2', event_id: 'demo-event-1', name: '숙박', planned_amount: 600000, created_at: '2026-06-01T00:00:00.000Z' },
+  { id: 'bc3', event_id: 'demo-event-1', name: '교통', planned_amount: 300000, created_at: '2026-06-01T00:00:00.000Z' },
+  { id: 'bc4', event_id: 'demo-event-1', name: '자료/교재', planned_amount: 200000, created_at: '2026-06-01T00:00:00.000Z' },
+  { id: 'bc5', event_id: 'demo-event-1', name: '보험', planned_amount: 100000, created_at: '2026-06-01T00:00:00.000Z' },
+  { id: 'bc6', event_id: 'demo-event-1', name: '기타', planned_amount: 200000, created_at: '2026-06-01T00:00:00.000Z' },
+]
+
+// ============================================
+// Demo Income Records
+// ============================================
+
+export const DEMO_INCOME_RECORDS: IncomeRecord[] = [
+  // 15 participant registration fees (30,000 each)
+  { id: 'inc1', event_id: 'demo-event-1', participant_id: 'p1', category: 'registration_fee', amount: 30000, description: '김은혜 참가비', paid_at: '2026-06-20T10:00:00.000Z', created_at: '2026-06-20T10:00:00.000Z' },
+  { id: 'inc2', event_id: 'demo-event-1', participant_id: 'p2', category: 'registration_fee', amount: 30000, description: '이준서 참가비', paid_at: '2026-06-20T10:05:00.000Z', created_at: '2026-06-20T10:05:00.000Z' },
+  { id: 'inc3', event_id: 'demo-event-1', participant_id: 'p4', category: 'registration_fee', amount: 30000, description: '최민준 참가비', paid_at: '2026-06-21T11:00:00.000Z', created_at: '2026-06-21T11:00:00.000Z' },
+  { id: 'inc4', event_id: 'demo-event-1', participant_id: 'p5', category: 'registration_fee', amount: 30000, description: '정서연 참가비', paid_at: '2026-06-22T08:30:00.000Z', created_at: '2026-06-22T08:30:00.000Z' },
+  { id: 'inc5', event_id: 'demo-event-1', participant_id: 'p6', category: 'registration_fee', amount: 30000, description: '강도현 참가비', paid_at: '2026-06-22T09:00:00.000Z', created_at: '2026-06-22T09:00:00.000Z' },
+  { id: 'inc6', event_id: 'demo-event-1', participant_id: 'p7', category: 'registration_fee', amount: 30000, description: '윤수빈 참가비', paid_at: '2026-06-23T10:00:00.000Z', created_at: '2026-06-23T10:00:00.000Z' },
+  { id: 'inc7', event_id: 'demo-event-1', participant_id: 'p9', category: 'registration_fee', amount: 30000, description: '송예린 참가비', paid_at: '2026-06-24T09:00:00.000Z', created_at: '2026-06-24T09:00:00.000Z' },
+  { id: 'inc8', event_id: 'demo-event-1', participant_id: 'p10', category: 'registration_fee', amount: 30000, description: '임태현 참가비', paid_at: '2026-06-25T10:00:00.000Z', created_at: '2026-06-25T10:00:00.000Z' },
+  { id: 'inc9', event_id: 'demo-event-1', participant_id: 'p11', category: 'registration_fee', amount: 30000, description: '오소희 참가비', paid_at: '2026-06-26T10:00:00.000Z', created_at: '2026-06-26T10:00:00.000Z' },
+  { id: 'inc10', event_id: 'demo-event-1', participant_id: 'p12', category: 'registration_fee', amount: 30000, description: '배성민 참가비', paid_at: '2026-06-27T10:00:00.000Z', created_at: '2026-06-27T10:00:00.000Z' },
+  { id: 'inc11', event_id: 'demo-event-1', participant_id: 'p14', category: 'registration_fee', amount: 30000, description: '문현우 참가비', paid_at: '2026-06-29T10:00:00.000Z', created_at: '2026-06-29T10:00:00.000Z' },
+  { id: 'inc12', event_id: 'demo-event-1', participant_id: 'p15', category: 'registration_fee', amount: 30000, description: '신유진 참가비', paid_at: '2026-06-30T10:00:00.000Z', created_at: '2026-06-30T10:00:00.000Z' },
+  { id: 'inc13', event_id: 'demo-event-1', participant_id: 'p16', category: 'registration_fee', amount: 30000, description: '김하은 참가비', paid_at: '2026-07-01T09:00:00.000Z', created_at: '2026-07-01T09:00:00.000Z' },
+  { id: 'inc14', event_id: 'demo-event-1', participant_id: 'p17', category: 'registration_fee', amount: 30000, description: '이서준 참가비', paid_at: '2026-07-01T09:30:00.000Z', created_at: '2026-07-01T09:30:00.000Z' },
+  { id: 'inc15', event_id: 'demo-event-1', participant_id: 'p19', category: 'registration_fee', amount: 30000, description: '조은율 참가비', paid_at: '2026-07-02T09:00:00.000Z', created_at: '2026-07-02T09:00:00.000Z' },
+  // Donations
+  { id: 'inc16', event_id: 'demo-event-1', participant_id: null, category: 'donation', amount: 100000, description: '김집사님 헌금', paid_at: '2026-07-10T10:00:00.000Z', created_at: '2026-07-10T10:00:00.000Z' },
+  { id: 'inc17', event_id: 'demo-event-1', participant_id: null, category: 'donation', amount: 200000, description: '박장로님 헌금', paid_at: '2026-07-12T10:00:00.000Z', created_at: '2026-07-12T10:00:00.000Z' },
+  // Sponsorship
+  { id: 'inc18', event_id: 'demo-event-1', participant_id: null, category: 'sponsorship', amount: 300000, description: '교회 청년부 후원', paid_at: '2026-07-05T10:00:00.000Z', created_at: '2026-07-05T10:00:00.000Z' },
+]
+
+// ============================================
+// Demo Expense Records
+// ============================================
+
+export const DEMO_EXPENSE_RECORDS: ExpenseRecord[] = [
+  { id: 'exp1', event_id: 'demo-event-1', category: 'food', amount: 350000, description: '수련원 식비 (4일 20명분)', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-18T10:00:00.000Z', created_at: '2026-07-18T10:00:00.000Z' },
+  { id: 'exp2', event_id: 'demo-event-1', category: 'food', amount: 120000, description: '바비큐 재료 구입', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-19T14:00:00.000Z', created_at: '2026-07-19T14:00:00.000Z' },
+  { id: 'exp3', event_id: 'demo-event-1', category: 'accommodation', amount: 500000, description: '은혜수련원 숙박비', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-15T10:00:00.000Z', created_at: '2026-07-15T10:00:00.000Z' },
+  { id: 'exp4', event_id: 'demo-event-1', category: 'transportation', amount: 250000, description: '관광버스 대절 (왕복)', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-17T10:00:00.000Z', created_at: '2026-07-17T10:00:00.000Z' },
+  { id: 'exp5', event_id: 'demo-event-1', category: 'materials', amount: 85000, description: '큐티 교재 인쇄비', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-14T10:00:00.000Z', created_at: '2026-07-14T10:00:00.000Z' },
+  { id: 'exp6', event_id: 'demo-event-1', category: 'materials', amount: 45000, description: '활동 자료 및 문구류', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-16T10:00:00.000Z', created_at: '2026-07-16T10:00:00.000Z' },
+  { id: 'exp7', event_id: 'demo-event-1', category: 'insurance', amount: 60000, description: '행사 보험료 (20명)', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-13T10:00:00.000Z', created_at: '2026-07-13T10:00:00.000Z' },
+  { id: 'exp8', event_id: 'demo-event-1', category: 'equipment', amount: 35000, description: '음향 장비 렌탈', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-19T16:00:00.000Z', created_at: '2026-07-19T16:00:00.000Z' },
+]

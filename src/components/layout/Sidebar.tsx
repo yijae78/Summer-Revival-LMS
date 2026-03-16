@@ -14,6 +14,7 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeft,
+  Banknote,
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -37,6 +38,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: '조', icon: UsersRound, href: '/groups' },
     { label: '공지', icon: Megaphone, href: '/announcements' },
     { label: '갤러리', icon: Image, href: '/gallery' },
+    { label: '회계', icon: Banknote, href: '/accounting' },
     { label: '설정', icon: Settings, href: '/settings' },
   ],
   staff: [
@@ -45,6 +47,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: '조', icon: UsersRound, href: '/groups' },
     { label: '공지', icon: Megaphone, href: '/announcements' },
     { label: '일정', icon: Calendar, href: '/schedule' },
+    { label: '회계', icon: Banknote, href: '/accounting' },
   ],
   student: [
     { label: '홈', icon: Home, href: '/dashboard' },

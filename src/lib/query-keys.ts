@@ -48,4 +48,7 @@ export const queryKeys = {
 
   // Rooms
   rooms: (eventId: string) => ['rooms', eventId] as const,
+
+  // Accounting
+  accounting: (eventId: string) => ['accounting', eventId] as const,
 } as const

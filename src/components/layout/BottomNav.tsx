@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   Gamepad2,
   Settings,
+  Banknote,
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -32,7 +33,7 @@ const tabsByRole: Record<UserRole, NavTab[]> = {
   staff: [
     { label: '홈', icon: Home, href: '/dashboard' },
     { label: '출석', icon: ClipboardCheck, href: '/attendance' },
-    { label: '조', icon: Users, href: '/groups' },
+    { label: '회계', icon: Banknote, href: '/accounting' },
     { label: '일정', icon: Calendar, href: '/schedule' },
     { label: '설정', icon: Settings, href: '/settings' },
   ],

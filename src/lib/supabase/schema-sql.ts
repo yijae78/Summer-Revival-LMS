@@ -231,6 +231,40 @@ CREATE TABLE IF NOT EXISTS room_assignments (
   UNIQUE(room_id, participant_id)
 );
 
+-- 예산 카테고리
+CREATE TABLE IF NOT EXISTS budget_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  planned_amount INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 수입 기록
+CREATE TABLE IF NOT EXISTS income_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  participant_id UUID REFERENCES participants(id),
+  category TEXT NOT NULL DEFAULT 'registration_fee',
+  amount INTEGER NOT NULL,
+  description TEXT,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 지출 기록
+CREATE TABLE IF NOT EXISTS expense_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  category TEXT NOT NULL,
+  amount INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  receipt_url TEXT,
+  paid_by UUID REFERENCES profiles(id),
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- ============================================
 -- 인덱스 (성능 최적화)
 -- ============================================
@@ -246,6 +280,9 @@ CREATE INDEX IF NOT EXISTS idx_points_participant ON points(participant_id);
 CREATE INDEX IF NOT EXISTS idx_points_group ON points(group_id);
 CREATE INDEX IF NOT EXISTS idx_announcements_event ON announcements(event_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_responses_question ON quiz_responses(question_id);
+CREATE INDEX IF NOT EXISTS idx_budget_categories_event ON budget_categories(event_id);
+CREATE INDEX IF NOT EXISTS idx_income_records_event ON income_records(event_id);
+CREATE INDEX IF NOT EXISTS idx_expense_records_event ON expense_records(event_id);
 
 -- ============================================
 -- RPC 함수
@@ -277,6 +314,9 @@ ALTER TABLE gallery_albums ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gallery_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE room_assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE budget_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE income_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE expense_records ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- RLS 정책 (기본: 인증 사용자 전체 접근)
@@ -304,6 +344,9 @@ CREATE POLICY "Authenticated access gallery_albums" ON gallery_albums FOR ALL TO
 CREATE POLICY "Authenticated access gallery_photos" ON gallery_photos FOR ALL TO authenticated USING (true);
 CREATE POLICY "Authenticated access rooms" ON rooms FOR ALL TO authenticated USING (true);
 CREATE POLICY "Authenticated access room_assignments" ON room_assignments FOR ALL TO authenticated USING (true);
+CREATE POLICY "Authenticated access budget_categories" ON budget_categories FOR ALL TO authenticated USING (true);
+CREATE POLICY "Authenticated access income_records" ON income_records FOR ALL TO authenticated USING (true);
+CREATE POLICY "Authenticated access expense_records" ON expense_records FOR ALL TO authenticated USING (true);
 
 -- Public access for join page (participants registration)
 CREATE POLICY "Public can insert participants" ON participants FOR INSERT TO anon WITH CHECK (true);

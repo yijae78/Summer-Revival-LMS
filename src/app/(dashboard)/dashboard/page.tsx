@@ -11,6 +11,7 @@ import {
   HelpCircle,
   FolderOpen,
   Settings,
+  Banknote,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -37,6 +38,7 @@ const QUICK_ACTIONS = [
   { href: '/gallery', icon: Camera, label: '갤러리', gradient: 'from-cyan-500 to-cyan-600' },
   { href: '/groups', icon: Trophy, label: '조/반', gradient: 'from-orange-500 to-orange-600' },
   { href: '/materials', icon: FolderOpen, label: '자료실', gradient: 'from-fuchsia-500 to-fuchsia-600' },
+  { href: '/accounting', icon: Banknote, label: '회계', gradient: 'from-teal-500 to-teal-600' },
   { href: '/settings', icon: Settings, label: '설정', gradient: 'from-slate-500 to-slate-600' },
 ]
 

@@ -252,3 +252,41 @@ export interface RoomAssignment {
   room_id: string | null
   participant_id: string | null
 }
+
+// === 회계: 예산 카테고리 ===
+export type IncomeCategory = 'registration_fee' | 'donation' | 'sponsorship' | 'other'
+
+export type ExpenseCategory = 'food' | 'accommodation' | 'transportation' | 'materials' | 'equipment' | 'insurance' | 'venue' | 'other'
+
+export interface BudgetCategory {
+  id: string
+  event_id: string
+  name: string
+  planned_amount: number
+  created_at: string
+}
+
+// === 회계: 수입 기록 ===
+export interface IncomeRecord {
+  id: string
+  event_id: string
+  participant_id: string | null
+  category: IncomeCategory
+  amount: number
+  description: string
+  paid_at: string | null
+  created_at: string
+}
+
+// === 회계: 지출 기록 ===
+export interface ExpenseRecord {
+  id: string
+  event_id: string
+  category: ExpenseCategory
+  amount: number
+  description: string
+  receipt_url: string | null
+  paid_by: string | null
+  paid_at: string | null
+  created_at: string
+}
