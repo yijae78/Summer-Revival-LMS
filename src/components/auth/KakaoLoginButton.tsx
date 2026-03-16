@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import { toast } from 'sonner'
+
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -22,6 +24,7 @@ export function KakaoLoginButton() {
     try {
       await signInWithKakao()
     } catch {
+      toast.error('카카오 로그인에 실패했어요. 다시 시도해 주세요.')
       setIsLoading(false)
     }
   }

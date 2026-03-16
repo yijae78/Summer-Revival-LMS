@@ -1,16 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { PartyPopper } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { getSupabaseConfig } from '@/lib/supabase/config'
 
 export function StepComplete() {
   const router = useRouter()
   const [churchName, setChurchName] = useState('')
+
+  // Ensure cookies are set from localStorage (handles edge cases
+  // where user reached this step without going through StepEnterCredentials)
+  useEffect(() => {
+    const config = getSupabaseConfig()
+    if (config) {
+      document.cookie = `sb-url=${encodeURIComponent(config.url)}; path=/; max-age=31536000; SameSite=Lax`
+      document.cookie = `sb-anon-key=${encodeURIComponent(config.anonKey)}; path=/; max-age=31536000; SameSite=Lax`
+    }
+  }, [])
 
   function handleStart() {
     // Store church name for later use

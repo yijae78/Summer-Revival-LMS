@@ -1,16 +1,22 @@
+'use client'
+
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
 import { BottomNav } from '@/components/layout/BottomNav'
+
+import { useUser } from '@/hooks/useUser'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { data: user } = useUser()
+
   return (
     <div className="flex h-dvh">
       {/* Desktop sidebar */}
-      <Sidebar />
+      <Sidebar role={user?.role} />
 
       {/* Main area */}
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -21,7 +27,7 @@ export default function DashboardLayout({
         </main>
 
         {/* Mobile bottom nav */}
-        <BottomNav />
+        <BottomNav role={user?.role} />
       </div>
     </div>
   )

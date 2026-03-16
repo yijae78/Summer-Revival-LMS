@@ -51,8 +51,11 @@ export function StepEnterCredentials({
         return
       }
 
-      // Save config
+      // Save config to localStorage (client-side access)
       saveSupabaseConfig({ url: url.trim(), anonKey: anonKey.trim() })
+      // Save config to cookies (server-side access for BYOS)
+      document.cookie = `sb-url=${encodeURIComponent(url.trim())}; path=/; max-age=31536000; SameSite=Lax`
+      document.cookie = `sb-anon-key=${encodeURIComponent(anonKey.trim())}; path=/; max-age=31536000; SameSite=Lax`
       resetSupabaseClient()
       onUrlSet(url.trim())
       toast.success('연결에 성공했어요!')

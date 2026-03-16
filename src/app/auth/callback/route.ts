@@ -4,7 +4,10 @@ import { createClient } from '@supabase/supabase-js'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/dashboard'
+  let next = searchParams.get('next') ?? '/dashboard'
+  if (!next.startsWith('/') || next.startsWith('//')) {
+    next = '/dashboard'
+  }
 
   if (code) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -27,7 +30,7 @@ export async function GET(request: Request) {
         .single()
 
       if (!profile) {
-        await supabase.from('profiles').insert({
+        const { error: insertError } = await supabase.from('profiles').insert({
           id: data.user.id,
           name:
             data.user.user_metadata?.full_name ||
@@ -36,6 +39,10 @@ export async function GET(request: Request) {
           role: 'student',
           avatar_url: data.user.user_metadata?.avatar_url,
         })
+
+        if (insertError) {
+          return NextResponse.redirect(`${origin}/login?error=profile_creation_failed`)
+        }
       }
 
       return NextResponse.redirect(`${origin}${next}`)

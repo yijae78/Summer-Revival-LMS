@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS schedules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id UUID REFERENCES events(id) ON DELETE CASCADE,
   day_number INTEGER NOT NULL,
+  date DATE,
   title TEXT NOT NULL,
   type TEXT NOT NULL,
   start_time TIME NOT NULL,
@@ -229,6 +230,32 @@ CREATE TABLE IF NOT EXISTS room_assignments (
   participant_id UUID REFERENCES participants(id) ON DELETE CASCADE,
   UNIQUE(room_id, participant_id)
 );
+
+-- ============================================
+-- 인덱스 (성능 최적화)
+-- ============================================
+CREATE INDEX IF NOT EXISTS idx_participants_event ON participants(event_id);
+CREATE INDEX IF NOT EXISTS idx_schedules_event_day ON schedules(event_id, day_number);
+CREATE INDEX IF NOT EXISTS idx_schedules_date ON schedules(date);
+CREATE INDEX IF NOT EXISTS idx_attendance_schedule ON attendance(schedule_id);
+CREATE INDEX IF NOT EXISTS idx_attendance_participant ON attendance(participant_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_group ON group_members(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_members_participant ON group_members(participant_id);
+CREATE INDEX IF NOT EXISTS idx_points_event ON points(event_id);
+CREATE INDEX IF NOT EXISTS idx_points_participant ON points(participant_id);
+CREATE INDEX IF NOT EXISTS idx_points_group ON points(group_id);
+CREATE INDEX IF NOT EXISTS idx_announcements_event ON announcements(event_id);
+CREATE INDEX IF NOT EXISTS idx_quiz_responses_question ON quiz_responses(question_id);
+
+-- ============================================
+-- RPC 함수
+-- ============================================
+CREATE OR REPLACE FUNCTION increment_group_points(p_group_id UUID, p_amount INTEGER)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE groups SET total_points = total_points + p_amount WHERE id = p_group_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================
 -- Row Level Security (RLS) 활성화

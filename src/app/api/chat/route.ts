@@ -43,10 +43,42 @@ export async function POST(req: Request) {
     )
   }
 
-  const { messages, role }: { messages: UIMessage[]; role?: UserRole } = await req.json()
+  const { messages }: { messages: UIMessage[] } = await req.json()
 
-  // Rate limit check using a simple identifier from headers
-  const userId = req.headers.get('x-user-id') ?? 'anonymous'
+  // Authenticate user and fetch verified role from DB
+  let verifiedRole: UserRole | undefined
+  let tools = {}
+  let userId = 'anonymous'
+
+  try {
+    const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      userId = user.id
+
+      // Fetch actual role from profiles table — never trust client-supplied role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      verifiedRole = profile?.role as UserRole | undefined
+
+      const readTools = createReadTools(supabase)
+      tools = { ...readTools }
+
+      if (verifiedRole === 'admin' || verifiedRole === 'staff') {
+        const writeTools = createWriteTools(supabase)
+        tools = { ...tools, ...writeTools }
+      }
+    }
+  } catch {
+    // No auth — chatbot works without tools (Q&A only mode)
+  }
+
+  // Rate limit check using verified user ID (not spoofable header)
   const { allowed, remaining } = checkRateLimit(userId)
 
   if (!allowed) {
@@ -56,27 +88,7 @@ export async function POST(req: Request) {
     )
   }
 
-  // Build tools based on authentication and role
-  let tools = {}
-
-  try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (user) {
-      const readTools = createReadTools(supabase)
-      tools = { ...readTools }
-
-      if (role === 'admin' || role === 'staff') {
-        const writeTools = createWriteTools(supabase)
-        tools = { ...tools, ...writeTools }
-      }
-    }
-  } catch {
-    // No auth — chatbot works without tools (Q&A only mode)
-  }
-
-  const systemPrompt = buildSystemPrompt(role)
+  const systemPrompt = buildSystemPrompt(verifiedRole)
   const recentMessages = messages.slice(-40)
 
   try {
@@ -92,22 +104,29 @@ export async function POST(req: Request) {
     return result.toUIMessageStreamResponse()
   } catch {
     // Fallback to Groq if Gemini fails
-    const fallback = getFallbackModel()
-    if (!fallback) {
+    try {
+      const fallback = getFallbackModel()
+      if (!fallback) {
+        return Response.json(
+          { error: '답변을 생성할 수 없어요. 잠시 후 다시 시도해 주세요.' },
+          { status: 500 }
+        )
+      }
+
+      const result = streamText({
+        model: fallback,
+        system: systemPrompt,
+        messages: await convertToModelMessages(recentMessages),
+        tools,
+        stopWhen: stepCountIs(5),
+      })
+
+      return result.toUIMessageStreamResponse()
+    } catch {
       return Response.json(
         { error: '답변을 생성할 수 없어요. 잠시 후 다시 시도해 주세요.' },
         { status: 500 }
       )
     }
-
-    const result = streamText({
-      model: fallback,
-      system: systemPrompt,
-      messages: await convertToModelMessages(recentMessages),
-      tools,
-      stopWhen: stepCountIs(5),
-    })
-
-    return result.toUIMessageStreamResponse()
   }
 }

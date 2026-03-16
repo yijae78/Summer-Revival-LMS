@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import { toast } from 'sonner'
+
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -37,6 +39,7 @@ export function GoogleLoginButton() {
     try {
       await signInWithGoogle()
     } catch {
+      toast.error('구글 로그인에 실패했어요. 다시 시도해 주세요.')
       setIsLoading(false)
     }
   }

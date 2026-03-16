@@ -12,7 +12,7 @@
 
 | 계층 | 기술 | 버전 | 선정 이유 |
 |------|------|------|-----------|
-| **프레임워크** | Next.js (App Router) | 15.x | Vercel 최적 호환, Server Actions로 백엔드 최소화 |
+| **프레임워크** | Next.js (App Router) | 16.x | Vercel 최적 호환, Server Actions로 백엔드 최소화 |
 | **언어** | TypeScript | 5.x | 타입 안전성, Supabase SDK 타입 연동 |
 | **스타일링** | Tailwind CSS | v4 | 모바일 반응형, 빠른 개발 |
 | **UI 컴포넌트** | shadcn/ui | latest | RSC 호환, 대시보드에 최적, 커스텀 자유도 |
@@ -35,7 +35,7 @@
 | **버전 관리** | Git + GitHub | - | 협업, 버전 관리, Vercel 자동 배포 연동 |
 
 ### 1.2 패키지 매니저
-- **pnpm** (빠른 설치, 디스크 효율)
+- **npm** (OneDrive 한글 경로에서 pnpm 심링크 오류로 npm 사용)
 
 ---
 
@@ -549,7 +549,7 @@ Supabase 클라이언트는 반드시 `getSupabaseClient()` 팩토리 함수를 
 
 ### 7.2 Vercel 배포 설정
 - **Framework**: Next.js (자동 감지)
-- **Build Command**: `pnpm build`
+- **Build Command**: `npm run build`
 - **Output Directory**: `.next`
 - **Node.js Version**: 20.x
 - **환경 변수**: Vercel Dashboard에서 설정

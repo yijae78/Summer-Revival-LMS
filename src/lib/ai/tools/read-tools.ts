@@ -18,14 +18,41 @@ export function createReadTools(supabase: SupabaseClient) {
       }),
       execute: async ({ query, searchType, limit }) => {
         const sanitized = query.replace(/[;'"\\]/g, '').slice(0, 100)
-        const field =
-          searchType === 'phone' ? 'phone' : searchType === 'group' ? 'group_name' : 'name'
+        const maxResults = limit ?? 20
 
+        if (searchType === 'group') {
+          const { data: groups } = await supabase
+            .from('groups')
+            .select('id')
+            .ilike('name', `%${sanitized}%`)
+
+          if (!groups?.length) return { participants: [], total: 0 }
+
+          const groupIds = groups.map((g) => g.id)
+          const { data: members } = await supabase
+            .from('group_members')
+            .select('participant_id')
+            .in('group_id', groupIds)
+
+          if (!members?.length) return { participants: [], total: 0 }
+
+          const participantIds = members.map((m) => m.participant_id)
+          const { data, error, count } = await supabase
+            .from('participants')
+            .select('id, name, phone, gender, grade, fee_paid', { count: 'exact' })
+            .in('id', participantIds)
+            .limit(maxResults)
+
+          if (error) throw new Error('참가자 검색에 실패했어요')
+          return { participants: data ?? [], total: count ?? 0 }
+        }
+
+        const field = searchType === 'phone' ? 'phone' : 'name'
         const { data, error, count } = await supabase
           .from('participants')
-          .select('id, name, phone, group_id, gender, grade, fee_paid', { count: 'exact' })
+          .select('id, name, phone, gender, grade, fee_paid', { count: 'exact' })
           .ilike(field, `%${sanitized}%`)
-          .limit(limit ?? 20)
+          .limit(maxResults)
 
         if (error) throw new Error('참가자 검색에 실패했어요')
         return { participants: data ?? [], total: count ?? 0 }
@@ -178,16 +205,27 @@ export function createReadTools(supabase: SupabaseClient) {
       }),
       execute: async ({ quizId, limit }) => {
         if (quizId) {
-          const [quizRes, responsesRes] = await Promise.all([
-            supabase.from('quizzes').select('*').eq('id', quizId).single(),
-            supabase
+          const quizRes = await supabase.from('quizzes').select('*').eq('id', quizId).single()
+
+          const { data: questions } = await supabase
+            .from('quiz_questions')
+            .select('id')
+            .eq('quiz_id', quizId)
+
+          const questionIds = questions?.map((q) => q.id) ?? []
+
+          let responses: unknown[] = []
+          if (questionIds.length > 0) {
+            const { data } = await supabase
               .from('quiz_responses')
               .select('participant_id, is_correct, points_earned, participants(name)')
-              .eq('question_id', quizId)
+              .in('question_id', questionIds)
               .order('points_earned', { ascending: false })
-              .limit(limit ?? 10),
-          ])
-          return { quiz: quizRes.data, responses: responsesRes.data ?? [] }
+              .limit(limit ?? 10)
+            responses = data ?? []
+          }
+
+          return { quiz: quizRes.data, responses }
         }
 
         const { data, error } = await supabase

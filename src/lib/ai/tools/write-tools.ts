@@ -36,7 +36,6 @@ export function createWriteTools(supabase: SupabaseClient) {
           .object({
             name: z.string().optional(),
             phone: z.string().optional(),
-            group_id: z.string().optional(),
             fee_paid: z.boolean().optional(),
           })
           .describe('Fields to update'),
