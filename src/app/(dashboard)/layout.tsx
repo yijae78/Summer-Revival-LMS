@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 
 import { Monitor, Tablet, Smartphone } from 'lucide-react'
 
@@ -17,10 +17,10 @@ import { cn } from '@/lib/utils'
 
 import type { ViewportMode } from '@/stores/viewportStore'
 
-const VIEWPORT_CONFIG: Record<ViewportMode, { width: string; showSidebar: boolean; showBottomNav: boolean }> = {
-  desktop: { width: '100%', showSidebar: true, showBottomNav: true },
-  tablet: { width: '768px', showSidebar: false, showBottomNav: true },
-  mobile: { width: '375px', showSidebar: false, showBottomNav: true },
+const VIEWPORT_CONFIG: Record<ViewportMode, { width: string }> = {
+  desktop: { width: '100%' },
+  tablet: { width: '768px' },
+  mobile: { width: '375px' },
 }
 
 const VIEWPORT_OPTIONS: { mode: ViewportMode; icon: typeof Monitor; label: string }[] = [
@@ -28,6 +28,20 @@ const VIEWPORT_OPTIONS: { mode: ViewportMode; icon: typeof Monitor; label: strin
   { mode: 'tablet', icon: Tablet, label: '태블릿' },
   { mode: 'mobile', icon: Smartphone, label: '모바일' },
 ]
+
+// Detect if the actual device is mobile/tablet (not simulation)
+function useIsNativeSmallScreen() {
+  const [isSmall, setIsSmall] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsSmall(window.innerWidth < 1024)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  return isSmall
+}
 
 export default function DashboardLayout({
   children,
@@ -40,15 +54,20 @@ export default function DashboardLayout({
   const viewport = useViewportStore((s) => s.viewport)
   const setViewport = useViewportStore((s) => s.setViewport)
 
-  const config = VIEWPORT_CONFIG[viewport]
-  const isFramed = viewport !== 'desktop'
+  // True if the ACTUAL browser window is small (real mobile/tablet device)
+  const isNativeSmall = useIsNativeSmallScreen()
+
+  // On real mobile/tablet: never show simulation frame, just render natively
+  // On desktop browser: show simulation frame if viewport is set to mobile/tablet
+  const isSimulating = !isNativeSmall && viewport !== 'desktop'
+  const showSidebar = !isNativeSmall && viewport === 'desktop'
 
   const dashboardContent = (
-    <div className={cn('flex h-full flex-col', isFramed && 'h-dvh')}>
+    <>
       <DemoBanner />
       <div className="flex flex-1 overflow-hidden">
-        {/* Desktop sidebar — only when not framed */}
-        {config.showSidebar && !isFramed && (
+        {/* Desktop sidebar */}
+        {showSidebar && (
           <div className="relative z-20 hidden lg:flex">
             <Sidebar role={user?.role} />
             <div
@@ -87,7 +106,7 @@ export default function DashboardLayout({
           <Header />
 
           <main className="flex-1 overflow-auto pb-20 lg:pb-0">
-            <div className={cn('mx-auto p-4', !isFramed && 'max-w-6xl lg:p-6')}>
+            <div className={cn('mx-auto p-4', showSidebar && 'max-w-6xl lg:p-6')}>
               {children}
             </div>
           </main>
@@ -95,18 +114,20 @@ export default function DashboardLayout({
           <BottomNav role={user?.role} />
         </div>
       </div>
-    </div>
+    </>
   )
 
-  // Desktop mode — render normally
-  if (!isFramed) {
+  // Native rendering (real mobile/tablet OR desktop mode)
+  if (!isSimulating) {
     return <div className="flex h-dvh flex-col">{dashboardContent}</div>
   }
 
-  // Framed mode (tablet/mobile simulation)
+  // Simulation frame (desktop browser simulating mobile/tablet)
+  const config = VIEWPORT_CONFIG[viewport]
+
   return (
     <div className="flex h-dvh flex-col bg-[#0a0a0f]">
-      {/* Viewport toggle bar */}
+      {/* Viewport toggle bar — only on desktop browser */}
       <div className="flex h-10 shrink-0 items-center justify-center gap-1 border-b border-white/[0.06] bg-[#0c0e14]">
         {VIEWPORT_OPTIONS.map((v) => {
           const Icon = v.icon
@@ -118,9 +139,7 @@ export default function DashboardLayout({
               onClick={() => setViewport(v.mode)}
               className={cn(
                 'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all duration-200',
-                isActive
-                  ? 'bg-white/[0.1] text-white'
-                  : 'text-slate-500 hover:text-slate-300'
+                isActive ? 'bg-white/[0.1] text-white' : 'text-slate-500 hover:text-slate-300'
               )}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -136,16 +155,15 @@ export default function DashboardLayout({
           className="relative flex-shrink-0 overflow-hidden rounded-2xl border border-white/[0.1] shadow-[0_0_60px_rgba(0,0,0,0.5)]"
           style={{
             width: config.width,
-            height: viewport === 'mobile' ? '812px' : viewport === 'tablet' ? '1024px' : '100%',
+            height: viewport === 'mobile' ? '812px' : '1024px',
             maxHeight: 'calc(100dvh - 3.5rem)',
           }}
         >
-          {/* Device notch (mobile only) */}
           {viewport === 'mobile' && (
             <div className="absolute left-1/2 top-0 z-50 h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-black" />
           )}
 
-          <div className="h-full overflow-auto bg-background">
+          <div className="flex h-full flex-col overflow-auto bg-background">
             {dashboardContent}
           </div>
         </div>
