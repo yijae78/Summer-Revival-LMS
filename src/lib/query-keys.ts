@@ -31,7 +31,8 @@ export const queryKeys = {
     ['points', eventId, ...(type ? [type] : []), ...(department ? [department] : [])] as const,
 
   // Quizzes
-  quizzes: (eventId: string) => ['quizzes', eventId] as const,
+  quizzes: (eventId: string, department?: string) =>
+    ['quizzes', eventId, ...(department ? [department] : [])] as const,
   quiz: (id: string) => ['quiz', id] as const,
   quizResponses: (quizId: string) => ['quizResponses', quizId] as const,
 
@@ -44,7 +45,8 @@ export const queryKeys = {
     ['materials', eventId, ...(category ? [category] : []), ...(department ? [department] : [])] as const,
 
   // Gallery
-  albums: (eventId: string) => ['albums', eventId] as const,
+  albums: (eventId: string, department?: string) =>
+    ['albums', eventId, ...(department ? [department] : [])] as const,
   photos: (albumId: string) => ['photos', albumId] as const,
 
   // Rooms

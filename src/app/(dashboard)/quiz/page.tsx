@@ -31,11 +31,13 @@ import { QuizCard } from '@/components/dashboard/QuizCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useQuizzes } from '@/hooks/useQuiz'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useUser } from '@/hooks/useUser'
 import { useAppModeStore } from '@/stores/appModeStore'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 import { createQuiz } from '@/actions/quiz'
 import { insert } from '@/lib/local-db'
 import { queryKeys } from '@/lib/query-keys'
@@ -272,7 +274,8 @@ export default function QuizPage() {
   const queryClient = useQueryClient()
   const { eventId } = useCurrentEvent()
   const { data: user } = useUser()
-  const { data: quizzes, isLoading } = useQuizzes(eventId ?? null)
+  const department = useDepartmentFilterStore((s) => s.department)
+  const { data: quizzes, isLoading } = useQuizzes(eventId ?? null, department)
 
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -281,9 +284,9 @@ export default function QuizPage() {
 
   const handleRefresh = useCallback(() => {
     if (eventId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.quizzes(eventId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.quizzes(eventId, department) })
     }
-  }, [eventId, queryClient])
+  }, [eventId, department, queryClient])
 
   return (
     <motion.div
@@ -310,6 +313,8 @@ export default function QuizPage() {
           ) : undefined
         }
       />
+
+      <DepartmentFilter />
 
       {/* Content */}
       <motion.div variants={fadeUp}>

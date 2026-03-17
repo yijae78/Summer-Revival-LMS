@@ -45,7 +45,6 @@ const QUICK_ACTIONS = [
   { href: '/groups', icon: Medal, label: '조/반', gradient: 'from-orange-500 to-orange-600' },
   { href: '/materials', icon: FolderOpen, label: '자료실', gradient: 'from-fuchsia-500 to-fuchsia-600' },
   { href: '/accounting', icon: Banknote, label: '회계', gradient: 'from-teal-500 to-teal-600' },
-  { href: '/settings', icon: Settings, label: '설정', gradient: 'from-slate-500 to-slate-600' },
 ]
 
 function EventSelector() {
@@ -265,7 +264,7 @@ function DashboardContent() {
           ? 'space-y-2'
           : 'grid grid-cols-4 gap-4'
       )}>
-        <motion.div variants={fadeUp} className={cn(!isMobileView && 'col-span-2')}>
+        <motion.div variants={fadeUp} className={cn(!isMobileView && 'col-span-2 [&>div]:h-full')}>
           <EventBanner eventName={event.name} startDate={startDate} endDate={endDate} />
         </motion.div>
         <div className={cn(isMobileView ? 'grid grid-cols-2 gap-2' : 'contents')}>

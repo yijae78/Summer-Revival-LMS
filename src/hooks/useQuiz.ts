@@ -29,14 +29,20 @@ export interface QuizResponseWithParticipant extends QuizResponse {
   participant_name: string
 }
 
-export function useQuizzes(eventId: string | null) {
+function filterByDepartment(quizzes: Quiz[], department?: string): Quiz[] {
+  if (!department || department === 'all') return quizzes
+  return quizzes.filter((q) => !q.department || q.department === department)
+}
+
+export function useQuizzes(eventId: string | null, department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.quizzes(eventId!),
+    queryKey: queryKeys.quizzes(eventId!, department),
     queryFn: async (): Promise<QuizWithQuestionCount[]> => {
       if (mode === 'local') {
-        const quizzes = getAll<Quiz>('quizzes').filter((q) => q.event_id === eventId)
+        let quizzes = getAll<Quiz>('quizzes').filter((q) => q.event_id === eventId)
+        quizzes = filterByDepartment(quizzes, department)
         const questions = getAll<QuizQuestion>('quiz_questions')
         return quizzes.map((quiz) => ({
           ...quiz,
@@ -61,13 +67,14 @@ export function useQuizzes(eventId: string | null) {
         } as QuizWithQuestionCount
       })
 
-      return quizzes
+      return filterByDepartment(quizzes, department) as QuizWithQuestionCount[]
     },
     enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
   if (mode === 'demo') {
-    const quizzesWithCount: QuizWithQuestionCount[] = DEMO_QUIZZES.map((quiz) => ({
+    let demoQuizzes = filterByDepartment(DEMO_QUIZZES, department)
+    const quizzesWithCount: QuizWithQuestionCount[] = demoQuizzes.map((quiz) => ({
       ...quiz,
       questionCount: DEMO_QUIZ_QUESTIONS.filter((q) => q.quiz_id === quiz.id).length,
     }))

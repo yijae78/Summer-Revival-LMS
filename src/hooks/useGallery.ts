@@ -12,16 +12,22 @@ import { getAll } from '@/lib/local-db'
 
 import type { GalleryAlbum, GalleryPhoto } from '@/types'
 
-export function useAlbums(eventId: string | null) {
+function filterByDepartment(albums: GalleryAlbum[], department?: string): GalleryAlbum[] {
+  if (!department || department === 'all') return albums
+  return albums.filter((a) => !a.department || a.department === department)
+}
+
+export function useAlbums(eventId: string | null, department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.albums(eventId!),
+    queryKey: queryKeys.albums(eventId!, department),
     queryFn: async () => {
       if (mode === 'local') {
-        const albums = getAll<GalleryAlbum>('gallery_albums').filter(
+        let albums = getAll<GalleryAlbum>('gallery_albums').filter(
           (a) => a.event_id === eventId
         )
+        albums = filterByDepartment(albums, department)
         const photos = getAll<GalleryPhoto>('gallery_photos')
         return albums
           .sort((a, b) => (a.day_number ?? 0) - (b.day_number ?? 0))
@@ -38,18 +44,20 @@ export function useAlbums(eventId: string | null) {
         .eq('event_id', eventId!)
         .order('day_number', { ascending: true })
       if (error) throw error
-      return (data ?? []).map((album) => ({
+      const allAlbums = (data ?? []).map((album) => ({
         ...album,
         photoCount: Array.isArray(album.gallery_photos)
           ? album.gallery_photos.length
           : 0,
       })) as (GalleryAlbum & { photoCount: number })[]
+      return filterByDepartment(allAlbums, department) as (GalleryAlbum & { photoCount: number })[]
     },
     enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
   if (mode === 'demo') {
-    const albumsWithCount = DEMO_ALBUMS.map((album) => ({
+    const filteredAlbums = filterByDepartment(DEMO_ALBUMS, department)
+    const albumsWithCount = filteredAlbums.map((album) => ({
       ...album,
       photoCount: DEMO_PHOTOS.filter((p) => p.album_id === album.id).length,
     }))

@@ -75,21 +75,54 @@ export function Header({ className }: HeaderProps) {
       {/* ── Line 1 + 2: Banner (교회+부서 / 주제+성구) ── */}
       {(rawChurchName || eventTheme) && (
         <div
-          className="relative overflow-hidden transition-all duration-700"
-          style={{ background: `linear-gradient(180deg, rgba(${deptTheme.primary},0.07) 0%, rgba(${deptTheme.secondary},0.03) 60%, transparent 100%)` }}
+          className="relative transition-all duration-700"
+          style={{ background: `linear-gradient(180deg, rgba(${deptTheme.primary},0.12) 0%, rgba(${deptTheme.secondary},0.06) 40%, rgba(${deptTheme.primary},0.02) 80%, transparent 100%)` }}
         >
-          {/* Subtle ripple effects */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            {[1, 2, 3].map((i) => (
+          {/* White ripple waves — 흰색 물결이 강하게 밀려나감 */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="absolute rounded-full transition-all duration-700"
+                className="absolute rounded-full"
                 style={{
-                  width: `${i * 200}px`,
-                  height: `${i * 60}px`,
-                  background: `radial-gradient(ellipse, rgba(${deptTheme.headerGlow},${0.04 / i}) 0%, transparent 70%)`,
-                  animation: `graceRipple ${5 + i}s ease-out infinite`,
-                  animationDelay: `${i * 0.8}s`,
+                  width: `${i * 150}px`,
+                  height: `${i * 45}px`,
+                  border: `2px solid rgba(255,255,255,${0.35 / i})`,
+                  boxShadow: `0 0 ${10 + i * 5}px rgba(255,255,255,${0.15 / i}), inset 0 0 ${5 + i * 2}px rgba(255,255,255,${0.06 / i})`,
+                  animation: `graceRipple ${2.5 + i * 0.6}s ease-out infinite`,
+                  animationDelay: `${i * 0.35}s`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Center white glow pulse — 강한 발광 */}
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2"
+            style={{
+              width: '400px',
+              height: '160px',
+              borderRadius: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: 'radial-gradient(ellipse, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 35%, transparent 65%)',
+              animation: 'gracePulse 3.5s ease-in-out infinite',
+            }}
+          />
+
+          {/* White light rays flowing down — 굵고 많게 */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((i) => (
+              <div
+                key={i}
+                className="absolute"
+                style={{
+                  left: `${3 + i * 6.5}%`,
+                  width: '2px',
+                  height: `${16 + (i % 4) * 8}px`,
+                  borderRadius: '1px',
+                  background: `linear-gradient(180deg, rgba(255,255,255,${0.4 + (i % 3) * 0.1}), transparent)`,
+                  animation: `graceFlow ${1.5 + i * 0.12}s ease-in infinite`,
+                  animationDelay: `${i * 0.15}s`,
                 }}
               />
             ))}
@@ -99,41 +132,63 @@ export function Header({ className }: HeaderProps) {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative flex flex-col items-center gap-0.5 px-3 py-3 text-center md:gap-1 md:px-4 md:py-4"
+            className="relative flex flex-col items-center gap-1.5 px-3 py-5 text-center md:gap-2 md:px-4 md:py-6"
           >
-            {/* Church name */}
+            {/* Church name — 크게 */}
             {rawChurchName && (
-              <p className="text-xs font-bold text-white/90 md:text-sm lg:text-base">
+              <motion.p
+                className="text-base font-extrabold tracking-tight text-white md:text-lg lg:text-xl"
+                animate={{ scale: [1, 1.01, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ textShadow: `0 0 20px rgba(${deptTheme.primary},0.3)` }}
+              >
                 {rawChurchName}
-              </p>
+              </motion.p>
             )}
 
-            {/* Department labels — hidden on very small, scrollable on mobile */}
+            {/* Department labels — pill badges */}
             {departmentLabels.length > 0 && (
               <div className="flex flex-wrap items-center justify-center gap-1">
                 {departmentLabels.map((label, i) => (
-                  <span key={i} className="rounded-full bg-white/[0.08] px-1.5 py-0.5 text-[0.5625rem] font-medium text-slate-400 md:text-[0.625rem]">
+                  <span
+                    key={i}
+                    className="rounded-full px-2.5 py-0.5 text-[0.625rem] font-semibold transition-all duration-700 md:text-xs"
+                    style={{
+                      background: `rgba(${deptTheme.primary},0.12)`,
+                      color: `rgba(${deptTheme.primary},0.8)`,
+                      border: `1px solid rgba(${deptTheme.primary},0.15)`,
+                    }}
+                  >
                     {label}
                   </span>
                 ))}
               </div>
             )}
 
-            {/* Theme + Verse in one line */}
-            {(eventTheme || themeVerse) && (
-              <p className="flex flex-wrap items-center justify-center gap-1.5 text-[0.6875rem] text-slate-400 md:gap-2 md:text-sm">
-                {eventTheme && (
-                  <span
-                    className="font-semibold transition-colors duration-700"
-                    style={{ color: `rgba(${deptTheme.primary},0.8)`, textShadow: `0 0 20px rgba(${deptTheme.primary},0.2)` }}
-                  >
-                    &ldquo;{eventTheme}&rdquo;
-                  </span>
-                )}
-                {themeVerse && (
-                  <span className="text-slate-500">— {themeVerse}</span>
-                )}
-              </p>
+            {/* Theme — 주제 (글로우 강조) */}
+            {eventTheme && (
+              <motion.p
+                className="mt-0.5 text-sm font-bold md:text-base"
+                animate={{ scale: [1, 1.015, 1] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
+                style={{
+                  color: `rgba(${deptTheme.primary},0.9)`,
+                  textShadow: `0 0 24px rgba(${deptTheme.primary},0.4), 0 0 48px rgba(${deptTheme.primary},0.15)`,
+                }}
+              >
+                &ldquo;{eventTheme}&rdquo;
+              </motion.p>
+            )}
+
+            {/* Verse — 성구 */}
+            {themeVerse && (
+              <motion.p
+                className="text-xs font-medium text-slate-400/80 md:text-sm"
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                {themeVerse}
+              </motion.p>
             )}
           </motion.div>
         </div>

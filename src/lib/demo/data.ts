@@ -1142,6 +1142,30 @@ export const DEMO_QUIZZES: Quiz[] = [
     points_per_question: 5,
     created_at: '2026-07-15T00:00:00.000Z',
   },
+  {
+    id: 'q3',
+    event_id: 'demo-event-1',
+    title: '중등부 말씀 퀴즈',
+    description: '중등부 친구들을 위한 쉬운 성경 퀴즈예요',
+    type: 'multiple_choice',
+    is_active: true,
+    time_limit: 45,
+    points_per_question: 10,
+    department: 'middle',
+    created_at: '2026-07-16T00:00:00.000Z',
+  },
+  {
+    id: 'q4',
+    event_id: 'demo-event-1',
+    title: '고등부 심화 퀴즈',
+    description: '고등부를 위한 심화 성경 퀴즈예요',
+    type: 'fill_blank',
+    is_active: true,
+    time_limit: 60,
+    points_per_question: 15,
+    department: 'high',
+    created_at: '2026-07-16T00:00:00.000Z',
+  },
 ]
 
 export const DEMO_QUIZ_QUESTIONS: QuizQuestion[] = [
@@ -1329,6 +1353,22 @@ export const DEMO_ALBUMS: GalleryAlbum[] = [
     title: '2일차 - 물놀이 & 찬양의 밤',
     day_number: 2,
     created_at: '2026-07-21T20:00:00.000Z',
+  },
+  {
+    id: 'al3',
+    event_id: 'demo-event-1',
+    title: '중등부 활동 사진',
+    day_number: 1,
+    department: 'middle',
+    created_at: '2026-07-20T19:00:00.000Z',
+  },
+  {
+    id: 'al4',
+    event_id: 'demo-event-1',
+    title: '고등부 조별 활동',
+    day_number: 2,
+    department: 'high',
+    created_at: '2026-07-21T18:00:00.000Z',
   },
 ]
 

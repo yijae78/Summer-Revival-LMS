@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { ClipboardCheck, Clock, ChevronRight, CalendarDays } from 'lucide-react'
+import { ClipboardCheck, Clock, ChevronRight, CalendarDays, LayoutGrid, List } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -14,9 +14,12 @@ import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useSchedules } from '@/hooks/useSchedules'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { getDepartmentTheme } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
 import type { Schedule } from '@/types'
+
+type AttendanceViewMode = 'card' | 'list'
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
@@ -31,21 +34,73 @@ function formatTime(time: string): string {
   return `${period} ${displayHour}:${minute}`
 }
 
+// ============================================
+// View Mode Toggle
+// ============================================
+
+function ViewModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: AttendanceViewMode
+  onChange: (m: AttendanceViewMode) => void
+}) {
+  const options: { value: AttendanceViewMode; icon: typeof LayoutGrid; label: string }[] = [
+    { value: 'card', icon: LayoutGrid, label: '카드' },
+    { value: 'list', icon: List, label: '리스트' },
+  ]
+
+  return (
+    <div className="flex rounded-full border border-white/[0.08] bg-white/[0.03] p-0.5">
+      {options.map((opt) => {
+        const Icon = opt.icon
+        const isActive = mode === opt.value
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+              isActive
+                ? 'bg-white/[0.1] text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+            aria-pressed={isActive}
+          >
+            <Icon className="size-3.5" />
+            <span className="hidden sm:inline">{opt.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ============================================
+// Card View (existing)
+// ============================================
+
 interface ScheduleAttendanceCardProps {
   schedule: Schedule
   onNavigate: (scheduleId: string) => void
+  deptTheme: ReturnType<typeof getDepartmentTheme>
 }
 
-function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCardProps) {
+function ScheduleAttendanceCard({ schedule, onNavigate, deptTheme: theme }: ScheduleAttendanceCardProps) {
   return (
     <motion.div
       variants={fadeUp}
       className={cn(
-        'cursor-pointer rounded-2xl border border-emerald-500/15 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 backdrop-blur-xl',
-        'transition-all duration-300',
-        'hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]',
+        'cursor-pointer rounded-2xl border backdrop-blur-xl',
+        'transition-all duration-500',
+        'hover:scale-[1.02]',
         'active:scale-[0.99]'
       )}
+      style={{
+        borderColor: `rgba(${theme.primary},0.15)`,
+        background: `linear-gradient(135deg, rgba(${theme.primary},0.1), rgba(${theme.secondary},0.05))`,
+      }}
       onClick={() => onNavigate(schedule.id)}
       role="button"
       tabIndex={0}
@@ -58,7 +113,12 @@ function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCard
     >
       <div className="flex items-center gap-3 px-4 py-4 md:px-6">
         {/* Icon */}
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg">
+        <div
+          className="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-lg transition-all duration-500"
+          style={{
+            background: `linear-gradient(135deg, rgb(${theme.primary}), rgb(${theme.secondary}))`,
+          }}
+        >
           <ClipboardCheck className="size-5 text-white" />
         </div>
 
@@ -83,6 +143,66 @@ function ScheduleAttendanceCard({ schedule, onNavigate }: ScheduleAttendanceCard
         {/* Arrow */}
         <ChevronRight className="size-5 shrink-0 text-muted-foreground/50" />
       </div>
+    </motion.div>
+  )
+}
+
+// ============================================
+// List View (new - compact single-line)
+// ============================================
+
+function ScheduleAttendanceListItem({
+  schedule,
+  onNavigate,
+}: {
+  schedule: Schedule
+  onNavigate: (scheduleId: string) => void
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'group flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 backdrop-blur-xl',
+        'border-white/[0.08] bg-white/[0.04]',
+        'transition-all duration-300',
+        'hover:bg-white/[0.06] hover:shadow-lg',
+        'active:scale-[0.99]'
+      )}
+      onClick={() => onNavigate(schedule.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onNavigate(schedule.id)
+        }
+      }}
+    >
+      {/* Time */}
+      <span className="shrink-0 text-xs font-semibold tabular-nums text-muted-foreground">
+        {schedule.start_time.slice(0, 5)}
+      </span>
+
+      {/* Title */}
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+        {schedule.title}
+      </span>
+
+      {/* Time range */}
+      <span className="hidden shrink-0 items-center gap-1 text-xs text-muted-foreground sm:flex">
+        <Clock className="size-3" />
+        {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
+      </span>
+
+      {/* Location */}
+      {schedule.location && (
+        <span className="hidden shrink-0 text-xs text-muted-foreground md:block">
+          {schedule.location}
+        </span>
+      )}
+
+      {/* Arrow */}
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100" />
     </motion.div>
   )
 }
@@ -116,7 +236,9 @@ export default function AttendancePage() {
   const router = useRouter()
   const { eventId } = useCurrentEvent()
   const department = useDepartmentFilterStore((s) => s.department)
+  const deptTheme = getDepartmentTheme(department)
   const { data: schedules, isLoading } = useSchedules(eventId ?? null, undefined, department)
+  const [viewMode, setViewMode] = useState<AttendanceViewMode>('card')
 
   // Group schedules by day
   const dayNumbers = useMemo(() => {
@@ -152,7 +274,12 @@ export default function AttendancePage() {
         backHref="/dashboard"
       />
 
-      <DepartmentFilter />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 overflow-hidden">
+          <DepartmentFilter />
+        </div>
+        <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+      </div>
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<AttendanceSkeleton />}>
@@ -172,11 +299,15 @@ export default function AttendancePage() {
                     type="button"
                     onClick={() => setSelectedDay(day)}
                     className={cn(
-                      'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-300',
-                      activeDay === day
-                        ? 'border-emerald-500/30 bg-gradient-to-r from-emerald-500/15 to-emerald-600/15 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.15)]'
-                        : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:border-emerald-500/20 hover:bg-white/[0.06]'
+                      'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-500',
+                      activeDay !== day && 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:bg-white/[0.06]'
                     )}
+                    style={activeDay === day ? {
+                      borderColor: `rgba(${deptTheme.primary},0.3)`,
+                      background: `linear-gradient(to right, rgba(${deptTheme.primary},0.15), rgba(${deptTheme.secondary},0.15))`,
+                      color: `rgb(${deptTheme.primary})`,
+                      boxShadow: `0 0 16px rgba(${deptTheme.primary},0.15)`,
+                    } : undefined}
                   >
                     <CalendarDays className="size-3.5" />
                     {day}일차
@@ -184,7 +315,7 @@ export default function AttendancePage() {
                 ))}
               </div>
 
-              {/* Schedule cards */}
+              {/* Schedule items */}
               {filteredSchedules.length === 0 ? (
                 <EmptyState
                   icon={ClipboardCheck}
@@ -192,15 +323,33 @@ export default function AttendancePage() {
                   description="다른 일차를 선택해 보세요."
                   className="py-12"
                 />
-              ) : (
+              ) : viewMode === 'card' ? (
                 <motion.div
                   className="space-y-3"
                   variants={stagger}
                   initial="hidden"
                   animate="show"
+                  key="card"
                 >
                   {filteredSchedules.map((schedule) => (
                     <ScheduleAttendanceCard
+                      key={schedule.id}
+                      schedule={schedule}
+                      onNavigate={handleNavigate}
+                      deptTheme={deptTheme}
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="space-y-1.5"
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                  key="list"
+                >
+                  {filteredSchedules.map((schedule) => (
+                    <ScheduleAttendanceListItem
                       key={schedule.id}
                       schedule={schedule}
                       onNavigate={handleNavigate}

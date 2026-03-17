@@ -37,10 +37,12 @@ import {
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useAlbums } from '@/hooks/useGallery'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useUser } from '@/hooks/useUser'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 import { createAlbum } from '@/actions/gallery'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
@@ -404,7 +406,8 @@ export default function GalleryPage() {
   const router = useRouter()
   const { eventId } = useCurrentEvent()
   const { data: user } = useUser()
-  const { data: albums, isLoading } = useAlbums(eventId ?? null)
+  const department = useDepartmentFilterStore((s) => s.department)
+  const { data: albums, isLoading } = useAlbums(eventId ?? null, department)
   const queryClient = useQueryClient()
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -414,9 +417,9 @@ export default function GalleryPage() {
 
   const handleRefresh = useCallback(() => {
     if (eventId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.albums(eventId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.albums(eventId, department) })
     }
-  }, [eventId, queryClient])
+  }, [eventId, department, queryClient])
 
   function handleNavigate(albumId: string) {
     router.push(`/gallery/${albumId}`)
@@ -444,10 +447,13 @@ export default function GalleryPage() {
         }
       />
 
-      {/* View toggle */}
-      <motion.div variants={fadeUp} className="flex justify-end">
+      {/* Department filter + View toggle */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 overflow-hidden">
+          <DepartmentFilter />
+        </div>
         <ViewModeToggle mode={viewMode} onChange={setViewMode} />
-      </motion.div>
+      </div>
 
       {/* Content */}
       <motion.div variants={fadeUp}>

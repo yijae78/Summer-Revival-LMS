@@ -47,6 +47,7 @@ import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useMaterials } from '@/hooks/useMaterials'
 import { useUser } from '@/hooks/useUser'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { getDepartmentTheme } from '@/constants/departments'
 import { useAppModeStore } from '@/stores/appModeStore'
 import { deleteMaterial } from '@/actions/materials'
 import { insert } from '@/lib/local-db'
@@ -124,10 +125,12 @@ function MaterialCard({
   material,
   canManage,
   onDelete,
+  deptTheme: theme,
 }: {
   material: Material
   canManage: boolean
   onDelete: (id: string) => void
+  deptTheme: ReturnType<typeof getDepartmentTheme>
 }) {
   const categoryConfig =
     CATEGORY_CONFIG[material.category as MaterialCategory] ?? CATEGORY_CONFIG.other
@@ -138,13 +141,22 @@ function MaterialCard({
     <motion.div
       variants={fadeUp}
       className={cn(
-        'rounded-2xl border border-fuchsia-500/15 bg-gradient-to-br from-fuchsia-500/10 to-fuchsia-600/5 backdrop-blur-xl',
-        'transition-all duration-300',
-        'hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(232,121,249,0.12)]'
+        'rounded-2xl border backdrop-blur-xl',
+        'transition-all duration-500',
+        'hover:scale-[1.01]'
       )}
+      style={{
+        borderColor: `rgba(${theme.primary},0.15)`,
+        background: `linear-gradient(135deg, rgba(${theme.primary},0.1), rgba(${theme.secondary},0.05))`,
+      }}
     >
       <div className="flex items-center gap-4 px-4 py-4 md:px-6">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 shadow-lg">
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-lg transition-all duration-500"
+          style={{
+            background: `linear-gradient(135deg, rgb(${theme.primary}), rgb(${theme.secondary}))`,
+          }}
+        >
           <FileIcon className="size-5 text-white" />
         </div>
 
@@ -228,11 +240,13 @@ function MaterialList({
   canManage,
   onDelete,
   category,
+  deptTheme: theme,
 }: {
   materials: Material[]
   canManage: boolean
   onDelete: (id: string) => void
   category: string
+  deptTheme: ReturnType<typeof getDepartmentTheme>
 }) {
   const filtered =
     category === 'all'
@@ -262,6 +276,7 @@ function MaterialList({
           material={material}
           canManage={canManage}
           onDelete={onDelete}
+          deptTheme={theme}
         />
       ))}
     </motion.div>
@@ -406,6 +421,7 @@ function CreateMaterialDialog({
 export default function MaterialsPage() {
   const { eventId } = useCurrentEvent()
   const department = useDepartmentFilterStore((s) => s.department)
+  const deptTheme = getDepartmentTheme(department)
   const { data: materials, isLoading } = useMaterials(eventId ?? '', undefined, department)
   const { data: user } = useUser()
   const queryClient = useQueryClient()
@@ -465,9 +481,21 @@ export default function MaterialsPage() {
             />
           ) : (
             <Tabs defaultValue="all">
-              <TabsList className="w-full overflow-x-auto rounded-full border border-fuchsia-500/15 bg-gradient-to-r from-fuchsia-500/10 to-purple-500/5 p-1 backdrop-blur-xl md:w-auto">
+              <style>{`
+                .materials-tabs [data-state=active] {
+                  background: linear-gradient(to right, rgba(${deptTheme.primary},0.15), rgba(${deptTheme.secondary},0.15)) !important;
+                  color: rgb(${deptTheme.primary}) !important;
+                }
+              `}</style>
+              <TabsList
+                className="materials-tabs w-full overflow-x-auto rounded-full border p-1 backdrop-blur-xl transition-all duration-500 md:w-auto"
+                style={{
+                  borderColor: `rgba(${deptTheme.primary},0.15)`,
+                  background: `linear-gradient(to right, rgba(${deptTheme.primary},0.1), rgba(${deptTheme.secondary},0.05))`,
+                }}
+              >
                 {TABS.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9 rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-fuchsia-500/15 data-[state=active]:to-purple-500/15 data-[state=active]:text-fuchsia-300">
+                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9 rounded-full transition-all duration-500">
                     {tab.label}
                   </TabsTrigger>
                 ))}
@@ -480,6 +508,7 @@ export default function MaterialsPage() {
                     canManage={canManage}
                     onDelete={handleDelete}
                     category={tab.value}
+                    deptTheme={deptTheme}
                   />
                 </TabsContent>
               ))}

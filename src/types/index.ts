@@ -191,6 +191,7 @@ export interface Quiz {
   is_active: boolean
   time_limit: number | null
   points_per_question: number
+  department?: string | null
   created_at: string
 }
 
@@ -236,6 +237,7 @@ export interface GalleryAlbum {
   event_id: string | null
   title: string
   day_number: number | null
+  department?: string | null
   created_at: string
 }
 

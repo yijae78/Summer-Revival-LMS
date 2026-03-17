@@ -244,7 +244,7 @@ export default function LandingPage() {
           <div
             className={cn(
               'relative inline-flex items-center rounded-full bg-[#0c0e14] backdrop-blur-md',
-              isMobileFrame ? 'gap-2 px-3.5 py-1.5' : 'gap-2.5 px-5 py-2'
+              isMobileFrame ? 'gap-2 px-4 py-2' : 'gap-3 px-6 py-2.5'
             )}
             style={{ animation: 'glowPulse 3s ease-in-out infinite' }}
           >
@@ -259,7 +259,7 @@ export default function LandingPage() {
             <span
               className={cn(
                 'bg-clip-text font-bold uppercase text-transparent',
-                isMobileFrame ? 'text-[0.6rem] tracking-[0.15em]' : 'text-[0.75rem] tracking-[0.25em]'
+                isMobileFrame ? 'text-xs tracking-[0.15em]' : 'text-base tracking-[0.25em]'
               )}
               style={{
                 backgroundImage:
@@ -279,7 +279,7 @@ export default function LandingPage() {
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           className={cn(
             'mt-4 w-full text-center font-semibold tracking-[0.08em] text-foreground/70',
-            isMobileFrame ? 'text-xs' : isTabletFrame ? 'text-sm' : 'text-base md:text-lg'
+            isMobileFrame ? 'text-sm' : isTabletFrame ? 'text-base' : 'text-lg md:text-xl'
           )}
         >
           여름행사의 모든 것을{' '}
@@ -318,7 +318,7 @@ export default function LandingPage() {
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           className={cn(
             'mt-1 uppercase text-muted-foreground/40',
-            isMobileFrame ? 'text-[0.5rem] tracking-[0.15em]' : 'text-[0.6875rem] tracking-[0.3em]'
+            isMobileFrame ? 'text-xs tracking-[0.15em]' : 'text-base tracking-[0.3em]'
           )}
         >
           <span className="font-bold text-primary">L</span>earning{' '}
@@ -331,8 +331,8 @@ export default function LandingPage() {
           variants={fadeUp}
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           className={cn(
-            'mt-6 max-w-sm leading-[1.7] text-muted-foreground',
-            isMobileFrame ? 'text-xs' : 'text-sm'
+            'mt-6 max-w-md leading-[1.7] text-muted-foreground',
+            isMobileFrame ? 'text-sm' : 'text-base'
           )}
         >
           수련회 · 성경학교 · 캠프 — 출석, 프로그램, 공지까지 하나로
@@ -347,12 +347,12 @@ export default function LandingPage() {
           type="button"
           onClick={navigate}
           className={cn(
-            'inline-flex items-center gap-2 rounded-xl bg-primary font-bold text-primary-foreground shadow-[0_0_30px_rgba(56,189,248,0.25)] transition-shadow duration-300 hover:shadow-[0_0_40px_rgba(56,189,248,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-            isMobileFrame ? 'mt-6 h-10 px-6 text-xs' : 'mt-10 h-12 px-8 text-sm'
+            'inline-flex items-center gap-2.5 rounded-xl bg-primary font-bold text-primary-foreground shadow-[0_0_30px_rgba(56,189,248,0.25)] transition-shadow duration-300 hover:shadow-[0_0_40px_rgba(56,189,248,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            isMobileFrame ? 'mt-6 h-11 px-7 text-sm' : 'mt-10 h-14 px-10 text-base'
           )}
         >
           시작하기
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className={cn(isMobileFrame ? 'h-4 w-4' : 'h-5 w-5')} />
         </motion.button>
 
         {/* Demo mode link */}
@@ -361,7 +361,10 @@ export default function LandingPage() {
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
           type="button"
           onClick={handleDemoMode}
-          className="mt-3 text-sm text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className={cn(
+            'mt-4 text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            isMobileFrame ? 'text-sm' : 'text-base'
+          )}
         >
           데모로 둘러보기
         </motion.button>

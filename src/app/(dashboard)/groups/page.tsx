@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { Users, Plus, ChevronRight, Star } from 'lucide-react'
+import { Users, Plus, ChevronRight, Star, LayoutGrid, List } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
@@ -27,9 +27,12 @@ import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useGroups } from '@/hooks/useGroups'
 import { useUser } from '@/hooks/useUser'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { getDepartmentTheme } from '@/constants/departments'
 import { createGroup } from '@/actions/groups'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
+
+type GroupViewMode = 'grid' | 'list'
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
@@ -44,6 +47,53 @@ const GROUP_COLORS = [
   '#8b5cf6', // violet
   '#ec4899', // pink
 ]
+
+// ============================================
+// View Mode Toggle
+// ============================================
+
+function ViewModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: GroupViewMode
+  onChange: (m: GroupViewMode) => void
+}) {
+  const options: { value: GroupViewMode; icon: typeof LayoutGrid; label: string }[] = [
+    { value: 'grid', icon: LayoutGrid, label: '그리드' },
+    { value: 'list', icon: List, label: '리스트' },
+  ]
+
+  return (
+    <div className="flex rounded-full border border-white/[0.08] bg-white/[0.03] p-0.5">
+      {options.map((opt) => {
+        const Icon = opt.icon
+        const isActive = mode === opt.value
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+              isActive
+                ? 'bg-white/[0.1] text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+            aria-pressed={isActive}
+          >
+            <Icon className="size-3.5" />
+            <span className="hidden sm:inline">{opt.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ============================================
+// Grid Card (existing)
+// ============================================
 
 function GroupCard({
   name,
@@ -114,6 +164,76 @@ function GroupCard({
   )
 }
 
+// ============================================
+// List Row (new)
+// ============================================
+
+function GroupListRow({
+  name,
+  color,
+  memberCount,
+  totalPoints,
+  onClick,
+}: {
+  name: string
+  color: string | null
+  memberCount: number
+  totalPoints: number
+  onClick: () => void
+}) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'group flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 backdrop-blur-xl',
+        'border-white/[0.08] bg-white/[0.04]',
+        'transition-all duration-300',
+        'hover:bg-white/[0.06] hover:shadow-lg',
+        'active:scale-[0.99]'
+      )}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
+    >
+      {/* Color dot */}
+      <div
+        className="size-3 shrink-0 rounded-full"
+        style={{
+          backgroundColor: color ?? '#6b7280',
+          boxShadow: `0 0 6px ${color ?? '#6b7280'}40`,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Name */}
+      <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+        {name}
+      </span>
+
+      {/* Member count */}
+      <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+        <Users className="size-3" />
+        {memberCount}명
+      </span>
+
+      {/* Points */}
+      <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+        <Star className="size-3 text-amber-400" />
+        {totalPoints}점
+      </span>
+
+      {/* Arrow */}
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100" />
+    </motion.div>
+  )
+}
+
 function GroupsSkeletons() {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -130,7 +250,9 @@ export default function GroupsPage() {
   const { eventId } = useCurrentEvent()
   const { data: user } = useUser()
   const department = useDepartmentFilterStore((s) => s.department)
+  const deptTheme = getDepartmentTheme(department)
   const { data: groups, isLoading } = useGroups(eventId ?? null, department)
+  const [viewMode, setViewMode] = useState<GroupViewMode>('grid')
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [groupName, setGroupName] = useState('')
@@ -186,29 +308,64 @@ export default function GroupsPage() {
         }
       />
 
-      <DepartmentFilter />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 overflow-hidden">
+          <DepartmentFilter />
+        </div>
+        <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+      </div>
 
-      {/* Group Grid */}
+      {/* Department accent line */}
+      <div
+        className="h-px w-full transition-all duration-500"
+        style={{
+          background: `linear-gradient(to right, rgba(${deptTheme.primary},0.3), rgba(${deptTheme.secondary},0.1), transparent)`,
+        }}
+      />
+
+      {/* Group content */}
       <motion.div variants={fadeUp}>
       <LoadingSkeleton isLoading={isLoading} skeleton={<GroupsSkeletons />}>
         {hasGroups ? (
-          <motion.div
-            className="grid grid-cols-2 gap-3 md:grid-cols-3"
-            variants={stagger}
-            initial="hidden"
-            animate="show"
-          >
-            {groups.map((group) => (
-              <GroupCard
-                key={group.id}
-                name={group.name}
-                color={group.color}
-                memberCount={group.member_count}
-                totalPoints={group.total_points}
-                onClick={() => router.push(`/groups/${group.id}`)}
-              />
-            ))}
-          </motion.div>
+          viewMode === 'grid' ? (
+            <motion.div
+              className="grid grid-cols-2 gap-3 md:grid-cols-3"
+              variants={stagger}
+              initial="hidden"
+              animate="show"
+              key="grid"
+            >
+              {groups.map((group) => (
+                <GroupCard
+                  key={group.id}
+                  name={group.name}
+                  color={group.color}
+                  memberCount={group.member_count}
+                  totalPoints={group.total_points}
+                  onClick={() => router.push(`/groups/${group.id}`)}
+                />
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              className="space-y-1.5"
+              variants={stagger}
+              initial="hidden"
+              animate="show"
+              key="list"
+            >
+              {groups.map((group) => (
+                <GroupListRow
+                  key={group.id}
+                  name={group.name}
+                  color={group.color}
+                  memberCount={group.member_count}
+                  totalPoints={group.total_points}
+                  onClick={() => router.push(`/groups/${group.id}`)}
+                />
+              ))}
+            </motion.div>
+          )
         ) : (
           <EmptyState
             icon={Users}

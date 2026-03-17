@@ -12,6 +12,7 @@ import {
   Music,
   Star,
   Coffee,
+  LayoutGrid,
 } from 'lucide-react'
 
 import { motion } from 'framer-motion'
@@ -25,9 +26,12 @@ import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useSchedules } from '@/hooks/useSchedules'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { getDepartmentTheme } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
 import type { Schedule, SessionType } from '@/types'
+
+type ScheduleViewMode = 'timeline' | 'card'
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
@@ -87,6 +91,53 @@ function formatTimeRange(startTime: string, endTime: string): string {
 
   return `${formatSingle(startTime)} - ${formatSingle(endTime)}`
 }
+
+// ============================================
+// View Mode Toggle
+// ============================================
+
+function ViewModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: ScheduleViewMode
+  onChange: (m: ScheduleViewMode) => void
+}) {
+  const options: { value: ScheduleViewMode; icon: typeof Clock; label: string }[] = [
+    { value: 'timeline', icon: Clock, label: '타임라인' },
+    { value: 'card', icon: LayoutGrid, label: '카드' },
+  ]
+
+  return (
+    <div className="flex rounded-full border border-white/[0.08] bg-white/[0.03] p-0.5">
+      {options.map((opt) => {
+        const Icon = opt.icon
+        const isActive = mode === opt.value
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+              isActive
+                ? 'bg-white/[0.1] text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+            aria-pressed={isActive}
+          >
+            <Icon className="size-3.5" />
+            <span className="hidden sm:inline">{opt.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ============================================
+// Timeline Card (existing)
+// ============================================
 
 function TimelineCard({ schedule, isLast }: { schedule: Schedule; isLast: boolean }) {
   const config = SESSION_CONFIG[schedule.type as SessionType] ?? SESSION_CONFIG.special
@@ -168,6 +219,79 @@ function TimelineCard({ schedule, isLast }: { schedule: Schedule; isLast: boolea
   )
 }
 
+// ============================================
+// Simple Card (no timeline dots/lines)
+// ============================================
+
+function SimpleScheduleCard({ schedule }: { schedule: Schedule }) {
+  const config = SESSION_CONFIG[schedule.type as SessionType] ?? SESSION_CONFIG.special
+  const TypeIcon = config.icon
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-xl',
+        'transition-all duration-300',
+        'hover:scale-[1.01] hover:shadow-2xl'
+      )}
+    >
+      <div className="flex gap-4 px-4 py-4 md:px-5">
+        {/* Time */}
+        <div className="flex w-16 shrink-0 flex-col items-start pt-0.5">
+          <span className="text-sm font-semibold text-foreground">
+            {schedule.start_time.slice(0, 5)}
+          </span>
+          <span className="text-xs text-muted-foreground/60">
+            {schedule.end_time.slice(0, 5)}
+          </span>
+        </div>
+
+        {/* Content */}
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[0.9375rem] font-medium leading-snug text-foreground">
+              {schedule.title}
+            </p>
+            <Badge
+              variant="outline"
+              className={cn('shrink-0 text-xs', config.className)}
+            >
+              <TypeIcon className="mr-0.5 size-3" />
+              {config.label}
+            </Badge>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="size-3" />
+              {formatTimeRange(schedule.start_time, schedule.end_time)}
+            </span>
+            {schedule.location && (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="size-3" />
+                {schedule.location}
+              </span>
+            )}
+          </div>
+
+          {schedule.speaker && (
+            <p className="text-xs text-muted-foreground">
+              {schedule.speaker}
+            </p>
+          )}
+
+          {schedule.description && (
+            <p className="text-xs leading-relaxed text-muted-foreground/80">
+              {schedule.description}
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 function ScheduleSkeleton() {
   return (
     <div className="space-y-6">
@@ -198,7 +322,9 @@ function ScheduleSkeleton() {
 export default function SchedulePage() {
   const { eventId } = useCurrentEvent()
   const department = useDepartmentFilterStore((s) => s.department)
+  const deptTheme = getDepartmentTheme(department)
   const { data: schedules, isLoading } = useSchedules(eventId ?? null, undefined, department)
+  const [viewMode, setViewMode] = useState<ScheduleViewMode>('timeline')
 
   const groupedByDay = useMemo(() => {
     if (!schedules || schedules.length === 0) return new Map<number, Schedule[]>()
@@ -240,7 +366,12 @@ export default function SchedulePage() {
         backHref="/dashboard"
       />
 
-      <DepartmentFilter />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 overflow-hidden">
+          <DepartmentFilter />
+        </div>
+        <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+      </div>
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<ScheduleSkeleton />}>
@@ -264,11 +395,17 @@ export default function SchedulePage() {
                         type="button"
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-300',
-                          activeDay === day
-                            ? 'border-indigo-500/30 bg-gradient-to-r from-indigo-500/15 to-purple-500/15 text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.15)]'
-                            : 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:border-indigo-500/20 hover:bg-white/[0.06]'
+                          'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-500',
+                          activeDay !== day && 'border-white/[0.08] bg-white/[0.04] text-muted-foreground hover:bg-white/[0.06]'
                         )}
+                        style={activeDay === day ? {
+                          borderColor: `rgba(${deptTheme.primary},0.3)`,
+                          background: `linear-gradient(to right, rgba(${deptTheme.primary},0.15), rgba(${deptTheme.secondary},0.15))`,
+                          color: `rgb(${deptTheme.primary})`,
+                          boxShadow: `0 0 16px rgba(${deptTheme.primary},0.15)`,
+                        } : {
+                          borderColor: undefined,
+                        }}
                       >
                         <CalendarDays className="size-3.5" />
                         {day}일차
@@ -281,20 +418,38 @@ export default function SchedulePage() {
                 </div>
               )}
 
-              {/* Timeline */}
-              <motion.div
-                variants={stagger}
-                initial="hidden"
-                animate="show"
-              >
-                {activeDaySchedules.map((schedule, idx) => (
-                  <TimelineCard
-                    key={schedule.id}
-                    schedule={schedule}
-                    isLast={idx === activeDaySchedules.length - 1}
-                  />
-                ))}
-              </motion.div>
+              {/* Content based on view mode */}
+              {viewMode === 'timeline' ? (
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                  key="timeline"
+                >
+                  {activeDaySchedules.map((schedule, idx) => (
+                    <TimelineCard
+                      key={schedule.id}
+                      schedule={schedule}
+                      isLast={idx === activeDaySchedules.length - 1}
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="space-y-3"
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                  key="card"
+                >
+                  {activeDaySchedules.map((schedule) => (
+                    <SimpleScheduleCard
+                      key={schedule.id}
+                      schedule={schedule}
+                    />
+                  ))}
+                </motion.div>
+              )}
             </div>
           )}
         </LoadingSkeleton>
