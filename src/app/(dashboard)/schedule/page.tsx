@@ -26,6 +26,7 @@ import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useSchedules } from '@/hooks/useSchedules'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { useViewportStore } from '@/stores/viewportStore'
 import { getDepartmentTheme } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
@@ -139,7 +140,7 @@ function ViewModeToggle({
 // Timeline Card (existing)
 // ============================================
 
-function TimelineCard({ schedule, isLast }: { schedule: Schedule; isLast: boolean }) {
+function TimelineCard({ schedule, isLast, isMobile }: { schedule: Schedule; isLast: boolean; isMobile?: boolean }) {
   const config = SESSION_CONFIG[schedule.type as SessionType] ?? SESSION_CONFIG.special
   const TypeIcon = config.icon
 
@@ -162,21 +163,21 @@ function TimelineCard({ schedule, isLast }: { schedule: Schedule; isLast: boolea
           'hover:scale-[1.01] hover:shadow-2xl'
         )}
       >
-        <div className="flex gap-4 px-4 py-4 md:px-5">
+        <div className={cn('flex', isMobile ? 'gap-3 px-3 py-3' : 'gap-4 px-4 py-4')}>
           {/* Time */}
-          <div className="flex w-16 shrink-0 flex-col items-start pt-0.5">
-            <span className="text-sm font-semibold text-foreground">
+          <div className={cn('flex shrink-0 flex-col items-start pt-0.5', isMobile ? 'w-14' : 'w-16')}>
+            <span className={cn('font-semibold text-foreground', isMobile ? 'text-xs' : 'text-sm')}>
               {schedule.start_time.slice(0, 5)}
             </span>
-            <span className="text-xs text-muted-foreground/60">
+            <span className={cn('text-muted-foreground/60', isMobile ? 'text-[0.625rem]' : 'text-xs')}>
               {schedule.end_time.slice(0, 5)}
             </span>
           </div>
 
           {/* Content */}
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className={cn('flex min-w-0 flex-1 flex-col', isMobile ? 'gap-1.5' : 'gap-2')}>
             <div className="flex items-start justify-between gap-2">
-              <p className="text-[0.9375rem] font-medium leading-snug text-foreground">
+              <p className={cn('font-medium leading-snug text-foreground', isMobile ? 'text-sm' : 'text-[0.9375rem]')}>
                 {schedule.title}
               </p>
               <Badge
@@ -223,7 +224,7 @@ function TimelineCard({ schedule, isLast }: { schedule: Schedule; isLast: boolea
 // Simple Card (no timeline dots/lines)
 // ============================================
 
-function SimpleScheduleCard({ schedule }: { schedule: Schedule }) {
+function SimpleScheduleCard({ schedule, isMobile }: { schedule: Schedule; isMobile?: boolean }) {
   const config = SESSION_CONFIG[schedule.type as SessionType] ?? SESSION_CONFIG.special
   const TypeIcon = config.icon
 
@@ -236,21 +237,21 @@ function SimpleScheduleCard({ schedule }: { schedule: Schedule }) {
         'hover:scale-[1.01] hover:shadow-2xl'
       )}
     >
-      <div className="flex gap-4 px-4 py-4 md:px-5">
+      <div className={cn('flex', isMobile ? 'gap-3 px-3 py-3' : 'gap-4 px-4 py-4')}>
         {/* Time */}
-        <div className="flex w-16 shrink-0 flex-col items-start pt-0.5">
-          <span className="text-sm font-semibold text-foreground">
+        <div className={cn('flex shrink-0 flex-col items-start pt-0.5', isMobile ? 'w-14' : 'w-16')}>
+          <span className={cn('font-semibold text-foreground', isMobile ? 'text-xs' : 'text-sm')}>
             {schedule.start_time.slice(0, 5)}
           </span>
-          <span className="text-xs text-muted-foreground/60">
+          <span className={cn('text-muted-foreground/60', isMobile ? 'text-[0.625rem]' : 'text-xs')}>
             {schedule.end_time.slice(0, 5)}
           </span>
         </div>
 
         {/* Content */}
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className={cn('flex min-w-0 flex-1 flex-col', isMobile ? 'gap-1.5' : 'gap-2')}>
           <div className="flex items-start justify-between gap-2">
-            <p className="text-[0.9375rem] font-medium leading-snug text-foreground">
+            <p className={cn('font-medium leading-snug text-foreground', isMobile ? 'text-sm' : 'text-[0.9375rem]')}>
               {schedule.title}
             </p>
             <Badge
@@ -299,7 +300,7 @@ function ScheduleSkeleton() {
         <div key={dayIdx} className="space-y-3">
           <SkeletonBox className="h-6 w-24" />
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
+            <div key={i} className="flex gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
               <div className="w-16 space-y-1">
                 <SkeletonBox className="h-4 w-12" />
                 <SkeletonBox className="h-3 w-10" />
@@ -320,6 +321,8 @@ function ScheduleSkeleton() {
 }
 
 export default function SchedulePage() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const { eventId } = useCurrentEvent()
   const department = useDepartmentFilterStore((s) => s.department)
   const deptTheme = getDepartmentTheme(department)
@@ -431,6 +434,7 @@ export default function SchedulePage() {
                       key={schedule.id}
                       schedule={schedule}
                       isLast={idx === activeDaySchedules.length - 1}
+                      isMobile={isMobile}
                     />
                   ))}
                 </motion.div>
@@ -446,6 +450,7 @@ export default function SchedulePage() {
                     <SimpleScheduleCard
                       key={schedule.id}
                       schedule={schedule}
+                      isMobile={isMobile}
                     />
                   ))}
                 </motion.div>

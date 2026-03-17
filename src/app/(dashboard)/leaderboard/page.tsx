@@ -15,6 +15,7 @@ import { LeaderboardTable } from '@/components/dashboard/LeaderboardTable'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { usePointsRanking } from '@/hooks/usePoints'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { useViewportStore } from '@/stores/viewportStore'
 import { getDepartmentTheme } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
@@ -113,9 +114,11 @@ function getMedalConfig(rank: number) {
 function PodiumCardView({
   entries,
   type,
+  isMobile,
 }: {
   entries: LeaderboardEntry[]
   type: 'group' | 'individual'
+  isMobile?: boolean
 }) {
   const topThree = entries.slice(0, 3)
   const rest = entries.slice(3)
@@ -136,19 +139,21 @@ function PodiumCardView({
             key={`${entry.rank}-${entry.name}`}
             variants={fadeUp}
             className={cn(
-              'rounded-2xl border px-5 py-6 backdrop-blur-xl transition-all duration-300',
+              'rounded-2xl border backdrop-blur-xl transition-all duration-300',
+              isMobile ? 'px-3 py-4' : 'px-5 py-6',
               medal ? cn('bg-gradient-to-br', medal.gradient, medal.border, medal.glow) : ''
             )}
           >
-            <div className="flex items-center gap-4">
+            <div className={cn('flex items-center', isMobile ? 'gap-3' : 'gap-4')}>
               {/* Rank badge */}
               <div
                 className={cn(
-                  'flex size-12 shrink-0 items-center justify-center rounded-full shadow-lg',
+                  'flex shrink-0 items-center justify-center rounded-full shadow-lg',
+                  isMobile ? 'size-10' : 'size-12',
                   medal?.badge
                 )}
               >
-                <Trophy className="size-6 text-white" />
+                <Trophy className={cn('text-white', isMobile ? 'size-5' : 'size-6')} />
               </div>
 
               {/* Info */}
@@ -164,7 +169,7 @@ function PodiumCardView({
                       aria-hidden="true"
                     />
                   )}
-                  <h3 className="truncate text-lg font-bold text-foreground">
+                  <h3 className={cn('truncate font-bold text-foreground', isMobile ? 'text-base' : 'text-lg')}>
                     {entry.name}
                   </h3>
                 </div>
@@ -174,7 +179,7 @@ function PodiumCardView({
               </div>
 
               {/* Points */}
-              <span className={cn('shrink-0 text-xl font-extrabold tabular-nums', medal?.text)}>
+              <span className={cn('shrink-0 font-extrabold tabular-nums', isMobile ? 'text-lg' : 'text-xl', medal?.text)}>
                 {entry.points.toLocaleString()}점
               </span>
             </div>
@@ -189,7 +194,7 @@ function PodiumCardView({
             <motion.div
               key={`${entry.rank}-${entry.name}`}
               variants={fadeUp}
-              className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 backdrop-blur-xl transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04]"
+              className={cn('flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04]', isMobile ? 'px-3 py-2.5' : 'px-4 py-3')}
             >
               <div className="flex size-8 items-center justify-center rounded-full bg-white/[0.04]">
                 <span className="text-sm font-bold tabular-nums text-muted-foreground">
@@ -256,6 +261,8 @@ function toLeaderboardEntries(
 // ============================================
 
 export default function LeaderboardPage() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const { eventId } = useCurrentEvent()
   const department = useDepartmentFilterStore((s) => s.department)
   const deptTheme = getDepartmentTheme(department)
@@ -339,7 +346,7 @@ export default function LeaderboardPage() {
               viewMode === 'table' ? (
                 <LeaderboardTable entries={groupEntries} type="group" />
               ) : (
-                <PodiumCardView entries={groupEntries} type="group" />
+                <PodiumCardView entries={groupEntries} type="group" isMobile={isMobile} />
               )
             ) : (
               <EmptyState
@@ -360,7 +367,7 @@ export default function LeaderboardPage() {
               viewMode === 'table' ? (
                 <LeaderboardTable entries={individualEntries} type="individual" />
               ) : (
-                <PodiumCardView entries={individualEntries} type="individual" />
+                <PodiumCardView entries={individualEntries} type="individual" isMobile={isMobile} />
               )
             ) : (
               <EmptyState

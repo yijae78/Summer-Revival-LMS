@@ -22,6 +22,7 @@ import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useAdminAuthStore } from '@/stores/adminAuthStore'
 import { useAppModeStore } from '@/stores/appModeStore'
 import { useEventStore } from '@/stores/eventStore'
+import { useViewportStore } from '@/stores/viewportStore'
 import { AdminGate } from '@/components/shared/AdminGate'
 import { DEPARTMENT_LIST } from '@/constants/departments'
 import { update as updateLocal } from '@/lib/local-db'
@@ -50,31 +51,33 @@ function GlassSection({
   title,
   description,
   children,
+  isMobile,
 }: {
   icon: typeof User
   title: string
   description?: string
   children: React.ReactNode
+  isMobile?: boolean
 }) {
   return (
     <motion.div
       variants={fadeUp}
       className="rounded-2xl border border-indigo-500/15 bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 backdrop-blur-xl transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_0_25px_rgba(99,102,241,0.1)]"
     >
-      <div className="px-5 pt-5 pb-2">
+      <div className={cn('pb-2', isMobile ? 'px-3 pt-3' : 'px-5 pt-5')}>
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
-            <Icon className="size-4 text-white" />
+          <div className={cn('flex items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg', isMobile ? 'h-7 w-7' : 'h-8 w-8')}>
+            <Icon className={cn('text-white', isMobile ? 'size-3.5' : 'size-4')} />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-foreground">{title}</h3>
+            <h3 className={cn('font-semibold text-foreground', isMobile ? 'text-sm' : 'text-base')}>{title}</h3>
             {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
+              <p className={cn('text-muted-foreground', isMobile ? 'text-xs' : 'text-sm')}>{description}</p>
             )}
           </div>
         </div>
       </div>
-      <div className="p-5 pt-3">
+      <div className={cn('pt-3', isMobile ? 'p-3' : 'p-5')}>
         {children}
       </div>
     </motion.div>
@@ -86,6 +89,8 @@ function GlassSection({
 // ============================================
 
 function EventInfoSection() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const { event, eventId } = useCurrentEvent()
   const mode = useAppModeStore((s) => s.mode)
   const eventStore = useEventStore()
@@ -180,7 +185,7 @@ function EventInfoSection() {
   if (!event) return null
 
   return (
-    <GlassSection icon={Building2} title="행사 정보" description="교회·행사·부서 정보를 수정해요">
+    <GlassSection icon={Building2} title="행사 정보" description="교회·행사·부서 정보를 수정해요" isMobile={isMobile}>
       <div className="space-y-4">
         {/* Church Name */}
         <div className="space-y-1.5">
@@ -267,7 +272,7 @@ function EventInfoSection() {
             <CalendarDays className="size-3.5" />
             부서 선택
           </Label>
-          <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+          <div className={cn('grid gap-1.5', isMobile ? 'grid-cols-3' : 'grid-cols-4')}>
             {DEPARTMENT_LIST.map((dept) => {
               const isSelected = departments.includes(dept.key)
               return (
@@ -320,6 +325,8 @@ function EventInfoSection() {
 // ============================================
 
 function AdminPasswordSection() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const { passwordHash, setPassword, changePassword } = useAdminAuthStore()
   const [oldPw, setOldPw] = useState('')
   const [newPw, setNewPw] = useState('')
@@ -383,7 +390,7 @@ function AdminPasswordSection() {
   }
 
   return (
-    <GlassSection icon={Lock} title="관리자 비밀번호" description="관리자 기능과 회계 페이지를 보호해요">
+    <GlassSection icon={Lock} title="관리자 비밀번호" description="관리자 기능과 회계 페이지를 보호해요" isMobile={isMobile}>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
@@ -465,6 +472,8 @@ function AdminPasswordSection() {
 // ============================================
 
 export default function SettingsPage() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const { data: user } = useUser()
   const { signOut } = useAuth()
   const { theme, setTheme } = useTheme()
@@ -497,19 +506,19 @@ export default function SettingsPage() {
       />
 
       {/* Profile Section */}
-      <GlassSection icon={User} title="프로필" description="내 계정 정보를 확인하세요">
-        <div className="flex items-center gap-4">
+      <GlassSection icon={User} title="프로필" description="내 계정 정보를 확인하세요" isMobile={isMobile}>
+        <div className={cn('flex items-center', isMobile ? 'gap-3' : 'gap-4')}>
           <div
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xl font-bold text-white ring-2 ring-indigo-500/20 shadow-lg"
+            className={cn('flex items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 font-bold text-white ring-2 ring-indigo-500/20 shadow-lg', isMobile ? 'h-12 w-12 text-lg' : 'h-14 w-14 text-xl')}
             aria-hidden="true"
           >
             {user?.name?.charAt(0) ?? '?'}
           </div>
           <div className="space-y-1">
-            <p className="text-base font-semibold leading-relaxed">
+            <p className={cn('font-semibold leading-relaxed', isMobile ? 'text-sm' : 'text-base')}>
               {user?.name ?? '이름 없음'}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className={cn('text-muted-foreground', isMobile ? 'text-xs' : 'text-sm')}>
               {user?.phone ?? '전화번호 미등록'}
             </p>
           </div>
@@ -520,8 +529,8 @@ export default function SettingsPage() {
       {isAdmin && <EventInfoSection />}
 
       {/* Theme Section */}
-      <GlassSection icon={Sun} title="테마" description="화면 밝기를 설정하세요">
-        <div className="grid grid-cols-3 gap-2">
+      <GlassSection icon={Sun} title="테마" description="화면 밝기를 설정하세요" isMobile={isMobile}>
+        <div className={cn('grid grid-cols-3', isMobile ? 'gap-1.5' : 'gap-2')}>
           {THEME_OPTIONS.map((option) => {
             const Icon = option.icon
             return (
@@ -529,7 +538,8 @@ export default function SettingsPage() {
                 key={option.value}
                 onClick={() => setTheme(option.value)}
                 className={cn(
-                  'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-xl border p-3 text-sm transition-all duration-300',
+                  'flex flex-col items-center justify-center gap-1 rounded-xl border transition-all duration-300',
+                  isMobile ? 'min-h-[44px] p-2 text-xs' : 'min-h-[48px] p-3 text-sm',
                   theme === option.value
                     ? 'border-indigo-500/30 bg-gradient-to-br from-indigo-500/15 to-purple-500/10 text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.15)]'
                     : 'border-white/[0.08] bg-white/[0.04] hover:border-indigo-500/20 hover:bg-white/[0.06]'
@@ -545,12 +555,12 @@ export default function SettingsPage() {
       </GlassSection>
 
       {/* Offline Queue Section */}
-      <GlassSection icon={CloudOff} title="오프라인 데이터" description="오프라인에서 저장된 데이터를 확인하고 동기화하세요">
+      <GlassSection icon={CloudOff} title="오프라인 데이터" description="오프라인에서 저장된 데이터를 확인하고 동기화하세요" isMobile={isMobile}>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-sm font-medium">대기 중인 항목</p>
-              <p className="text-2xl font-bold tabular-nums">{pendingCount}건</p>
+              <p className={cn('font-medium', isMobile ? 'text-xs' : 'text-sm')}>대기 중인 항목</p>
+              <p className={cn('font-bold tabular-nums', isMobile ? 'text-xl' : 'text-2xl')}>{pendingCount}건</p>
             </div>
             <div className="flex items-center gap-2">
               <div
@@ -596,7 +606,7 @@ export default function SettingsPage() {
       )}
 
       {/* App Info Section */}
-      <GlassSection icon={Info} title="앱 정보">
+      <GlassSection icon={Info} title="앱 정보" isMobile={isMobile}>
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">버전</span>

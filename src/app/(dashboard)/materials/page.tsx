@@ -47,6 +47,7 @@ import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useMaterials } from '@/hooks/useMaterials'
 import { useUser } from '@/hooks/useUser'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { useViewportStore } from '@/stores/viewportStore'
 import { getDepartmentTheme } from '@/constants/departments'
 import { useAppModeStore } from '@/stores/appModeStore'
 import { deleteMaterial } from '@/actions/materials'
@@ -126,11 +127,13 @@ function MaterialCard({
   canManage,
   onDelete,
   deptTheme: theme,
+  isMobile,
 }: {
   material: Material
   canManage: boolean
   onDelete: (id: string) => void
   deptTheme: ReturnType<typeof getDepartmentTheme>
+  isMobile?: boolean
 }) {
   const categoryConfig =
     CATEGORY_CONFIG[material.category as MaterialCategory] ?? CATEGORY_CONFIG.other
@@ -150,9 +153,9 @@ function MaterialCard({
         background: `linear-gradient(135deg, rgba(${theme.primary},0.1), rgba(${theme.secondary},0.05))`,
       }}
     >
-      <div className="flex items-center gap-4 px-4 py-4 md:px-6">
+      <div className={cn('flex items-center', isMobile ? 'gap-3 px-3 py-3' : 'gap-4 px-4 py-4')}>
         <div
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-lg transition-all duration-500"
+          className={cn('flex shrink-0 items-center justify-center rounded-xl shadow-lg transition-all duration-500', isMobile ? 'h-10 w-10' : 'h-12 w-12')}
           style={{
             background: `linear-gradient(135deg, rgb(${theme.primary}), rgb(${theme.secondary}))`,
           }}
@@ -160,8 +163,8 @@ function MaterialCard({
           <FileIcon className="size-5 text-white" />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <p className="truncate text-[0.9375rem] font-medium leading-snug text-foreground">
+        <div className={cn('flex min-w-0 flex-1 flex-col', isMobile ? 'gap-1' : 'gap-1.5')}>
+          <p className={cn('truncate font-medium leading-snug text-foreground', isMobile ? 'text-sm' : 'text-[0.9375rem]')}>
             {material.title}
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -222,7 +225,7 @@ function MaterialSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4 md:p-6">
+        <div key={i} className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl p-4">
           <SkeletonBox className="h-12 w-12 rounded-xl" />
           <div className="flex-1 space-y-2">
             <SkeletonBox className="h-4 w-48" />
@@ -241,12 +244,14 @@ function MaterialList({
   onDelete,
   category,
   deptTheme: theme,
+  isMobile,
 }: {
   materials: Material[]
   canManage: boolean
   onDelete: (id: string) => void
   category: string
   deptTheme: ReturnType<typeof getDepartmentTheme>
+  isMobile?: boolean
 }) {
   const filtered =
     category === 'all'
@@ -277,6 +282,7 @@ function MaterialList({
           canManage={canManage}
           onDelete={onDelete}
           deptTheme={theme}
+          isMobile={isMobile}
         />
       ))}
     </motion.div>
@@ -419,6 +425,8 @@ function CreateMaterialDialog({
 }
 
 export default function MaterialsPage() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const { eventId } = useCurrentEvent()
   const department = useDepartmentFilterStore((s) => s.department)
   const deptTheme = getDepartmentTheme(department)
@@ -488,14 +496,14 @@ export default function MaterialsPage() {
                 }
               `}</style>
               <TabsList
-                className="materials-tabs w-full overflow-x-auto rounded-full border p-1 backdrop-blur-xl transition-all duration-500 md:w-auto"
+                className={cn('materials-tabs w-full overflow-x-auto rounded-full border backdrop-blur-xl transition-all duration-500', isMobile ? 'p-0.5' : 'p-1')}
                 style={{
                   borderColor: `rgba(${deptTheme.primary},0.15)`,
                   background: `linear-gradient(to right, rgba(${deptTheme.primary},0.1), rgba(${deptTheme.secondary},0.05))`,
                 }}
               >
                 {TABS.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} className="min-h-9 rounded-full transition-all duration-500">
+                  <TabsTrigger key={tab.value} value={tab.value} className={cn('rounded-full transition-all duration-500', isMobile ? 'min-h-8 text-xs px-2' : 'min-h-9')}>
                     {tab.label}
                   </TabsTrigger>
                 ))}
@@ -509,6 +517,7 @@ export default function MaterialsPage() {
                     onDelete={handleDelete}
                     category={tab.value}
                     deptTheme={deptTheme}
+                    isMobile={isMobile}
                   />
                 </TabsContent>
               ))}

@@ -14,6 +14,7 @@ import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useSchedules } from '@/hooks/useSchedules'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { useViewportStore } from '@/stores/viewportStore'
 import { getDepartmentTheme } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
@@ -85,9 +86,10 @@ interface ScheduleAttendanceCardProps {
   schedule: Schedule
   onNavigate: (scheduleId: string) => void
   deptTheme: ReturnType<typeof getDepartmentTheme>
+  isMobile?: boolean
 }
 
-function ScheduleAttendanceCard({ schedule, onNavigate, deptTheme: theme }: ScheduleAttendanceCardProps) {
+function ScheduleAttendanceCard({ schedule, onNavigate, deptTheme: theme, isMobile }: ScheduleAttendanceCardProps) {
   return (
     <motion.div
       variants={fadeUp}
@@ -111,20 +113,20 @@ function ScheduleAttendanceCard({ schedule, onNavigate, deptTheme: theme }: Sche
         }
       }}
     >
-      <div className="flex items-center gap-3 px-4 py-4 md:px-6">
+      <div className={cn('flex items-center gap-3', isMobile ? 'px-3 py-3' : 'px-4 py-4')}>
         {/* Icon */}
         <div
-          className="flex size-11 shrink-0 items-center justify-center rounded-xl shadow-lg transition-all duration-500"
+          className={cn('flex shrink-0 items-center justify-center rounded-xl shadow-lg transition-all duration-500', isMobile ? 'size-9' : 'size-11')}
           style={{
             background: `linear-gradient(135deg, rgb(${theme.primary}), rgb(${theme.secondary}))`,
           }}
         >
-          <ClipboardCheck className="size-5 text-white" />
+          <ClipboardCheck className={cn('text-white', isMobile ? 'size-4' : 'size-5')} />
         </div>
 
         {/* Content */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[0.9375rem] font-medium text-foreground">
+          <p className={cn('truncate font-medium text-foreground', isMobile ? 'text-sm' : 'text-[0.9375rem]')}>
             {schedule.title}
           </p>
           <div className="mt-1 flex items-center gap-2">
@@ -154,15 +156,18 @@ function ScheduleAttendanceCard({ schedule, onNavigate, deptTheme: theme }: Sche
 function ScheduleAttendanceListItem({
   schedule,
   onNavigate,
+  isMobile,
 }: {
   schedule: Schedule
   onNavigate: (scheduleId: string) => void
+  isMobile?: boolean
 }) {
   return (
     <motion.div
       variants={fadeUp}
       className={cn(
-        'group flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 backdrop-blur-xl',
+        'group flex cursor-pointer items-center gap-3 rounded-xl border backdrop-blur-xl',
+        isMobile ? 'px-3 py-2.5' : 'px-4 py-3',
         'border-white/[0.08] bg-white/[0.04]',
         'transition-all duration-300',
         'hover:bg-white/[0.06] hover:shadow-lg',
@@ -189,14 +194,16 @@ function ScheduleAttendanceListItem({
       </span>
 
       {/* Time range */}
-      <span className="hidden shrink-0 items-center gap-1 text-xs text-muted-foreground sm:flex">
-        <Clock className="size-3" />
-        {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
-      </span>
+      {!isMobile && (
+        <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+          <Clock className="size-3" />
+          {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
+        </span>
+      )}
 
       {/* Location */}
-      {schedule.location && (
-        <span className="hidden shrink-0 text-xs text-muted-foreground md:block">
+      {!isMobile && schedule.location && (
+        <span className="shrink-0 text-xs text-muted-foreground">
           {schedule.location}
         </span>
       )}
@@ -233,6 +240,8 @@ function AttendanceSkeleton() {
 }
 
 export default function AttendancePage() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const router = useRouter()
   const { eventId } = useCurrentEvent()
   const department = useDepartmentFilterStore((s) => s.department)
@@ -337,6 +346,7 @@ export default function AttendancePage() {
                       schedule={schedule}
                       onNavigate={handleNavigate}
                       deptTheme={deptTheme}
+                      isMobile={isMobile}
                     />
                   ))}
                 </motion.div>
@@ -353,6 +363,7 @@ export default function AttendancePage() {
                       key={schedule.id}
                       schedule={schedule}
                       onNavigate={handleNavigate}
+                      isMobile={isMobile}
                     />
                   ))}
                 </motion.div>

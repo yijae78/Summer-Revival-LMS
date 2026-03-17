@@ -38,6 +38,7 @@ import { useAccounting } from '@/hooks/useAccounting'
 import { useUser } from '@/hooks/useUser'
 import { useEventStore } from '@/stores/eventStore'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { useViewportStore } from '@/stores/viewportStore'
 import { getDepartmentByKey } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
@@ -97,29 +98,31 @@ interface SummaryCardProps {
   gradientTo: string
   iconBg: string
   delay?: number
+  isMobile?: boolean
 }
 
-function SummaryCard({ label, amount, icon: Icon, gradientFrom, gradientTo, iconBg, delay = 0 }: SummaryCardProps) {
+function SummaryCard({ label, amount, icon: Icon, gradientFrom, gradientTo, iconBg, delay = 0, isMobile }: SummaryCardProps) {
   return (
     <motion.div
       variants={fadeUp}
       transition={{ delay }}
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-white/[0.08] p-5',
+        'relative overflow-hidden rounded-2xl border border-white/[0.08]',
         'bg-gradient-to-br backdrop-blur-xl',
+        isMobile ? 'p-3' : 'p-5',
         gradientFrom,
         gradientTo
       )}
     >
       <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="text-2xl font-bold tracking-tight text-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <div className={cn(isMobile ? 'space-y-1' : 'space-y-2')}>
+          <p className={cn('font-medium text-muted-foreground', isMobile ? 'text-xs' : 'text-sm')}>{label}</p>
+          <p className={cn('font-bold tracking-tight text-foreground', isMobile ? 'text-lg' : 'text-2xl')} style={{ fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(amount)}
           </p>
         </div>
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', iconBg)}>
-          <Icon className="h-5 w-5 text-white" />
+        <div className={cn('flex shrink-0 items-center justify-center rounded-xl', iconBg, isMobile ? 'h-9 w-9' : 'h-11 w-11')}>
+          <Icon className={cn('text-white', isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
         </div>
       </div>
     </motion.div>
@@ -129,9 +132,11 @@ function SummaryCard({ label, amount, icon: Icon, gradientFrom, gradientTo, icon
 function BudgetBreakdown({
   budgetCategories,
   expenseRecords,
+  isMobile,
 }: {
   budgetCategories: { name: string; planned_amount: number }[]
   expenseRecords: ExpenseRecord[]
+  isMobile?: boolean
 }) {
   // Compute spent per budget category
   const spentByCategory: Record<string, number> = {}
@@ -143,10 +148,10 @@ function BudgetBreakdown({
   return (
     <motion.div
       variants={fadeUp}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 backdrop-blur-xl"
+      className={cn('rounded-2xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl', isMobile ? 'p-3' : 'p-5')}
     >
-      <h3 className="mb-4 text-base font-semibold text-foreground">예산 항목별 현황</h3>
-      <div className="space-y-4">
+      <h3 className={cn('font-semibold text-foreground', isMobile ? 'mb-3 text-sm' : 'mb-4 text-base')}>예산 항목별 현황</h3>
+      <div className={cn(isMobile ? 'space-y-3' : 'space-y-4')}>
         {budgetCategories.map((cat) => {
           const spent = spentByCategory[cat.name] ?? 0
           const remaining = cat.planned_amount - spent
@@ -155,9 +160,9 @@ function BudgetBreakdown({
 
           return (
             <div key={cat.name} className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
+              <div className={cn('text-muted-foreground', isMobile ? 'space-y-1 text-xs' : 'flex items-center justify-between text-sm')}>
                 <span className="font-medium text-foreground">{cat.name}</span>
-                <div className="flex gap-4 text-muted-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <div className={cn('flex text-muted-foreground', isMobile ? 'gap-2 text-xs' : 'gap-4')} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   <span>계획 {formatCurrency(cat.planned_amount)}</span>
                   <span>사용 {formatCurrency(spent)}</span>
                   <span className={cn(remaining < 0 ? 'text-red-400' : 'text-emerald-400')}>
@@ -179,7 +184,7 @@ function BudgetBreakdown({
   )
 }
 
-function IncomeList({ records }: { records: IncomeRecord[] }) {
+function IncomeList({ records, isMobile }: { records: IncomeRecord[]; isMobile?: boolean }) {
   if (records.length === 0) {
     return (
       <EmptyState
@@ -206,13 +211,14 @@ function IncomeList({ records }: { records: IncomeRecord[] }) {
             key={record.id}
             variants={fadeUp}
             className={cn(
-              'flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3',
+              'flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02]',
+              isMobile ? 'px-3 py-2.5' : 'px-4 py-3',
               'transition-all duration-300 hover:border-primary/15 hover:bg-white/[0.04]'
             )}
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-                <ArrowUpRight className="h-5 w-5 text-emerald-400" />
+            <div className={cn('flex items-center', isMobile ? 'gap-2' : 'gap-3')}>
+              <div className={cn('flex items-center justify-center rounded-xl bg-emerald-500/10', isMobile ? 'h-8 w-8' : 'h-10 w-10')}>
+                <ArrowUpRight className={cn('text-emerald-400', isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">{record.description}</p>
@@ -231,9 +237,9 @@ function IncomeList({ records }: { records: IncomeRecord[] }) {
         )
       })}
 
-      <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
-        <span className="text-sm font-semibold text-foreground">총 수입</span>
-        <span className="text-base font-bold text-emerald-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <div className={cn('flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5', isMobile ? 'px-3 py-2.5' : 'px-4 py-3')}>
+        <span className={cn('font-semibold text-foreground', isMobile ? 'text-xs' : 'text-sm')}>총 수입</span>
+        <span className={cn('font-bold text-emerald-400', isMobile ? 'text-sm' : 'text-base')} style={{ fontVariantNumeric: 'tabular-nums' }}>
           {formatCurrency(total)}
         </span>
       </div>
@@ -241,7 +247,7 @@ function IncomeList({ records }: { records: IncomeRecord[] }) {
   )
 }
 
-function ExpenseList({ records }: { records: ExpenseRecord[] }) {
+function ExpenseList({ records, isMobile }: { records: ExpenseRecord[]; isMobile?: boolean }) {
   if (records.length === 0) {
     return (
       <EmptyState
@@ -268,13 +274,14 @@ function ExpenseList({ records }: { records: ExpenseRecord[] }) {
             key={record.id}
             variants={fadeUp}
             className={cn(
-              'flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3',
+              'flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02]',
+              isMobile ? 'px-3 py-2.5' : 'px-4 py-3',
               'transition-all duration-300 hover:border-primary/15 hover:bg-white/[0.04]'
             )}
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10">
-                <ArrowDownRight className="h-5 w-5 text-rose-400" />
+            <div className={cn('flex items-center', isMobile ? 'gap-2' : 'gap-3')}>
+              <div className={cn('flex items-center justify-center rounded-xl bg-rose-500/10', isMobile ? 'h-8 w-8' : 'h-10 w-10')}>
+                <ArrowDownRight className={cn('text-rose-400', isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">{record.description}</p>
@@ -296,9 +303,9 @@ function ExpenseList({ records }: { records: ExpenseRecord[] }) {
         )
       })}
 
-      <div className="flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-3">
-        <span className="text-sm font-semibold text-foreground">총 지출</span>
-        <span className="text-base font-bold text-rose-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <div className={cn('flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/5', isMobile ? 'px-3 py-2.5' : 'px-4 py-3')}>
+        <span className={cn('font-semibold text-foreground', isMobile ? 'text-xs' : 'text-sm')}>총 지출</span>
+        <span className={cn('font-bold text-rose-400', isMobile ? 'text-sm' : 'text-base')} style={{ fontVariantNumeric: 'tabular-nums' }}>
           {formatCurrency(total)}
         </span>
       </div>
@@ -418,6 +425,8 @@ function AddExpenseDialog({ eventId }: { eventId: string }) {
 }
 
 function AccountingContent() {
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const eventId = useEventStore((s) => s.currentEventId)
   const { data: user } = useUser()
   const globalDept = useDepartmentFilterStore((s) => s.department)
@@ -466,7 +475,7 @@ function AccountingContent() {
       animate="show"
     >
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className={cn('grid', isMobile ? 'grid-cols-2 gap-2' : 'grid-cols-4 gap-3')}>
         <SummaryCard
           label="총예산"
           amount={summary.totalBudget}
@@ -474,6 +483,7 @@ function AccountingContent() {
           gradientFrom="from-indigo-500/10"
           gradientTo="to-indigo-600/5"
           iconBg="bg-gradient-to-br from-indigo-500 to-indigo-600"
+          isMobile={isMobile}
         />
         <SummaryCard
           label="총수입"
@@ -483,6 +493,7 @@ function AccountingContent() {
           gradientTo="to-emerald-600/5"
           iconBg="bg-gradient-to-br from-emerald-500 to-emerald-600"
           delay={0.05}
+          isMobile={isMobile}
         />
         <SummaryCard
           label="총지출"
@@ -492,6 +503,7 @@ function AccountingContent() {
           gradientTo="to-rose-600/5"
           iconBg="bg-gradient-to-br from-rose-500 to-rose-600"
           delay={0.1}
+          isMobile={isMobile}
         />
         <SummaryCard
           label="잔액"
@@ -501,32 +513,33 @@ function AccountingContent() {
           gradientTo="to-amber-600/5"
           iconBg="bg-gradient-to-br from-amber-500 to-amber-600"
           delay={0.15}
+          isMobile={isMobile}
         />
       </div>
 
       {/* Tabs: Summary / Income / Expense */}
       <motion.div variants={fadeUp}>
         <Tabs defaultValue="summary" className="w-full">
-          <TabsList className="mb-4 grid w-full grid-cols-3 rounded-xl border border-white/[0.08] bg-white/[0.04] p-1 backdrop-blur-md">
+          <TabsList className={cn('mb-4 grid w-full grid-cols-3 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-md', isMobile ? 'p-0.5' : 'p-1')}>
             <TabsTrigger
               value="summary"
-              className="min-h-[40px] rounded-lg text-sm font-medium data-[state=active]:bg-white/[0.08] data-[state=active]:text-foreground"
+              className={cn('rounded-lg font-medium data-[state=active]:bg-white/[0.08] data-[state=active]:text-foreground', isMobile ? 'min-h-[36px] text-xs' : 'min-h-[40px] text-sm')}
             >
-              <FileText className="mr-1.5 h-4 w-4" />
+              <FileText className={cn(isMobile ? 'mr-1 h-3.5 w-3.5' : 'mr-1.5 h-4 w-4')} />
               요약
             </TabsTrigger>
             <TabsTrigger
               value="income"
-              className="min-h-[40px] rounded-lg text-sm font-medium data-[state=active]:bg-white/[0.08] data-[state=active]:text-foreground"
+              className={cn('rounded-lg font-medium data-[state=active]:bg-white/[0.08] data-[state=active]:text-foreground', isMobile ? 'min-h-[36px] text-xs' : 'min-h-[40px] text-sm')}
             >
-              <ArrowUpRight className="mr-1.5 h-4 w-4" />
+              <ArrowUpRight className={cn(isMobile ? 'mr-1 h-3.5 w-3.5' : 'mr-1.5 h-4 w-4')} />
               수입
             </TabsTrigger>
             <TabsTrigger
               value="expense"
-              className="min-h-[40px] rounded-lg text-sm font-medium data-[state=active]:bg-white/[0.08] data-[state=active]:text-foreground"
+              className={cn('rounded-lg font-medium data-[state=active]:bg-white/[0.08] data-[state=active]:text-foreground', isMobile ? 'min-h-[36px] text-xs' : 'min-h-[40px] text-sm')}
             >
-              <ArrowDownRight className="mr-1.5 h-4 w-4" />
+              <ArrowDownRight className={cn(isMobile ? 'mr-1 h-3.5 w-3.5' : 'mr-1.5 h-4 w-4')} />
               지출
             </TabsTrigger>
           </TabsList>
@@ -536,6 +549,7 @@ function AccountingContent() {
               <BudgetBreakdown
                 budgetCategories={budgetCategories}
                 expenseRecords={expenseRecords}
+                isMobile={isMobile}
               />
             ) : (
               <EmptyState
@@ -547,7 +561,7 @@ function AccountingContent() {
           </TabsContent>
 
           <TabsContent value="income">
-            <IncomeList records={incomeRecords} />
+            <IncomeList records={incomeRecords} isMobile={isMobile} />
           </TabsContent>
 
           <TabsContent value="expense">
@@ -557,7 +571,7 @@ function AccountingContent() {
                   <AddExpenseDialog eventId={eventId} />
                 </div>
               )}
-              <ExpenseList records={expenseRecords} />
+              <ExpenseList records={expenseRecords} isMobile={isMobile} />
             </div>
           </TabsContent>
         </Tabs>

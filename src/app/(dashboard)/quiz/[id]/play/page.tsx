@@ -15,6 +15,7 @@ import { QuizResults } from '@/components/dashboard/QuizResults'
 
 import { useQuiz } from '@/hooks/useQuiz'
 import { useUser } from '@/hooks/useUser'
+import { useViewportStore } from '@/stores/viewportStore'
 import { submitAnswer } from '@/actions/quiz'
 
 import type { QuizQuestion } from '@/types'
@@ -54,6 +55,8 @@ function PlaySkeletons() {
 export default function QuizPlayPage({ params }: QuizPlayPageProps) {
   const { id: quizId } = use(params)
   const router = useRouter()
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobile = viewport === 'mobile' || viewport === 'tablet'
   const { data: user } = useUser()
   const { data: quiz, isLoading } = useQuiz(quizId)
 
@@ -195,7 +198,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
           >
             <ArrowLeft className="size-[18px]" />
           </button>
-          <h1 className="text-xl font-bold text-foreground md:text-2xl">
+          <h1 className={cn('font-bold text-foreground', isMobile ? 'text-lg' : 'text-2xl')}>
             퀴즈 완료!
           </h1>
         </motion.div>
@@ -203,9 +206,9 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
         {/* Quick Summary */}
         <motion.div variants={fadeUp}>
           <Card className="border-indigo-500/30 bg-gradient-to-br from-indigo-500/15 to-purple-500/10 backdrop-blur-xl">
-            <CardContent className="py-6 text-center">
-              <p className="bg-gradient-to-r from-indigo-400 via-purple-400 to-fuchsia-400 bg-clip-text text-4xl font-bold tabular-nums text-transparent">{totalScore}점</p>
-              <p className="mt-2 text-sm text-muted-foreground">
+            <CardContent className={cn('text-center', isMobile ? 'py-4' : 'py-6')}>
+              <p className={cn('bg-gradient-to-r from-indigo-400 via-purple-400 to-fuchsia-400 bg-clip-text font-bold tabular-nums text-transparent', isMobile ? 'text-2xl' : 'text-4xl')}>{totalScore}점</p>
+              <p className={cn('mt-2 text-muted-foreground', isMobile ? 'text-xs' : 'text-sm')}>
                 {totalQuestions}문제 중 {correctCount}문제 정답이에요
               </p>
             </CardContent>
@@ -296,8 +299,8 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
             {/* Question */}
             <motion.div variants={fadeUp}>
               <Card className="border-purple-500/15 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/5 backdrop-blur-xl">
-                <CardContent className="py-6">
-                  <p className="text-center text-lg font-semibold leading-relaxed text-foreground">
+                <CardContent className={cn(isMobile ? 'py-4' : 'py-6')}>
+                  <p className={cn('text-center font-semibold leading-relaxed text-foreground', isMobile ? 'text-base' : 'text-lg')}>
                     <span className="mr-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                       Q{currentIndex + 1}.
                     </span>
@@ -310,7 +313,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
             {/* Answer Area */}
             {currentQuestion.type === 'multiple_choice' && (
               <motion.div
-                className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+                className={cn('grid gap-3', isMobile ? 'grid-cols-1' : 'grid-cols-2')}
                 variants={stagger}
                 initial="hidden"
                 animate="show"
@@ -334,7 +337,8 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       onClick={() => handleSubmitAnswer(option)}
                       whileTap={phase === 'playing' ? { scale: 0.97 } : undefined}
                       className={cn(
-                        'flex min-h-[56px] items-center gap-3 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all',
+                        'flex items-center gap-3 rounded-xl border-2 text-left font-medium transition-all',
+                        isMobile ? 'min-h-[48px] px-3 py-2.5 text-xs' : 'min-h-[56px] px-4 py-3 text-sm',
                         phase === 'playing' &&
                           'border-white/[0.08] bg-white/[0.03] hover:border-indigo-500/50 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-purple-500/5',
                         isCorrectAnswer &&
@@ -375,7 +379,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
 
             {currentQuestion.type === 'ox' && (
               <motion.div
-                className="grid grid-cols-2 gap-4"
+                className={cn('grid grid-cols-2', isMobile ? 'gap-2' : 'gap-4')}
                 variants={stagger}
                 initial="hidden"
                 animate="show"
@@ -402,7 +406,8 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                       onClick={() => handleSubmitAnswer(item.value)}
                       whileTap={phase === 'playing' ? { scale: 0.97 } : undefined}
                       className={cn(
-                        'flex min-h-[100px] flex-col items-center justify-center gap-2 rounded-2xl border-2 text-center transition-all',
+                        'flex flex-col items-center justify-center gap-2 rounded-2xl border-2 text-center transition-all',
+                        isMobile ? 'min-h-[80px]' : 'min-h-[100px]',
                         phase === 'playing' &&
                           'border-white/[0.08] bg-white/[0.03] hover:border-indigo-500/50 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-purple-500/5',
                         isCorrectAnswer &&
@@ -417,7 +422,8 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
                     >
                       <span
                         className={cn(
-                          'text-4xl font-black',
+                          'font-black',
+                          isMobile ? 'text-2xl' : 'text-4xl',
                           phase === 'playing' && 'text-foreground',
                           isCorrectAnswer && 'text-emerald-500',
                           isWrongSelected && 'text-destructive'
