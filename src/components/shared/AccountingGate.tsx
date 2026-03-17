@@ -14,29 +14,31 @@ interface AccountingGateProps {
   children: React.ReactNode
 }
 
+// Each mount (page navigation) requires fresh password entry
 export function AccountingGate({ children }: AccountingGateProps) {
-  const { passwordHash, isAuthenticated, verifyPassword, authenticate } = useAdminAuthStore()
+  const { passwordHash, verifyPassword } = useAdminAuthStore()
+  const [unlocked, setUnlocked] = useState(false)
   const [input, setInput] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isShaking, setIsShaking] = useState(false)
 
-  // No password set → pass through
   if (!passwordHash) return <>{children}</>
-
-  // Already authenticated this session → pass through
-  if (isAuthenticated) return <>{children}</>
+  if (unlocked) return <>{children}</>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (verifyPassword(input)) {
-      authenticate()
+      setUnlocked(true)
       toast.success('회계 페이지에 접근했어요')
     } else {
       setIsShaking(true)
       setTimeout(() => setIsShaking(false), 500)
       toast.error('비밀번호가 일치하지 않아요')
       setInput('')
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([50, 30, 50, 30, 50])
+      }
     }
   }
 
@@ -50,14 +52,12 @@ export function AccountingGate({ children }: AccountingGateProps) {
           isShaking && 'animate-[shake_0.5s_ease-in-out]'
         )}
       >
-        {/* Lock icon */}
         <div className="flex justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
             <Lock className="h-7 w-7 text-white" />
           </div>
         </div>
 
-        {/* Title */}
         <h2 className="mt-5 text-center text-lg font-bold text-foreground">
           회계 페이지 잠금
         </h2>
@@ -65,7 +65,6 @@ export function AccountingGate({ children }: AccountingGateProps) {
           비밀번호를 입력해야 접근할 수 있어요
         </p>
 
-        {/* Password form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="relative">
             <Input
@@ -74,6 +73,7 @@ export function AccountingGate({ children }: AccountingGateProps) {
               onChange={(e) => setInput(e.target.value)}
               placeholder="비밀번호를 입력하세요"
               autoFocus
+              aria-label="회계 비밀번호"
               className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] pr-12 text-center text-lg tracking-widest backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10"
             />
             <button
@@ -89,7 +89,7 @@ export function AccountingGate({ children }: AccountingGateProps) {
           <Button
             type="submit"
             disabled={!input.trim()}
-            className="h-12 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-40"
+            className="h-12 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 disabled:opacity-40"
           >
             <ShieldCheck className="mr-2 h-4 w-4" />
             확인
