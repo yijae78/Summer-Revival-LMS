@@ -20,6 +20,9 @@ import { cn } from '@/lib/utils'
 import { useAppModeStore } from '@/stores/appModeStore'
 import { useDemoStore } from '@/stores/demoStore'
 import { useEventStore } from '@/stores/eventStore'
+import { useViewportStore } from '@/stores/viewportStore'
+
+import type { ViewportMode } from '@/stores/viewportStore'
 
 const FEATURES = [
   {
@@ -60,9 +63,7 @@ const FEATURES = [
   },
 ]
 
-type Viewport = 'desktop' | 'tablet' | 'mobile'
-
-const VIEWPORTS: { mode: Viewport; icon: typeof Monitor; label: string; width: string }[] = [
+const VIEWPORTS: { mode: ViewportMode; icon: typeof Monitor; label: string; width: string }[] = [
   { mode: 'desktop', icon: Monitor, label: '데스크톱', width: '100%' },
   { mode: 'tablet', icon: Tablet, label: '태블릿', width: '768px' },
   { mode: 'mobile', icon: Smartphone, label: '모바일', width: '375px' },
@@ -84,7 +85,8 @@ export default function LandingPage() {
   const enableDemo = useDemoStore((s) => s.enableDemo)
   const setMode = useAppModeStore((s) => s.setMode)
   const setCurrentEventId = useEventStore((s) => s.setCurrentEventId)
-  const [viewport, setViewport] = useState<Viewport>('desktop')
+  const viewport = useViewportStore((s) => s.viewport)
+  const setViewport = useViewportStore((s) => s.setViewport)
 
   const handleDemoMode = () => {
     setMode('demo')
@@ -461,7 +463,7 @@ export default function LandingPage() {
 }
 
 /* ── Feature bar component ── */
-function FeatureBar({ viewport }: { viewport: Viewport }) {
+function FeatureBar({ viewport }: { viewport: ViewportMode }) {
   const [active, setActive] = useState<number | null>(null)
   const selected = active !== null ? FEATURES[active] : null
   const isMobile = viewport === 'mobile'

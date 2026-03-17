@@ -35,7 +35,7 @@ export function KakaoLoginButton() {
       onClick={handleClick}
       disabled={isLoading}
       className={cn(
-        'inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[0.9375rem] font-medium text-[#191919] transition-colors hover:bg-[#FEE500]/90 active:scale-[0.98]',
+        'inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] text-[0.9375rem] font-medium text-[#191919] transition-colors hover:bg-[#FEE500]/90 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         isLoading && 'cursor-not-allowed opacity-70'
       )}
     >

@@ -30,7 +30,6 @@ export async function createAlbum({ eventId, title, dayNumber }: CreateAlbumInpu
     revalidatePath('/gallery')
     return { success: true, data }
   } catch (e) {
-    console.error('createAlbum failed:', e)
     return { error: '앨범 생성 중 오류가 발생했어요.' }
   }
 }
@@ -61,7 +60,6 @@ export async function deleteAlbum(id: string) {
     revalidatePath('/gallery')
     return { success: true }
   } catch (e) {
-    console.error('deleteAlbum failed:', e)
     return { error: '앨범 삭제 중 오류가 발생했어요.' }
   }
 }
@@ -97,7 +95,6 @@ export async function addPhoto({ albumId, fileUrl, thumbnailUrl, caption }: AddP
     revalidatePath('/gallery')
     return { success: true, data }
   } catch (e) {
-    console.error('addPhoto failed:', e)
     return { error: '사진 추가 중 오류가 발생했어요.' }
   }
 }
@@ -117,7 +114,6 @@ export async function deletePhoto(id: string) {
     revalidatePath('/gallery')
     return { success: true }
   } catch (e) {
-    console.error('deletePhoto failed:', e)
     return { error: '사진 삭제 중 오류가 발생했어요.' }
   }
 }

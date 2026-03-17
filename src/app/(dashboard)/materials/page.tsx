@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -13,6 +13,7 @@ import {
   File,
   Upload,
   Trash2,
+  Plus,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -20,14 +21,35 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useMaterials } from '@/hooks/useMaterials'
 import { useUser } from '@/hooks/useUser'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { deleteMaterial } from '@/actions/materials'
+import { insert } from '@/lib/local-db'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
 
@@ -246,11 +268,148 @@ function MaterialList({
   )
 }
 
+function CreateMaterialDialog({
+  open,
+  onOpenChange,
+  eventId,
+  onCreated,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  eventId: string
+  onCreated: () => void
+}) {
+  const mode = useAppModeStore((s) => s.mode)
+  const department = useDepartmentFilterStore((s) => s.department)
+  const [title, setTitle] = useState('')
+  const [category, setCategory] = useState<MaterialCategory>('textbook')
+  const [fileUrl, setFileUrl] = useState('')
+  const [dayNumber, setDayNumber] = useState<string>('none')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const resetForm = useCallback(() => {
+    setTitle('')
+    setCategory('textbook')
+    setFileUrl('')
+    setDayNumber('none')
+  }, [])
+
+  const handleSubmit = useCallback(async () => {
+    if (!title.trim()) {
+      toast.error('자료 제목을 입력해 주세요.')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    if (mode === 'local' || mode === 'demo') {
+      const newMaterial: Material = {
+        id: `m-${Date.now()}`,
+        event_id: eventId,
+        title: title.trim(),
+        category,
+        file_url: fileUrl.trim() || '#',
+        file_type: 'pdf',
+        file_size: null,
+        day_number: dayNumber === 'none' ? null : Number(dayNumber),
+        uploaded_by: 'demo-user',
+        department: department !== 'all' ? department : null,
+        created_at: new Date().toISOString(),
+      }
+      insert<Material>('materials', newMaterial)
+      toast.success('자료가 등록됐어요.')
+      resetForm()
+      onOpenChange(false)
+      onCreated()
+    } else {
+      const { createMaterial } = await import('@/actions/materials')
+      const result = await createMaterial({
+        eventId,
+        title: title.trim(),
+        category,
+        fileUrl: fileUrl.trim() || '#',
+        fileType: 'pdf',
+        fileSize: null,
+        dayNumber: dayNumber === 'none' ? null : Number(dayNumber),
+      })
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success('자료가 등록됐어요.')
+        resetForm()
+        onOpenChange(false)
+        onCreated()
+      }
+    }
+
+    setIsSubmitting(false)
+  }, [eventId, title, category, fileUrl, dayNumber, department, mode, resetForm, onOpenChange, onCreated])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85dvh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>자료 등록</DialogTitle>
+          <DialogDescription>행사 자료를 등록해 주세요.</DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <Label htmlFor="mat-title">자료 제목</Label>
+            <Input id="mat-title" placeholder="예: 1일차 큐티 교재" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={100} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="mat-category">카테고리</Label>
+            <Select value={category} onValueChange={(v) => setCategory(v as MaterialCategory)}>
+              <SelectTrigger id="mat-category" className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="textbook">교재</SelectItem>
+                <SelectItem value="hymn">찬양</SelectItem>
+                <SelectItem value="worksheet">활동지</SelectItem>
+                <SelectItem value="video">영상</SelectItem>
+                <SelectItem value="other">기타</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="mat-url">파일 URL (선택)</Label>
+            <Input id="mat-url" placeholder="https://..." value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="mat-day">일차</Label>
+            <Select value={dayNumber} onValueChange={setDayNumber}>
+              <SelectTrigger id="mat-day" className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">전체</SelectItem>
+                <SelectItem value="1">1일차</SelectItem>
+                <SelectItem value="2">2일차</SelectItem>
+                <SelectItem value="3">3일차</SelectItem>
+                <SelectItem value="4">4일차</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit} disabled={isSubmitting || !title.trim()} className="min-h-12 w-full sm:w-auto">
+            {isSubmitting ? '등록 중...' : '등록하기'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export default function MaterialsPage() {
   const { eventId } = useCurrentEvent()
-  const { data: materials, isLoading } = useMaterials(eventId ?? '')
+  const department = useDepartmentFilterStore((s) => s.department)
+  const { data: materials, isLoading } = useMaterials(eventId ?? '', undefined, department)
   const { data: user } = useUser()
   const queryClient = useQueryClient()
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const canManage = user?.role === 'admin' || user?.role === 'staff'
 
@@ -286,13 +445,15 @@ export default function MaterialsPage() {
         backHref="/dashboard"
         action={
           canManage ? (
-            <Button className="min-h-12 gap-2" disabled>
-              <Upload />
-              자료 업로드
+            <Button className="min-h-12 gap-2" onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4" />
+              자료 등록
             </Button>
           ) : undefined
         }
       />
+
+      <DepartmentFilter />
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<MaterialSkeleton />}>
@@ -326,6 +487,15 @@ export default function MaterialsPage() {
           )}
         </LoadingSkeleton>
       </motion.div>
+
+      {canManage && eventId && (
+        <CreateMaterialDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          eventId={eventId}
+          onCreated={handleRefresh}
+        />
+      )}
     </motion.div>
   )
 }

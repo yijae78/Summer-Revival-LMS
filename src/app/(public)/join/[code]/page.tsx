@@ -28,7 +28,8 @@ async function fetchEventByCode(code: string): Promise<Event | null> {
 }
 
 export async function generateMetadata({ params }: JoinPageProps) {
-  const { code } = await params
+  const { code: rawCode } = await params
+  const code = rawCode.replace(/[^a-zA-Z0-9]/g, '')
   const event = await fetchEventByCode(code)
   return {
     title: event ? `${event.name} 참가 신청` : '참가 신청',
@@ -37,7 +38,8 @@ export async function generateMetadata({ params }: JoinPageProps) {
 }
 
 export default async function JoinPage({ params }: JoinPageProps) {
-  const { code } = await params
+  const { code: rawCode } = await params
+  const code = rawCode.replace(/[^a-zA-Z0-9]/g, '')
   const event = await fetchEventByCode(code)
 
   if (!event) {

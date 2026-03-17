@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint"
   },
@@ -13,6 +13,7 @@
     "@ai-sdk/groq": "^3.0.29",
     "@ai-sdk/react": "^3.0.118",
     "@hookform/resolvers": "^5.2.2",
+    "@serwist/next": "^9.5.7",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.99.1",
     "@tanstack/react-query": "^5.90.21",
@@ -31,6 +32,7 @@
     "react-hook-form": "^7.71.2",
     "react-modal-sheet": "^5.3.1",
     "recharts": "^3.8.0",
+    "serwist": "^9.5.7",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6",

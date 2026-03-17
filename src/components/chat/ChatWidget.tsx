@@ -100,6 +100,7 @@ export function ChatWidget() {
               'lg:h-[600px] lg:w-[400px] lg:rounded-2xl'
             )}
             role="dialog"
+            aria-modal="true"
             aria-label="AI 어시스턴트 채팅"
           >
             <ChatPanel

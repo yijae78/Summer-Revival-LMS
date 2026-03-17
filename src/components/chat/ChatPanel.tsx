@@ -156,6 +156,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
             name="prompt"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            maxLength={500}
             placeholder={isOnline ? '메시지를 입력하세요...' : '오프라인 상태에요'}
             disabled={isLoading || !isOnline}
             aria-label="AI 도우미에게 질문하기"

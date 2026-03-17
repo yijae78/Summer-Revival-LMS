@@ -14,6 +14,7 @@ import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useParticipants } from '@/hooks/useParticipants'
+import { DEPARTMENTS, matchDepartment as matchDept } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 import { formatRelativeTime } from '@/lib/utils/format-date'
 
@@ -36,7 +37,7 @@ const GRADE_LABELS: Record<string, string> = {
   high_2: '고2',
   high_3: '고3',
   college: '대학생',
-  adult: '성인',
+  adult: '교사',
 }
 
 function ParticipantCard({
@@ -140,25 +141,6 @@ function ParticipantSkeleton() {
   )
 }
 
-const DEPARTMENTS = [
-  { key: 'all', label: '전체', emoji: '👥', gradient: 'from-slate-500 to-slate-600', subGrades: [] },
-  { key: 'kindergarten', label: '유치부', emoji: '🧒', gradient: 'from-pink-500 to-rose-500', subGrades: ['유치부'] },
-  { key: 'children', label: '아동부', emoji: '🌱', gradient: 'from-emerald-500 to-green-500', subGrades: ['초1', '초2', '초3'] },
-  { key: 'elementary', label: '초등부', emoji: '📚', gradient: 'from-sky-500 to-blue-500', subGrades: ['초4', '초5', '초6'] },
-  { key: 'middle', label: '중등부', emoji: '⚡', gradient: 'from-indigo-500 to-purple-500', subGrades: ['중1', '중2', '중3'] },
-  { key: 'high', label: '고등부', emoji: '🔥', gradient: 'from-orange-500 to-amber-500', subGrades: ['고1', '고2', '고3'] },
-  { key: 'college', label: '청년부', emoji: '✨', gradient: 'from-fuchsia-500 to-purple-500', subGrades: ['대학생'] },
-  { key: 'adult', label: '성인', emoji: '🙏', gradient: 'from-cyan-500 to-teal-500', subGrades: ['성인'] },
-]
-
-function matchDepartment(grade: string | null, deptKey: string): boolean {
-  if (deptKey === 'all') return true
-  if (!grade) return false
-  const dept = DEPARTMENTS.find((d) => d.key === deptKey)
-  if (!dept) return false
-  return dept.subGrades.includes(grade)
-}
-
 function matchSubGrade(grade: string | null, subGrade: string | null): boolean {
   if (!subGrade) return true
   if (!grade) return false
@@ -182,7 +164,7 @@ export default function ParticipantsPage() {
 
     // 부서 필터
     if (department !== 'all') {
-      filtered = filtered.filter((p) => matchDepartment(p.grade, department))
+      filtered = filtered.filter((p) => matchDept(p.grade, department))
     }
 
     // 세부 학년 필터
@@ -208,7 +190,7 @@ export default function ParticipantsPage() {
     if (!participants) return {} as Record<string, number>
     const map: Record<string, number> = { all: participants.length }
     DEPARTMENTS.slice(1).forEach((d) => {
-      map[d.key] = participants.filter((p) => matchDepartment(p.grade, d.key)).length
+      map[d.key] = participants.filter((p) => matchDept(p.grade, d.key)).length
     })
     return map
   }, [participants])

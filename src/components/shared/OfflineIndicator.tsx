@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { WifiOff } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -10,12 +10,20 @@ export function OfflineIndicator() {
   const isOnline = useNetworkStatus()
   const [showRecovery, setShowRecovery] = useState(false)
   const [wasOffline, setWasOffline] = useState(false)
+  const wasEverOnlineRef = useRef(false)
+
+  // Track whether user was ever online (distinguishes initial offline from reconnection)
+  useEffect(() => {
+    if (isOnline) {
+      wasEverOnlineRef.current = true
+    }
+  }, [isOnline])
 
   useEffect(() => {
     if (!isOnline) {
       setWasOffline(true)
       setShowRecovery(false)
-    } else if (wasOffline) {
+    } else if (wasOffline && wasEverOnlineRef.current) {
       setShowRecovery(true)
       const timer = setTimeout(() => {
         setShowRecovery(false)

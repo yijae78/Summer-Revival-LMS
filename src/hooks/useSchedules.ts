@@ -12,11 +12,16 @@ import { getAll } from '@/lib/local-db'
 
 import type { Schedule } from '@/types'
 
-export function useSchedules(eventId: string | null, day?: number) {
+function filterByDepartment(schedules: Schedule[], department?: string): Schedule[] {
+  if (!department || department === 'all') return schedules
+  return schedules.filter((s) => !s.department || s.department === department)
+}
+
+export function useSchedules(eventId: string | null, day?: number, department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.schedules(eventId!, day),
+    queryKey: queryKeys.schedules(eventId!, day, department),
     queryFn: async (): Promise<Schedule[]> => {
       if (mode === 'local') {
         let schedules = getAll<Schedule>('schedules').filter(
@@ -25,6 +30,7 @@ export function useSchedules(eventId: string | null, day?: number) {
         if (day !== undefined) {
           schedules = schedules.filter((s) => s.day_number === day)
         }
+        schedules = filterByDepartment(schedules, department)
         return schedules.sort((a, b) => {
           if (a.day_number !== b.day_number) return a.day_number - b.day_number
           if (a.order_index !== b.order_index) return a.order_index - b.order_index
@@ -48,7 +54,7 @@ export function useSchedules(eventId: string | null, day?: number) {
       const { data, error } = await q
 
       if (error) throw error
-      return (data ?? []) as Schedule[]
+      return filterByDepartment((data ?? []) as Schedule[], department)
     },
     enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
@@ -58,6 +64,7 @@ export function useSchedules(eventId: string | null, day?: number) {
     if (day !== undefined) {
       schedules = schedules.filter((s) => s.day_number === day)
     }
+    schedules = filterByDepartment(schedules, department)
     return createDemoQueryResult(schedules)
   }
 

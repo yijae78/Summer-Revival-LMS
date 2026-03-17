@@ -20,11 +20,16 @@ function sortAnnouncements(announcements: Announcement[]): Announcement[] {
   })
 }
 
-export function useAnnouncements(eventId: string, type?: string) {
+function filterByDepartment(announcements: Announcement[], department?: string): Announcement[] {
+  if (!department || department === 'all') return announcements
+  return announcements.filter((a) => !a.department || a.department === department)
+}
+
+export function useAnnouncements(eventId: string, type?: string, department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.announcements(eventId, type),
+    queryKey: queryKeys.announcements(eventId, type, department),
     queryFn: async () => {
       if (mode === 'local') {
         let announcements = getAll<Announcement>('announcements').filter(
@@ -33,6 +38,7 @@ export function useAnnouncements(eventId: string, type?: string) {
         if (type) {
           announcements = announcements.filter((a) => a.type === type)
         }
+        announcements = filterByDepartment(announcements, department)
         return sortAnnouncements(announcements)
       }
 
@@ -50,7 +56,7 @@ export function useAnnouncements(eventId: string, type?: string) {
 
       const { data, error } = await q
       if (error) throw error
-      return data as Announcement[]
+      return filterByDepartment(data as Announcement[], department)
     },
     enabled: !!eventId && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
@@ -60,6 +66,7 @@ export function useAnnouncements(eventId: string, type?: string) {
     if (type) {
       announcements = announcements.filter((a) => a.type === type)
     }
+    announcements = filterByDepartment(announcements, department)
     return createDemoQueryResult(sortAnnouncements(announcements))
   }
 

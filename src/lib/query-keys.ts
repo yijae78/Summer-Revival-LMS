@@ -12,8 +12,8 @@ export const queryKeys = {
   participant: (id: string) => ['participant', id] as const,
 
   // Schedules
-  schedules: (eventId: string, day?: number) =>
-    ['schedules', eventId, ...(day != null ? [day] : [])] as const,
+  schedules: (eventId: string, day?: number, department?: string) =>
+    ['schedules', eventId, ...(day != null ? [day] : []), ...(department ? [department] : [])] as const,
 
   // Attendance
   attendance: (scheduleId: string) => ['attendance', scheduleId] as const,
@@ -21,13 +21,14 @@ export const queryKeys = {
     ['attendanceSummary', eventId, ...(date ? [date] : [])] as const,
 
   // Groups
-  groups: (eventId: string) => ['groups', eventId] as const,
+  groups: (eventId: string, department?: string) =>
+    ['groups', eventId, ...(department ? [department] : [])] as const,
   group: (id: string) => ['group', id] as const,
   groupMembers: (groupId: string) => ['groupMembers', groupId] as const,
 
   // Points
-  points: (eventId: string, type?: 'individual' | 'group') =>
-    ['points', eventId, ...(type ? [type] : [])] as const,
+  points: (eventId: string, type?: 'individual' | 'group', department?: string) =>
+    ['points', eventId, ...(type ? [type] : []), ...(department ? [department] : [])] as const,
 
   // Quizzes
   quizzes: (eventId: string) => ['quizzes', eventId] as const,
@@ -35,12 +36,12 @@ export const queryKeys = {
   quizResponses: (quizId: string) => ['quizResponses', quizId] as const,
 
   // Announcements
-  announcements: (eventId: string, type?: string) =>
-    ['announcements', eventId, ...(type ? [type] : [])] as const,
+  announcements: (eventId: string, type?: string, department?: string) =>
+    ['announcements', eventId, ...(type ? [type] : []), ...(department ? [department] : [])] as const,
 
   // Materials
-  materials: (eventId: string, category?: string) =>
-    ['materials', eventId, ...(category ? [category] : [])] as const,
+  materials: (eventId: string, category?: string, department?: string) =>
+    ['materials', eventId, ...(category ? [category] : []), ...(department ? [department] : [])] as const,
 
   // Gallery
   albums: (eventId: string) => ['albums', eventId] as const,
@@ -50,5 +51,6 @@ export const queryKeys = {
   rooms: (eventId: string) => ['rooms', eventId] as const,
 
   // Accounting
-  accounting: (eventId: string) => ['accounting', eventId] as const,
+  accounting: (eventId: string, department?: string) =>
+    ['accounting', eventId, ...(department ? [department] : [])] as const,
 } as const

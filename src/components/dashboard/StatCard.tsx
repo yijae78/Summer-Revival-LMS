@@ -101,41 +101,47 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl border bg-gradient-to-br backdrop-blur-xl p-5 transition-all duration-300',
-        'hover:scale-[1.02] hover:-translate-y-0.5',
+        'group relative overflow-hidden rounded-xl border bg-gradient-to-br backdrop-blur-xl transition-all duration-300',
+        'p-3 lg:rounded-2xl lg:p-5',
         colors.gradient,
         colors.border,
         colors.glow,
         className
       )}
     >
-      {/* Background watermark icon */}
-      <div className="pointer-events-none absolute -bottom-4 -right-4 opacity-100">
-        <Icon className={cn('h-28 w-28', colors.watermark)} />
+      {/* Background watermark */}
+      <div className="pointer-events-none absolute -bottom-3 -right-3 lg:-bottom-4 lg:-right-4">
+        <Icon className={cn('h-16 w-16 lg:h-28 lg:w-28', colors.watermark)} />
       </div>
 
       <div className="relative z-10">
-        <div className="flex items-center justify-between">
-          <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg', colors.iconBg)}>
-            <Icon className="h-5 w-5 text-white" />
+        {/* Mobile: horizontal row / Desktop: stacked */}
+        <div className="flex items-center gap-3 lg:block">
+          <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-md lg:h-12 lg:w-12 lg:rounded-2xl lg:shadow-lg', colors.iconBg)}>
+            <Icon className="h-3.5 w-3.5 text-white lg:h-5 lg:w-5" />
           </div>
-          {delta && (
-            <span
-              className={cn(
-                'rounded-full px-2.5 py-0.5 text-xs font-semibold',
-                isPositive && 'bg-emerald-500/15 text-emerald-400',
-                isNegative && 'bg-red-500/15 text-red-400',
-                !isPositive && !isNegative && 'bg-white/[0.04] text-slate-400'
+
+          <div className="flex-1 lg:mt-3">
+            <div className="flex items-baseline gap-2">
+              <p className="font-mono text-xl font-bold tracking-tight text-white lg:text-3xl">{value}</p>
+              {delta && (
+                <span
+                  className={cn(
+                    'rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold lg:text-xs',
+                    isPositive && 'bg-emerald-500/15 text-emerald-400',
+                    isNegative && 'bg-red-500/15 text-red-400',
+                    !isPositive && !isNegative && 'bg-white/[0.04] text-slate-400'
+                  )}
+                >
+                  {delta}
+                </span>
               )}
-            >
-              {delta}
-            </span>
-          )}
+            </div>
+            <p className="text-[0.6875rem] text-slate-400 lg:mt-0.5 lg:text-sm">{label}</p>
+          </div>
         </div>
 
-        <p className="mt-4 font-mono text-3xl font-bold tracking-tight text-white">{value}</p>
-        <p className="mt-1 text-sm text-slate-400">{label}</p>
-        {description && <p className="mt-2 text-xs text-slate-500">{description}</p>}
+        {description && <p className="mt-1.5 text-[0.625rem] text-slate-500 lg:mt-2 lg:text-xs">{description}</p>}
       </div>
     </div>
   )

@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { LogOut, Moon, Sun, Monitor, RefreshCw, CloudOff, Info, User, Lock, Eye, EyeOff } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  LogOut, Moon, Sun, Monitor, RefreshCw, CloudOff, Info, User, Lock, Eye, EyeOff,
+  Building2, CalendarDays, BookOpen, Save, Check,
+} from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useUser } from '@/hooks/useUser'
@@ -13,11 +17,18 @@ import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
 import { useOfflineSync } from '@/hooks/useOfflineSync'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 
 import { useAdminAuthStore } from '@/stores/adminAuthStore'
+import { useAppModeStore } from '@/stores/appModeStore'
+import { useEventStore } from '@/stores/eventStore'
 import { AdminGate } from '@/components/shared/AdminGate'
+import { DEPARTMENT_LIST } from '@/constants/departments'
+import { update as updateLocal } from '@/lib/local-db'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+
+import type { Event } from '@/types'
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
@@ -31,6 +42,8 @@ const THEME_OPTIONS: { value: ThemeOption; label: string; icon: typeof Sun }[] =
   { value: 'dark', label: '다크', icon: Moon },
   { value: 'system', label: '시스템', icon: Monitor },
 ]
+
+const inputClass = 'h-12 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10'
 
 function GlassSection({
   icon: Icon,
@@ -68,6 +81,244 @@ function GlassSection({
   )
 }
 
+// ============================================
+// Event Info Editor
+// ============================================
+
+function EventInfoSection() {
+  const { event, eventId } = useCurrentEvent()
+  const mode = useAppModeStore((s) => s.mode)
+  const eventStore = useEventStore()
+
+  const settings = (event?.settings ?? {}) as Record<string, unknown>
+
+  const [churchName, setChurchName] = useState('')
+  const [eventName, setEventName] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [location, setLocation] = useState('')
+  const [theme, setEventTheme] = useState('')
+  const [themeVerse, setThemeVerse] = useState('')
+  const [departments, setDepartments] = useState<string[]>([])
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  // Load current values
+  useEffect(() => {
+    if (!event) return
+    setChurchName((settings.churchName as string) ?? '')
+    setEventName(event.name ?? '')
+    setStartDate(event.start_date ?? '')
+    setEndDate(event.end_date ?? '')
+    setLocation(event.location ?? '')
+    setEventTheme((settings.theme as string) ?? '')
+    setThemeVerse((settings.themeVerse as string) ?? '')
+    setDepartments((settings.departments as string[]) ?? [])
+  }, [event, settings])
+
+  function toggleDepartment(key: string) {
+    setDepartments((prev) =>
+      prev.includes(key) ? prev.filter((d) => d !== key) : [...prev, key]
+    )
+  }
+
+  const handleSave = useCallback(async () => {
+    if (!eventId || !event) return
+
+    setIsSaving(true)
+    try {
+      const updatedEvent: Event = {
+        ...event,
+        name: eventName.trim() || event.name,
+        start_date: startDate || event.start_date,
+        end_date: endDate || event.end_date,
+        location: location.trim() || null,
+        settings: {
+          ...settings,
+          churchName: churchName.trim(),
+          departments,
+          theme: theme.trim() || null,
+          themeVerse: themeVerse.trim() || null,
+        },
+      }
+
+      if (mode === 'local' || mode === 'demo') {
+        updateLocal<Event>('events', eventId, updatedEvent)
+      }
+
+      if (mode === 'cloud') {
+        const { getSupabaseClient } = await import('@/lib/supabase/client')
+        const supabase = getSupabaseClient()
+        if (supabase) {
+          await supabase
+            .from('events')
+            .update({
+              name: updatedEvent.name,
+              start_date: updatedEvent.start_date,
+              end_date: updatedEvent.end_date,
+              location: updatedEvent.location,
+              settings: updatedEvent.settings,
+            })
+            .eq('id', eventId)
+        }
+      }
+
+      // Force re-render by toggling event ID
+      eventStore.clearCurrentEvent()
+      setTimeout(() => eventStore.setCurrentEventId(eventId), 50)
+
+      setSaved(true)
+      toast.success('행사 정보가 저장됐어요')
+      setTimeout(() => setSaved(false), 2000)
+    } catch {
+      toast.error('저장에 실패했어요. 다시 시도해 주세요.')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [eventId, event, eventName, startDate, endDate, location, churchName, departments, theme, themeVerse, settings, mode, eventStore])
+
+  if (!event) return null
+
+  return (
+    <GlassSection icon={Building2} title="행사 정보" description="교회·행사·부서 정보를 수정해요">
+      <div className="space-y-4">
+        {/* Church Name */}
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">교회 이름</Label>
+          <Input
+            value={churchName}
+            onChange={(e) => setChurchName(e.target.value)}
+            placeholder="예: 넘치는교회"
+            className={inputClass}
+          />
+        </div>
+
+        {/* Event Name */}
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">행사 이름</Label>
+          <Input
+            value={eventName}
+            onChange={(e) => setEventName(e.target.value)}
+            placeholder="예: 2026 여름수련회"
+            className={inputClass}
+          />
+        </div>
+
+        {/* Dates */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">시작일</Label>
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">종료일</Label>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        {/* Location */}
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">장소</Label>
+          <Input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="예: 속초 은혜수련원"
+            className={inputClass}
+          />
+        </div>
+
+        {/* Theme + Verse */}
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium flex items-center gap-1.5">
+            <BookOpen className="size-3.5" />
+            주제
+          </Label>
+          <Input
+            value={theme}
+            onChange={(e) => setEventTheme(e.target.value)}
+            placeholder="예: 주여 은혜를 주옵소서"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">주제 말씀</Label>
+          <Input
+            value={themeVerse}
+            onChange={(e) => setThemeVerse(e.target.value)}
+            placeholder="예: 고린도후서 9:8"
+            className={inputClass}
+          />
+        </div>
+
+        {/* Departments */}
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium flex items-center gap-1.5">
+            <CalendarDays className="size-3.5" />
+            부서 선택
+          </Label>
+          <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+            {DEPARTMENT_LIST.map((dept) => {
+              const isSelected = departments.includes(dept.key)
+              return (
+                <button
+                  key={dept.key}
+                  type="button"
+                  onClick={() => toggleDepartment(dept.key)}
+                  className={cn(
+                    'flex min-h-[44px] items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-medium transition-all duration-200',
+                    isSelected
+                      ? 'border-indigo-500/30 bg-indigo-500/15 text-indigo-300'
+                      : 'border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/[0.15]'
+                  )}
+                  aria-pressed={isSelected}
+                >
+                  <span>{dept.emoji}</span>
+                  <span>{dept.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || !churchName.trim() || !eventName.trim()}
+          className={cn(
+            'min-h-[48px] w-full rounded-xl font-bold text-white transition-all duration-300',
+            saved
+              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500'
+          )}
+        >
+          {saved ? (
+            <><Check className="mr-2 h-4 w-4" />저장 완료</>
+          ) : isSaving ? (
+            '저장 중...'
+          ) : (
+            <><Save className="mr-2 h-4 w-4" />변경사항 저장</>
+          )}
+        </Button>
+      </div>
+    </GlassSection>
+  )
+}
+
+// ============================================
+// Admin Password Section
+// ============================================
+
 function AdminPasswordSection() {
   const { passwordHash, setPassword, changePassword } = useAdminAuthStore()
   const [oldPw, setOldPw] = useState('')
@@ -85,6 +336,25 @@ function AdminPasswordSection() {
     if (newPw.length < 4) {
       toast.error('비밀번호는 4자리 이상이어야 해요')
       return
+    }
+    // Reject all same character (e.g. 1111, aaaa)
+    if (new Set(newPw.split('')).size === 1) {
+      toast.error('같은 문자만으로 이루어진 비밀번호는 사용할 수 없어요')
+      return
+    }
+    // Reject sequential numbers (ascending or descending)
+    const digits = newPw.split('').map(Number)
+    if (digits.every((d) => !Number.isNaN(d))) {
+      const isAscending = digits.every(
+        (d, i) => i === 0 || d === digits[i - 1] + 1
+      )
+      const isDescending = digits.every(
+        (d, i) => i === 0 || d === digits[i - 1] - 1
+      )
+      if (isAscending || isDescending) {
+        toast.error('연속된 숫자로 이루어진 비밀번호는 사용할 수 없어요')
+        return
+      }
     }
     if (newPw !== confirmPw) {
       toast.error('비밀번호가 일치하지 않아요')
@@ -138,7 +408,7 @@ function AdminPasswordSection() {
                 value={oldPw}
                 onChange={(e) => setOldPw(e.target.value)}
                 placeholder="현재 비밀번호"
-                className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] pr-10 backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10"
+                className={cn(inputClass, 'pr-10')}
               />
               <button
                 type="button"
@@ -156,7 +426,7 @@ function AdminPasswordSection() {
               value={newPw}
               onChange={(e) => setNewPw(e.target.value)}
               placeholder={hasPassword ? '새 비밀번호' : '비밀번호 설정 (4자리 이상)'}
-              className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] pr-10 backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10"
+              className={cn(inputClass, 'pr-10')}
             />
             {!hasPassword && (
               <button
@@ -174,7 +444,7 @@ function AdminPasswordSection() {
             value={confirmPw}
             onChange={(e) => setConfirmPw(e.target.value)}
             placeholder="비밀번호 확인"
-            className="h-12 rounded-xl border-white/[0.08] bg-white/[0.03] backdrop-blur-sm focus:border-indigo-500/30 focus:ring-2 focus:ring-indigo-500/10"
+            className={inputClass}
           />
           <Button
             type="submit"
@@ -190,6 +460,10 @@ function AdminPasswordSection() {
   )
 }
 
+// ============================================
+// Main Settings Page
+// ============================================
+
 export default function SettingsPage() {
   const { data: user } = useUser()
   const { signOut } = useAuth()
@@ -197,6 +471,8 @@ export default function SettingsPage() {
   const { isSyncing, pendingCount, triggerSync } = useOfflineSync()
   const isOnline = useNetworkStatus()
   const [isSigningOut, setIsSigningOut] = useState(false)
+
+  const isAdmin = user?.role === 'admin'
 
   async function handleSignOut() {
     setIsSigningOut(true)
@@ -239,6 +515,9 @@ export default function SettingsPage() {
           </div>
         </div>
       </GlassSection>
+
+      {/* Event Info Editor — Admin only */}
+      {isAdmin && <EventInfoSection />}
 
       {/* Theme Section */}
       <GlassSection icon={Sun} title="테마" description="화면 밝기를 설정하세요">

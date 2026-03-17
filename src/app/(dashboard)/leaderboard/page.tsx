@@ -9,10 +9,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 import { LeaderboardTable } from '@/components/dashboard/LeaderboardTable'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { usePointsRanking } from '@/hooks/usePoints'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 
 import type { RankEntry } from '@/hooks/usePoints'
 
@@ -45,13 +47,16 @@ function toLeaderboardEntries(
 
 export default function LeaderboardPage() {
   const { eventId } = useCurrentEvent()
+  const department = useDepartmentFilterStore((s) => s.department)
   const { data: groupRanking, isLoading: groupLoading } = usePointsRanking(
     eventId ?? null,
-    'group'
+    'group',
+    department
   )
   const { data: individualRanking, isLoading: individualLoading } = usePointsRanking(
     eventId ?? null,
-    'individual'
+    'individual',
+    department
   )
 
   const groupEntries = useMemo(
@@ -76,6 +81,8 @@ export default function LeaderboardPage() {
         description="조별/개인 순위를 확인해요"
         backHref="/dashboard"
       />
+
+      <DepartmentFilter />
 
       {/* Tabs */}
       <motion.div variants={fadeUp}>

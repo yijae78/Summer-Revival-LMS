@@ -9,6 +9,7 @@ import { useAppModeStore } from '@/stores/appModeStore'
 import { DEMO_GROUPS, DEMO_POINTS, DEMO_PARTICIPANTS } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
 import { getAll } from '@/lib/local-db'
+import { getDepartmentKeyFromGrade } from '@/constants/departments'
 
 import type { PointRecord, Group, Participant } from '@/types'
 
@@ -27,8 +28,12 @@ interface GroupRankEntry {
 
 export type RankEntry = IndividualRankEntry | GroupRankEntry
 
-function buildGroupRanking(groups: Group[]): GroupRankEntry[] {
-  return groups
+function buildGroupRanking(groups: Group[], department?: string): GroupRankEntry[] {
+  let filtered = groups
+  if (department && department !== 'all') {
+    filtered = groups.filter((g) => !g.department || g.department === department)
+  }
+  return filtered
     .map((g) => ({
       groupId: g.id,
       name: g.name,
@@ -40,15 +45,24 @@ function buildGroupRanking(groups: Group[]): GroupRankEntry[] {
 
 function buildIndividualRanking(
   points: PointRecord[],
-  participants: Participant[]
+  participants: Participant[],
+  department?: string
 ): IndividualRankEntry[] {
+  let filteredParticipants = participants
+  if (department && department !== 'all') {
+    filteredParticipants = participants.filter(
+      (p) => getDepartmentKeyFromGrade(p.grade) === department
+    )
+  }
+  const participantIds = new Set(filteredParticipants.map((p) => p.id))
+
   const totals = new Map<string, number>()
   for (const pt of points) {
-    if (pt.participant_id) {
+    if (pt.participant_id && participantIds.has(pt.participant_id)) {
       totals.set(pt.participant_id, (totals.get(pt.participant_id) ?? 0) + pt.amount)
     }
   }
-  const nameMap = new Map(participants.map((p) => [p.id, p.name]))
+  const nameMap = new Map(filteredParticipants.map((p) => [p.id, p.name]))
   return Array.from(totals.entries())
     .map(([pid, total]) => ({
       participantId: pid,
@@ -58,20 +72,20 @@ function buildIndividualRanking(
     .sort((a, b) => b.totalPoints - a.totalPoints)
 }
 
-export function usePointsRanking(eventId: string | null, type: 'individual' | 'group') {
+export function usePointsRanking(eventId: string | null, type: 'individual' | 'group', department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.points(eventId!, type),
+    queryKey: queryKeys.points(eventId!, type, department),
     queryFn: async (): Promise<RankEntry[]> => {
       if (mode === 'local') {
         if (type === 'group') {
           const groups = getAll<Group>('groups').filter((g) => g.event_id === eventId)
-          return buildGroupRanking(groups)
+          return buildGroupRanking(groups, department)
         }
         const points = getAll<PointRecord>('points').filter((p) => p.event_id === eventId)
         const participants = getAll<Participant>('participants')
-        return buildIndividualRanking(points, participants)
+        return buildIndividualRanking(points, participants, department)
       }
 
       const supabase = getSupabaseClient()!
@@ -79,16 +93,22 @@ export function usePointsRanking(eventId: string | null, type: 'individual' | 'g
       if (type === 'group') {
         const { data, error } = await supabase
           .from('groups')
-          .select('id, name, color, total_points')
+          .select('id, name, color, total_points, department')
           .eq('event_id', eventId!)
           .order('total_points', { ascending: false })
 
         if (error) throw error
-        return (data ?? []).map((g) => ({
-          groupId: g.id as string,
-          name: g.name as string,
-          color: g.color as string | null,
-          totalPoints: (g.total_points as number) ?? 0,
+
+        let groups = (data ?? []) as Group[]
+        if (department && department !== 'all') {
+          groups = groups.filter((g) => !g.department || g.department === department)
+        }
+
+        return groups.map((g) => ({
+          groupId: g.id,
+          name: g.name,
+          color: g.color,
+          totalPoints: g.total_points ?? 0,
         }))
       }
 
@@ -112,17 +132,27 @@ export function usePointsRanking(eventId: string | null, type: 'individual' | 'g
       const participantIds = Array.from(totals.keys())
       const { data: participants, error: partError } = await supabase
         .from('participants')
-        .select('id, name')
+        .select('id, name, grade')
         .in('id', participantIds)
 
       if (partError) throw partError
 
+      let filteredParticipants = participants ?? []
+      if (department && department !== 'all') {
+        filteredParticipants = filteredParticipants.filter(
+          (p) => getDepartmentKeyFromGrade(p.grade as string | null) === department
+        )
+      }
+
       const nameMap = new Map<string, string>()
-      for (const p of participants ?? []) {
+      const validIds = new Set<string>()
+      for (const p of filteredParticipants) {
         nameMap.set(p.id as string, p.name as string)
+        validIds.add(p.id as string)
       }
 
       const entries: IndividualRankEntry[] = Array.from(totals.entries())
+        .filter(([pid]) => validIds.has(pid))
         .map(([pid, total]) => ({
           participantId: pid,
           name: nameMap.get(pid) ?? '',
@@ -137,9 +167,9 @@ export function usePointsRanking(eventId: string | null, type: 'individual' | 'g
 
   if (mode === 'demo') {
     if (type === 'group') {
-      return createDemoQueryResult(buildGroupRanking(DEMO_GROUPS))
+      return createDemoQueryResult(buildGroupRanking(DEMO_GROUPS, department))
     }
-    return createDemoQueryResult(buildIndividualRanking(DEMO_POINTS, DEMO_PARTICIPANTS))
+    return createDemoQueryResult(buildIndividualRanking(DEMO_POINTS, DEMO_PARTICIPANTS, department))
   }
 
   return query

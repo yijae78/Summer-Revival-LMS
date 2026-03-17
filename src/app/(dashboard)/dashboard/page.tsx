@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   Calendar,
   Trophy,
+  Medal,
   Megaphone,
   Camera,
   HelpCircle,
@@ -18,12 +19,16 @@ import { motion } from 'framer-motion'
 import { EventBanner } from '@/components/dashboard/EventBanner'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { ZeroDataGuide } from '@/components/dashboard/ZeroDataGuide'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useEvents } from '@/hooks/useEvents'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useSchedules } from '@/hooks/useSchedules'
 import { useEventStore } from '@/stores/eventStore'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { useViewportStore } from '@/stores/viewportStore'
+import { getDepartmentByKey, getDepartmentTheme } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }
@@ -34,9 +39,10 @@ const QUICK_ACTIONS = [
   { href: '/schedule', icon: Calendar, label: '일정', gradient: 'from-purple-500 to-purple-600' },
   { href: '/attendance', icon: ClipboardCheck, label: '출석', gradient: 'from-emerald-500 to-emerald-600' },
   { href: '/quiz', icon: HelpCircle, label: '퀴즈', gradient: 'from-amber-500 to-amber-600' },
+  { href: '/leaderboard', icon: Trophy, label: '리더보드', gradient: 'from-amber-500 to-amber-600' },
   { href: '/announcements', icon: Megaphone, label: '공지', gradient: 'from-rose-500 to-rose-600' },
   { href: '/gallery', icon: Camera, label: '갤러리', gradient: 'from-cyan-500 to-cyan-600' },
-  { href: '/groups', icon: Trophy, label: '조/반', gradient: 'from-orange-500 to-orange-600' },
+  { href: '/groups', icon: Medal, label: '조/반', gradient: 'from-orange-500 to-orange-600' },
   { href: '/materials', icon: FolderOpen, label: '자료실', gradient: 'from-fuchsia-500 to-fuchsia-600' },
   { href: '/accounting', icon: Banknote, label: '회계', gradient: 'from-teal-500 to-teal-600' },
   { href: '/settings', icon: Settings, label: '설정', gradient: 'from-slate-500 to-slate-600' },
@@ -156,9 +162,21 @@ function EventSelector() {
 function DashboardContent() {
   const router = useRouter()
   const { event, isLoading: isEventLoading, eventId } = useCurrentEvent()
+  const viewport = useViewportStore((s) => s.viewport)
+  const isMobileView = viewport === 'mobile' || viewport === 'tablet'
+  const department = useDepartmentFilterStore((s) => s.department)
+  const deptDef = getDepartmentByKey(department)
+  const deptTheme = getDepartmentTheme(department)
   const { data: participants, isLoading: isParticipantsLoading } = useParticipants(eventId)
-  const { data: schedules, isLoading: isSchedulesLoading } = useSchedules(eventId)
+  const { data: schedules, isLoading: isSchedulesLoading } = useSchedules(eventId, undefined, department)
   const clearCurrentEvent = useEventStore((state) => state.clearCurrentEvent)
+
+  // Map department to StatCard color
+  const statColorMap: Record<string, 'indigo' | 'emerald' | 'fuchsia' | 'amber' | 'rose' | 'cyan'> = {
+    all: 'indigo', kindergarten: 'rose', children: 'emerald', elementary: 'cyan',
+    middle: 'indigo', high: 'amber', college: 'fuchsia', adult: 'cyan',
+  }
+  const statColor = statColorMap[department] ?? 'indigo'
 
   if (isEventLoading) {
     return (
@@ -186,18 +204,39 @@ function DashboardContent() {
 
   return (
     <motion.div
-      className="space-y-5"
+      className="space-y-3 md:space-y-5"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Welcome */}
-      <motion.div variants={fadeUp} className="flex items-start justify-between">
-        <div>
-          <h1 className="bg-gradient-to-r from-indigo-300 via-purple-300 to-fuchsia-300 bg-clip-text text-xl font-bold text-transparent">
-            안녕하세요!
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      {/* Welcome + Department Badge */}
+      <motion.div variants={fadeUp} className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className={cn('flex flex-wrap items-center', isMobileView ? 'gap-1.5' : 'gap-2.5')}>
+            <h1
+              className={cn('font-bold transition-colors duration-500', isMobileView ? 'text-sm' : 'text-xl')}
+              style={{ color: `rgba(${deptTheme.primary}, 0.9)` }}
+            >
+              안녕하세요!
+            </h1>
+            {department !== 'all' && deptDef && (
+              <motion.span
+                key={department}
+                initial={{ opacity: 0, scale: 0.8, y: -4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.6875rem] font-bold transition-all duration-500 lg:px-2.5 lg:py-1 lg:text-xs"
+                style={{
+                  background: `linear-gradient(135deg, rgba(${deptTheme.primary},0.2), rgba(${deptTheme.secondary},0.1))`,
+                  border: `1px solid rgba(${deptTheme.primary},0.25)`,
+                  color: `rgba(${deptTheme.primary}, 1)`,
+                }}
+              >
+                <span>{deptDef.emoji}</span>
+                {deptDef.label}
+              </motion.span>
+            )}
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground lg:mt-1 lg:text-sm">
             {hasData ? '오늘도 행사 준비를 함께해요' : '여름행사를 준비해 볼까요?'}
           </p>
         </div>
@@ -205,65 +244,47 @@ function DashboardContent() {
           type="button"
           onClick={clearCurrentEvent}
           className={cn(
-            'rounded-xl border border-purple-500/15 bg-gradient-to-br from-purple-500/10 to-purple-600/5 px-3 py-2 text-xs',
-            'text-purple-300 transition-all duration-300 backdrop-blur-xl',
-            'hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]'
+            'shrink-0 rounded-lg border px-2.5 py-1.5 text-[0.6875rem] transition-all duration-500 backdrop-blur-xl lg:rounded-xl lg:px-3 lg:py-2 lg:text-xs',
+            'hover:scale-[1.02]'
           )}
+          style={{
+            borderColor: `rgba(${deptTheme.primary},0.15)`,
+            background: `linear-gradient(135deg, rgba(${deptTheme.primary},0.1), rgba(${deptTheme.secondary},0.05))`,
+            color: `rgba(${deptTheme.primary},0.8)`,
+          }}
         >
           행사 변경
         </button>
       </motion.div>
 
+      <DepartmentFilter />
+
       {/* Event banner + Stats */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <motion.div variants={fadeUp} className="md:col-span-2 [&>div]:h-full">
-          <EventBanner
-            eventName={event.name}
-            startDate={startDate}
-            endDate={endDate}
-          />
+      <div className={cn(
+        isMobileView
+          ? 'space-y-2'
+          : 'grid grid-cols-4 gap-4'
+      )}>
+        <motion.div variants={fadeUp} className={cn(!isMobileView && 'col-span-2')}>
+          <EventBanner eventName={event.name} startDate={startDate} endDate={endDate} />
         </motion.div>
-        <motion.div
-          variants={fadeUp}
-          className="cursor-pointer"
-          onClick={() => router.push('/participants')}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <StatCard
-            value={isParticipantsLoading ? '...' : participantCount}
-            label="참가자"
-            icon={Users}
-            color="indigo"
-            description={hasParticipants ? undefined : '아직 등록된 참가자가 없어요'}
-            className="h-full"
-          />
-        </motion.div>
-        <motion.div
-          variants={fadeUp}
-          className="cursor-pointer"
-          onClick={() => router.push('/schedule')}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <StatCard
-            value={isSchedulesLoading ? '...' : hasSchedule ? scheduleCount : '\u2014'}
-            label={hasSchedule ? '일정' : '출석률'}
-            icon={hasSchedule ? Calendar : ClipboardCheck}
-            color="fuchsia"
-            description={hasSchedule ? `${scheduleCount}개 세션이 준비됐어요` : '행사가 시작되면 표시돼요'}
-            className="h-full"
-          />
-        </motion.div>
+        <div className={cn(isMobileView ? 'grid grid-cols-2 gap-2' : 'contents')}>
+          <motion.div variants={fadeUp} className="cursor-pointer" onClick={() => router.push('/participants')} whileTap={{ scale: 0.97 }}>
+            <StatCard value={isParticipantsLoading ? '...' : participantCount} label="참가자" icon={Users} color={statColor} className="h-full" />
+          </motion.div>
+          <motion.div variants={fadeUp} className="cursor-pointer" onClick={() => router.push('/schedule')} whileTap={{ scale: 0.97 }}>
+            <StatCard value={isSchedulesLoading ? '...' : hasSchedule ? scheduleCount : '\u2014'} label={hasSchedule ? '일정' : '출석률'} icon={hasSchedule ? Calendar : ClipboardCheck} color={statColor} className="h-full" />
+          </motion.div>
+        </div>
       </div>
 
-      {/* Quick Actions Grid */}
+      {/* Quick Actions Grid — mobile: compact 4 cols */}
       <motion.div variants={fadeUp}>
-        <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
+        <h2 className={cn('mb-2 flex items-center gap-2 font-semibold text-foreground', isMobileView ? 'text-sm' : 'mb-3 text-base')}>
           빠른 이동
         </h2>
         <motion.div
-          className="grid grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-5"
+          className={cn('grid gap-2', isMobileView ? 'grid-cols-4' : 'grid-cols-5 gap-3')}
           variants={stagger}
           initial="hidden"
           animate="show"
@@ -276,23 +297,25 @@ function DashboardContent() {
                 variants={fadeUp}
                 type="button"
                 onClick={() => router.push(action.href)}
-                whileHover={{ y: -4 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.93 }}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-2 rounded-2xl',
-                  'border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl',
-                  'px-3 py-4 transition-all duration-300',
-                  'hover:bg-white/[0.06] hover:shadow-2xl',
-                  'active:scale-[0.97]'
+                  'flex flex-col items-center justify-center rounded-xl',
+                  'bg-white/[0.04] backdrop-blur-xl transition-all duration-300',
+                  'hover:bg-white/[0.06] active:scale-[0.95]',
+                  isMobileView ? 'gap-1 px-1.5 py-2.5' : 'gap-2 rounded-2xl px-3 py-4'
                 )}
+                style={{
+                  border: `1px solid rgba(${deptTheme.primary},0.08)`,
+                }}
               >
                 <div className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg',
+                  'flex items-center justify-center bg-gradient-to-br',
+                  isMobileView ? 'h-9 w-9 rounded-xl shadow-md' : 'h-12 w-12 rounded-2xl shadow-lg',
                   action.gradient
                 )}>
-                  <Icon className="size-5 text-white" />
+                  <Icon className={cn('text-white', isMobileView ? 'size-4' : 'size-5')} />
                 </div>
-                <span className="text-xs font-medium text-slate-400">
+                <span className={cn('font-medium text-slate-400', isMobileView ? 'text-[0.625rem]' : 'text-xs')}>
                   {action.label}
                 </span>
               </motion.button>

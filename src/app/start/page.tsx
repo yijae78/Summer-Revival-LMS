@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Smartphone, Cloud, Eye, ArrowLeft } from 'lucide-react'
@@ -58,8 +59,18 @@ const containerVariants = {
   },
 }
 
+const containerVariantsReduced = {
+  hidden: {},
+  show: {},
+}
+
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+}
+
+const itemVariantsReduced = {
+  hidden: { opacity: 1, y: 0 },
   show: { opacity: 1, y: 0 },
 }
 
@@ -68,6 +79,16 @@ export default function StartPage() {
   const setMode = useAppModeStore((s) => s.setMode)
   const enableDemo = useDemoStore((s) => s.enableDemo)
   const setCurrentEventId = useEventStore((s) => s.setCurrentEventId)
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+
+  useEffect(() => {
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mql.matches)
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
 
   function handleSelect(option: ModeOption) {
     switch (option.id) {
@@ -107,9 +128,9 @@ export default function StartPage() {
       <motion.button
         type="button"
         onClick={() => router.push('/')}
-        initial={{ opacity: 0, x: -12 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, x: -12 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         className="absolute left-4 top-4 z-10 flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background md:left-8 md:top-8"
         aria-label="뒤로 가기"
       >
@@ -120,9 +141,9 @@ export default function StartPage() {
       {/* Header */}
       <motion.div
         className="relative z-10 mb-10 text-center"
-        initial={{ opacity: 0, y: -16 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
       >
         <h1
           className="bg-clip-text text-3xl font-black uppercase leading-none tracking-[-0.02em] text-transparent md:text-4xl"
@@ -130,7 +151,7 @@ export default function StartPage() {
             backgroundImage:
               'linear-gradient(90deg, #0ea5e9, #38bdf8, #7dd3fc, #38bdf8, #0ea5e9)',
             backgroundSize: '200% auto',
-            animation: 'waterFlow 6s linear infinite',
+            animation: prefersReducedMotion ? 'none' : 'waterFlow 6s linear infinite',
           }}
         >
           Flowing
@@ -143,7 +164,7 @@ export default function StartPage() {
       {/* Mode cards */}
       <motion.div
         className="relative z-10 flex w-full max-w-lg flex-col gap-4"
-        variants={containerVariants}
+        variants={prefersReducedMotion ? containerVariantsReduced : containerVariants}
         initial="hidden"
         animate="show"
       >
@@ -151,10 +172,10 @@ export default function StartPage() {
           <motion.button
             key={option.id}
             type="button"
-            variants={itemVariants}
-            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-            whileHover={{ y: -3, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
+            variants={prefersReducedMotion ? itemVariantsReduced : itemVariants}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            whileHover={prefersReducedMotion ? undefined : { y: -3, scale: 1.01 }}
+            whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
             onClick={() => handleSelect(option)}
             className={cn(
               'group relative flex min-h-[5rem] w-full items-center gap-4 overflow-hidden rounded-2xl border border-white/[0.08] p-5 text-left backdrop-blur-xl transition-all duration-300',
@@ -207,9 +228,9 @@ export default function StartPage() {
       {/* Footer hint */}
       <motion.p
         className="relative z-10 mt-8 max-w-sm text-center text-xs leading-[1.7] text-muted-foreground/60"
-        initial={{ opacity: 0 }}
+        initial={prefersReducedMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.8, duration: 0.5 }}
       >
         나중에 언제든 설정에서 모드를 변경할 수 있어요
       </motion.p>

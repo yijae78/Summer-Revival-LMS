@@ -33,7 +33,7 @@ export const DEMO_EVENT: Event = {
   invite_code: 'FLOW26',
   settings: {
     churchName: '넘치는교회',
-    departments: ['중고등부'],
+    departments: ['kindergarten', 'children', 'elementary', 'middle', 'high', 'college'],
     theme: '주여 은혜를 주옵소서',
     themeVerse: '고린도후서 9:8',
   },
@@ -801,6 +801,86 @@ export const DEMO_SCHEDULES: Schedule[] = [
     order_index: 2,
     created_at: '2026-07-01T00:00:00.000Z',
   },
+  // Department-specific schedules
+  {
+    id: 's20',
+    event_id: 'demo-event-1',
+    day_number: 2,
+    date: '2026-07-21',
+    title: '중등부 성경공부',
+    type: 'study',
+    start_time: '16:30',
+    end_time: '17:30',
+    location: '소예배실 A',
+    speaker: '박전도사',
+    description: '중등부 대상 소그룹 성경공부',
+    materials: null,
+    order_index: 8,
+    department: 'middle',
+    created_at: '2026-07-01T00:00:00.000Z',
+  },
+  {
+    id: 's21',
+    event_id: 'demo-event-1',
+    day_number: 2,
+    date: '2026-07-21',
+    title: '고등부 성경공부',
+    type: 'study',
+    start_time: '16:30',
+    end_time: '17:30',
+    location: '소예배실 B',
+    speaker: '이전도사',
+    description: '고등부 대상 심화 성경공부',
+    materials: null,
+    order_index: 8,
+    department: 'high',
+    created_at: '2026-07-01T00:00:00.000Z',
+  },
+  {
+    id: 's22',
+    event_id: 'demo-event-1',
+    day_number: 3,
+    date: '2026-07-22',
+    title: '중등부 조별활동',
+    type: 'recreation',
+    start_time: '14:00',
+    end_time: '15:30',
+    location: '운동장',
+    speaker: null,
+    description: '중등부 조별 체육활동',
+    materials: null,
+    order_index: 4,
+    department: 'middle',
+    created_at: '2026-07-01T00:00:00.000Z',
+  },
+  {
+    id: 's23',
+    event_id: 'demo-event-1',
+    day_number: 3,
+    date: '2026-07-22',
+    title: '고등부 토론모임',
+    type: 'study',
+    start_time: '14:00',
+    end_time: '15:30',
+    location: '세미나실',
+    speaker: '이전도사',
+    description: '고등부 신앙 토론 및 나눔',
+    materials: null,
+    order_index: 4,
+    department: 'high',
+    created_at: '2026-07-01T00:00:00.000Z',
+  },
+  // 유치부 전용
+  { id: 's24', event_id: 'demo-event-1', day_number: 2, date: '2026-07-21', title: '유치부 율동놀이', type: 'recreation', start_time: '10:30', end_time: '11:30', location: '유치부실', speaker: null, description: '유치부 찬양 율동 + 신체놀이', materials: null, order_index: 9, department: 'kindergarten', created_at: '2026-07-01T00:00:00.000Z' },
+  { id: 's25', event_id: 'demo-event-1', day_number: 3, date: '2026-07-22', title: '유치부 만들기 시간', type: 'special', start_time: '10:30', end_time: '11:30', location: '유치부실', speaker: null, description: '성경 인물 색칠 + 만들기', materials: null, order_index: 9, department: 'kindergarten', created_at: '2026-07-01T00:00:00.000Z' },
+  // 아동부 전용
+  { id: 's26', event_id: 'demo-event-1', day_number: 2, date: '2026-07-21', title: '아동부 성경학교', type: 'study', start_time: '10:30', end_time: '11:30', location: '소예배실 C', speaker: '김전도사', description: '아동부 눈높이 성경공부', materials: null, order_index: 9, department: 'children', created_at: '2026-07-01T00:00:00.000Z' },
+  { id: 's27', event_id: 'demo-event-1', day_number: 3, date: '2026-07-22', title: '아동부 보물찾기', type: 'recreation', start_time: '14:00', end_time: '15:30', location: '운동장', speaker: null, description: '아동부 팀별 보물찾기 게임', materials: null, order_index: 9, department: 'children', created_at: '2026-07-01T00:00:00.000Z' },
+  // 초등부 전용
+  { id: 's28', event_id: 'demo-event-1', day_number: 2, date: '2026-07-21', title: '초등부 성경퀴즈', type: 'special', start_time: '16:30', end_time: '17:30', location: '소예배실 D', speaker: null, description: '초등부 팀 대항 성경퀴즈', materials: null, order_index: 9, department: 'elementary', created_at: '2026-07-01T00:00:00.000Z' },
+  // 청년부 전용
+  { id: 's29', event_id: 'demo-event-1', day_number: 2, date: '2026-07-21', title: '청년부 소그룹 나눔', type: 'study', start_time: '16:30', end_time: '17:30', location: '카페', speaker: null, description: '청년부 신앙 간증 나눔', materials: null, order_index: 9, department: 'college', created_at: '2026-07-01T00:00:00.000Z' },
+  { id: 's30', event_id: 'demo-event-1', day_number: 3, date: '2026-07-22', title: '청년부 봉사활동', type: 'special', start_time: '14:00', end_time: '15:30', location: '수련원 전체', speaker: null, description: '어린이부서 보조 봉사 + 캠프 정리', materials: null, order_index: 9, department: 'college', created_at: '2026-07-01T00:00:00.000Z' },
 ]
 
 // ============================================
@@ -808,42 +888,21 @@ export const DEMO_SCHEDULES: Schedule[] = [
 // ============================================
 
 export const DEMO_GROUPS: Group[] = [
-  {
-    id: 'g1',
-    event_id: 'demo-event-1',
-    name: '1조 사랑',
-    leader_id: null,
-    color: '#38bdf8',
-    total_points: 120,
-    created_at: '2026-07-01T00:00:00.000Z',
-  },
-  {
-    id: 'g2',
-    event_id: 'demo-event-1',
-    name: '2조 믿음',
-    leader_id: null,
-    color: '#22d3ee',
-    total_points: 95,
-    created_at: '2026-07-01T00:00:00.000Z',
-  },
-  {
-    id: 'g3',
-    event_id: 'demo-event-1',
-    name: '3조 소망',
-    leader_id: null,
-    color: '#a78bfa',
-    total_points: 110,
-    created_at: '2026-07-01T00:00:00.000Z',
-  },
-  {
-    id: 'g4',
-    event_id: 'demo-event-1',
-    name: '4조 기쁨',
-    leader_id: null,
-    color: '#34d399',
-    total_points: 85,
-    created_at: '2026-07-01T00:00:00.000Z',
-  },
+  // 유치부
+  { id: 'g-k1', event_id: 'demo-event-1', name: '꽃잎반', leader_id: null, color: '#f472b6', total_points: 40, department: 'kindergarten', created_at: '2026-07-01T00:00:00.000Z' },
+  // 아동부
+  { id: 'g-c1', event_id: 'demo-event-1', name: '씨앗반', leader_id: null, color: '#34d399', total_points: 65, department: 'children', created_at: '2026-07-01T00:00:00.000Z' },
+  // 초등부
+  { id: 'g-e1', event_id: 'demo-event-1', name: '하늘반', leader_id: null, color: '#38bdf8', total_points: 80, department: 'elementary', created_at: '2026-07-01T00:00:00.000Z' },
+  { id: 'g-e2', event_id: 'demo-event-1', name: '바다반', leader_id: null, color: '#22d3ee', total_points: 75, department: 'elementary', created_at: '2026-07-01T00:00:00.000Z' },
+  // 중등부
+  { id: 'g1', event_id: 'demo-event-1', name: '1조 사랑', leader_id: null, color: '#818cf8', total_points: 120, department: 'middle', created_at: '2026-07-01T00:00:00.000Z' },
+  { id: 'g2', event_id: 'demo-event-1', name: '2조 믿음', leader_id: null, color: '#6366f1', total_points: 95, department: 'middle', created_at: '2026-07-01T00:00:00.000Z' },
+  // 고등부
+  { id: 'g3', event_id: 'demo-event-1', name: '3조 소망', leader_id: null, color: '#f97316', total_points: 110, department: 'high', created_at: '2026-07-01T00:00:00.000Z' },
+  { id: 'g4', event_id: 'demo-event-1', name: '4조 기쁨', leader_id: null, color: '#eab308', total_points: 85, department: 'high', created_at: '2026-07-01T00:00:00.000Z' },
+  // 청년부
+  { id: 'g-col1', event_id: 'demo-event-1', name: '은혜조', leader_id: null, color: '#e879f9', total_points: 70, department: 'college', created_at: '2026-07-01T00:00:00.000Z' },
 ]
 
 // ============================================
@@ -851,25 +910,32 @@ export const DEMO_GROUPS: Group[] = [
 // ============================================
 
 export const DEMO_GROUP_MEMBERS: GroupMember[] = [
-  // Group 1 (사랑): p1, p5, p9, p13
-  { id: 'gm1', group_id: 'g1', participant_id: 'p1' },
+  // 유치부 꽃잎반: p19, p20
+  { id: 'gm-k1', group_id: 'g-k1', participant_id: 'p19' },
+  { id: 'gm-k2', group_id: 'g-k1', participant_id: 'p20' },
+  // 아동부 씨앗반: p16, p17, p18
+  { id: 'gm-c1', group_id: 'g-c1', participant_id: 'p16' },
+  { id: 'gm-c2', group_id: 'g-c1', participant_id: 'p17' },
+  { id: 'gm-c3', group_id: 'g-c1', participant_id: 'p18' },
+  // 초등부 하늘반: p1, p10 / 바다반: p2, p11
+  { id: 'gm-e1', group_id: 'g-e1', participant_id: 'p1' },
+  { id: 'gm-e2', group_id: 'g-e1', participant_id: 'p10' },
+  { id: 'gm-e3', group_id: 'g-e2', participant_id: 'p2' },
+  { id: 'gm-e4', group_id: 'g-e2', participant_id: 'p11' },
+  // 중등부 1조 사랑: p3, p5, p12 / 2조 믿음: p4, p13
+  { id: 'gm1', group_id: 'g1', participant_id: 'p3' },
   { id: 'gm2', group_id: 'g1', participant_id: 'p5' },
-  { id: 'gm3', group_id: 'g1', participant_id: 'p9' },
-  { id: 'gm4', group_id: 'g1', participant_id: 'p13' },
-  // Group 2 (믿음): p2, p6, p10, p14
-  { id: 'gm5', group_id: 'g2', participant_id: 'p2' },
-  { id: 'gm6', group_id: 'g2', participant_id: 'p6' },
-  { id: 'gm7', group_id: 'g2', participant_id: 'p10' },
-  { id: 'gm8', group_id: 'g2', participant_id: 'p14' },
-  // Group 3 (소망): p3, p7, p11, p15
-  { id: 'gm9', group_id: 'g3', participant_id: 'p3' },
+  { id: 'gm3', group_id: 'g1', participant_id: 'p12' },
+  { id: 'gm4', group_id: 'g2', participant_id: 'p4' },
+  { id: 'gm5', group_id: 'g2', participant_id: 'p13' },
+  // 고등부 3조 소망: p6, p7 / 4조 기쁨: p8, p14
+  { id: 'gm9', group_id: 'g3', participant_id: 'p6' },
   { id: 'gm10', group_id: 'g3', participant_id: 'p7' },
-  { id: 'gm11', group_id: 'g3', participant_id: 'p11' },
-  { id: 'gm12', group_id: 'g3', participant_id: 'p15' },
-  // Group 4 (기쁨): p4, p8, p12
-  { id: 'gm13', group_id: 'g4', participant_id: 'p4' },
-  { id: 'gm14', group_id: 'g4', participant_id: 'p8' },
-  { id: 'gm15', group_id: 'g4', participant_id: 'p12' },
+  { id: 'gm13', group_id: 'g4', participant_id: 'p8' },
+  { id: 'gm14', group_id: 'g4', participant_id: 'p14' },
+  // 청년부 은혜조: p9, p15
+  { id: 'gm-col1', group_id: 'g-col1', participant_id: 'p9' },
+  { id: 'gm-col2', group_id: 'g-col1', participant_id: 'p15' },
 ]
 
 // ============================================
@@ -974,6 +1040,78 @@ export const DEMO_ANNOUNCEMENTS: Announcement[] = [
     is_pinned: false,
     author_id: 'demo-user',
     created_at: '2026-07-20T21:30:00.000Z',
+  },
+  {
+    id: 'a5',
+    event_id: 'demo-event-1',
+    title: '중등부 성경공부 장소 안내',
+    content: '내일 오후 4시 30분 중등부 성경공부는 소예배실 A에서 진행됩니다. 성경과 필기도구를 준비해 주세요.',
+    type: 'general',
+    target_group_id: null,
+    is_pinned: false,
+    author_id: 'demo-user',
+    department: 'middle',
+    created_at: '2026-07-20T22:00:00.000Z',
+  },
+  {
+    id: 'a6',
+    event_id: 'demo-event-1',
+    title: '고등부 토론모임 주제 안내',
+    content: '3일차 오후 고등부 토론 주제는 "은혜란 무엇인가?"입니다. 미리 고린도후서 9장을 읽어오세요.',
+    type: 'general',
+    target_group_id: null,
+    is_pinned: false,
+    author_id: 'demo-user',
+    department: 'high',
+    created_at: '2026-07-20T22:30:00.000Z',
+  },
+  {
+    id: 'a7',
+    event_id: 'demo-event-1',
+    title: '유치부 준비물 안내',
+    content: '유치부 친구들은 색연필, 가위, 풀을 꼭 챙겨와 주세요. 만들기 시간에 사용해요!',
+    type: 'general',
+    target_group_id: null,
+    is_pinned: false,
+    author_id: 'demo-user',
+    department: 'kindergarten',
+    created_at: '2026-07-19T10:00:00.000Z',
+  },
+  {
+    id: 'a8',
+    event_id: 'demo-event-1',
+    title: '아동부 보물찾기 안내',
+    content: '3일차 오후 보물찾기가 있어요! 편한 운동화를 신고 와주세요. 팀별로 진행됩니다.',
+    type: 'general',
+    target_group_id: null,
+    is_pinned: false,
+    author_id: 'demo-user',
+    department: 'children',
+    created_at: '2026-07-20T18:00:00.000Z',
+  },
+  {
+    id: 'a9',
+    event_id: 'demo-event-1',
+    title: '초등부 성경퀴즈 범위',
+    content: '2일차 초등부 성경퀴즈 범위는 창세기 1~3장이에요. 미리 읽어오면 더 재미있어요!',
+    type: 'general',
+    target_group_id: null,
+    is_pinned: false,
+    author_id: 'demo-user',
+    department: 'elementary',
+    created_at: '2026-07-20T19:00:00.000Z',
+  },
+  {
+    id: 'a10',
+    event_id: 'demo-event-1',
+    title: '청년부 봉사 일정',
+    content: '3일차 오후 청년부는 어린이부서 보조 봉사가 있어요. 담당 구역은 현장에서 안내해 드릴게요.',
+    type: 'general',
+    target_group_id: null,
+    is_pinned: false,
+    author_id: 'demo-user',
+    department: 'college',
+    created_at: '2026-07-20T23:00:00.000Z',
   },
 ]
 
@@ -1153,6 +1291,24 @@ export const DEMO_MATERIALS: Material[] = [
     uploaded_by: 'demo-user',
     created_at: '2026-07-16T10:00:00.000Z',
   },
+  // 유치부 자료
+  { id: 'm5', event_id: 'demo-event-1', title: '유치부 율동 영상 (예수님은 나의 친구)', category: 'video', file_url: '#', file_type: 'video/mp4', file_size: 52428800, day_number: 2, uploaded_by: 'demo-user', department: 'kindergarten', created_at: '2026-07-16T11:00:00.000Z' },
+  { id: 'm6', event_id: 'demo-event-1', title: '유치부 색칠공부 도안', category: 'worksheet', file_url: '#', file_type: 'pdf', file_size: 3145728, day_number: 3, uploaded_by: 'demo-user', department: 'kindergarten', created_at: '2026-07-16T11:30:00.000Z' },
+  // 아동부 자료
+  { id: 'm7', event_id: 'demo-event-1', title: '아동부 성경학교 교재', category: 'textbook', file_url: '#', file_type: 'pdf', file_size: 2097152, day_number: 2, uploaded_by: 'demo-user', department: 'children', created_at: '2026-07-16T12:00:00.000Z' },
+  { id: 'm8', event_id: 'demo-event-1', title: '아동부 보물찾기 미션 카드', category: 'worksheet', file_url: '#', file_type: 'pdf', file_size: 524288, day_number: 3, uploaded_by: 'demo-user', department: 'children', created_at: '2026-07-16T12:30:00.000Z' },
+  // 초등부 자료
+  { id: 'm9', event_id: 'demo-event-1', title: '초등부 성경퀴즈 문제지 (창세기 1-3장)', category: 'worksheet', file_url: '#', file_type: 'pdf', file_size: 819200, day_number: 2, uploaded_by: 'demo-user', department: 'elementary', created_at: '2026-07-16T13:00:00.000Z' },
+  { id: 'm10', event_id: 'demo-event-1', title: '초등부 찬양 가사집', category: 'hymn', file_url: '#', file_type: 'pdf', file_size: 1048576, day_number: null, uploaded_by: 'demo-user', department: 'elementary', created_at: '2026-07-16T13:30:00.000Z' },
+  // 중등부 자료
+  { id: 'm11', event_id: 'demo-event-1', title: '중등부 소그룹 교재 (요한복음)', category: 'textbook', file_url: '#', file_type: 'pdf', file_size: 1572864, day_number: 2, uploaded_by: 'demo-user', department: 'middle', created_at: '2026-07-16T14:00:00.000Z' },
+  { id: 'm12', event_id: 'demo-event-1', title: '중등부 조별활동 안내문', category: 'other', file_url: '#', file_type: 'pdf', file_size: 409600, day_number: 3, uploaded_by: 'demo-user', department: 'middle', created_at: '2026-07-16T14:30:00.000Z' },
+  // 고등부 자료
+  { id: 'm13', event_id: 'demo-event-1', title: '고등부 심화 성경공부 (이사야)', category: 'textbook', file_url: '#', file_type: 'pdf', file_size: 2621440, day_number: 2, uploaded_by: 'demo-user', department: 'high', created_at: '2026-07-16T15:00:00.000Z' },
+  { id: 'm14', event_id: 'demo-event-1', title: '고등부 토론 주제지 - 은혜란 무엇인가?', category: 'worksheet', file_url: '#', file_type: 'pdf', file_size: 614400, day_number: 3, uploaded_by: 'demo-user', department: 'high', created_at: '2026-07-16T15:30:00.000Z' },
+  // 청년부 자료
+  { id: 'm15', event_id: 'demo-event-1', title: '청년부 소그룹 나눔 가이드', category: 'textbook', file_url: '#', file_type: 'pdf', file_size: 1048576, day_number: 2, uploaded_by: 'demo-user', department: 'college', created_at: '2026-07-16T16:00:00.000Z' },
+  { id: 'm16', event_id: 'demo-event-1', title: '청년부 봉사 매뉴얼', category: 'other', file_url: '#', file_type: 'pdf', file_size: 716800, day_number: 3, uploaded_by: 'demo-user', department: 'college', created_at: '2026-07-16T16:30:00.000Z' },
 ]
 
 // ============================================
@@ -1277,6 +1433,13 @@ export const DEMO_INCOME_RECORDS: IncomeRecord[] = [
   { id: 'inc17', event_id: 'demo-event-1', participant_id: null, category: 'donation', amount: 200000, description: '박장로님 헌금', paid_at: '2026-07-12T10:00:00.000Z', created_at: '2026-07-12T10:00:00.000Z' },
   // Sponsorship
   { id: 'inc18', event_id: 'demo-event-1', participant_id: null, category: 'sponsorship', amount: 300000, description: '교회 청년부 후원', paid_at: '2026-07-05T10:00:00.000Z', created_at: '2026-07-05T10:00:00.000Z' },
+  // Department-specific donations
+  { id: 'inc19', event_id: 'demo-event-1', participant_id: null, category: 'donation', amount: 50000, description: '유치부 학부모회 헌금', paid_at: '2026-07-08T10:00:00.000Z', department: 'kindergarten', created_at: '2026-07-08T10:00:00.000Z' },
+  { id: 'inc20', event_id: 'demo-event-1', participant_id: null, category: 'donation', amount: 80000, description: '아동부 교사 헌금', paid_at: '2026-07-08T11:00:00.000Z', department: 'children', created_at: '2026-07-08T11:00:00.000Z' },
+  { id: 'inc21', event_id: 'demo-event-1', participant_id: null, category: 'sponsorship', amount: 100000, description: '초등부 후원금', paid_at: '2026-07-09T10:00:00.000Z', department: 'elementary', created_at: '2026-07-09T10:00:00.000Z' },
+  { id: 'inc22', event_id: 'demo-event-1', participant_id: null, category: 'donation', amount: 150000, description: '중등부 학부모회 헌금', paid_at: '2026-07-09T11:00:00.000Z', department: 'middle', created_at: '2026-07-09T11:00:00.000Z' },
+  { id: 'inc23', event_id: 'demo-event-1', participant_id: null, category: 'donation', amount: 120000, description: '고등부 교사 헌금', paid_at: '2026-07-10T11:00:00.000Z', department: 'high', created_at: '2026-07-10T11:00:00.000Z' },
+  { id: 'inc24', event_id: 'demo-event-1', participant_id: null, category: 'sponsorship', amount: 200000, description: '청년부 자체 후원', paid_at: '2026-07-11T10:00:00.000Z', department: 'college', created_at: '2026-07-11T10:00:00.000Z' },
 ]
 
 // ============================================
@@ -1292,4 +1455,16 @@ export const DEMO_EXPENSE_RECORDS: ExpenseRecord[] = [
   { id: 'exp6', event_id: 'demo-event-1', category: 'materials', amount: 45000, description: '활동 자료 및 문구류', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-16T10:00:00.000Z', created_at: '2026-07-16T10:00:00.000Z' },
   { id: 'exp7', event_id: 'demo-event-1', category: 'insurance', amount: 60000, description: '행사 보험료 (20명)', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-13T10:00:00.000Z', created_at: '2026-07-13T10:00:00.000Z' },
   { id: 'exp8', event_id: 'demo-event-1', category: 'equipment', amount: 35000, description: '음향 장비 렌탈', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-19T16:00:00.000Z', created_at: '2026-07-19T16:00:00.000Z' },
+  // Department-specific expenses
+  { id: 'exp9', event_id: 'demo-event-1', category: 'materials', amount: 25000, description: '유치부 색칠도안·풀·가위 구입', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-16T10:00:00.000Z', department: 'kindergarten', created_at: '2026-07-16T10:00:00.000Z' },
+  { id: 'exp10', event_id: 'demo-event-1', category: 'materials', amount: 18000, description: '유치부 율동 소품', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-17T10:00:00.000Z', department: 'kindergarten', created_at: '2026-07-17T10:00:00.000Z' },
+  { id: 'exp11', event_id: 'demo-event-1', category: 'materials', amount: 30000, description: '아동부 보물찾기 상품', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-17T11:00:00.000Z', department: 'children', created_at: '2026-07-17T11:00:00.000Z' },
+  { id: 'exp12', event_id: 'demo-event-1', category: 'materials', amount: 22000, description: '아동부 성경학교 교재 인쇄', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-14T11:00:00.000Z', department: 'children', created_at: '2026-07-14T11:00:00.000Z' },
+  { id: 'exp13', event_id: 'demo-event-1', category: 'materials', amount: 15000, description: '초등부 퀴즈 상품 구입', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-18T11:00:00.000Z', department: 'elementary', created_at: '2026-07-18T11:00:00.000Z' },
+  { id: 'exp14', event_id: 'demo-event-1', category: 'materials', amount: 35000, description: '중등부 소그룹 교재 인쇄', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-14T12:00:00.000Z', department: 'middle', created_at: '2026-07-14T12:00:00.000Z' },
+  { id: 'exp15', event_id: 'demo-event-1', category: 'materials', amount: 28000, description: '중등부 체육활동 장비', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-18T12:00:00.000Z', department: 'middle', created_at: '2026-07-18T12:00:00.000Z' },
+  { id: 'exp16', event_id: 'demo-event-1', category: 'materials', amount: 40000, description: '고등부 심화교재 인쇄', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-14T13:00:00.000Z', department: 'high', created_at: '2026-07-14T13:00:00.000Z' },
+  { id: 'exp17', event_id: 'demo-event-1', category: 'materials', amount: 20000, description: '고등부 토론 자료', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-18T13:00:00.000Z', department: 'high', created_at: '2026-07-18T13:00:00.000Z' },
+  { id: 'exp18', event_id: 'demo-event-1', category: 'food', amount: 45000, description: '청년부 봉사자 간식', receipt_url: '#', paid_by: 'demo-user', paid_at: '2026-07-19T10:00:00.000Z', department: 'college', created_at: '2026-07-19T10:00:00.000Z' },
+  { id: 'exp19', event_id: 'demo-event-1', category: 'materials', amount: 15000, description: '청년부 나눔 가이드 인쇄', receipt_url: null, paid_by: 'demo-user', paid_at: '2026-07-15T10:00:00.000Z', department: 'college', created_at: '2026-07-15T10:00:00.000Z' },
 ]

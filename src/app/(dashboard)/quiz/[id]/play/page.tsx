@@ -65,8 +65,8 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Track question start time
-  const questionStartRef = useRef<number>(Date.now())
+  // Track question start time (performance.now for higher precision)
+  const questionStartRef = useRef<number>(performance.now())
 
   const questions = quiz?.questions ?? []
   const currentQuestion: QuizQuestion | undefined = questions[currentIndex]
@@ -104,17 +104,10 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
     return () => clearInterval(interval)
   }, [currentIndex, phase, quiz?.time_limit])
 
-  // Auto-submit on timeout
-  useEffect(() => {
-    if (timeLeft === 0 && phase === 'playing') {
-      handleSubmitAnswer('')
-    }
-  }, [timeLeft]) // eslint-disable-line react-hooks/exhaustive-deps
-
   // Reset question start time when moving to next question
   useEffect(() => {
     if (phase === 'playing') {
-      questionStartRef.current = Date.now()
+      questionStartRef.current = performance.now()
       setSelectedAnswer(null)
       setFillAnswer('')
     }
@@ -125,7 +118,7 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
       if (!currentQuestion || !user?.id || isSubmitting) return
 
       setIsSubmitting(true)
-      const timeTaken = Date.now() - questionStartRef.current
+      const timeTaken = Math.round(performance.now() - questionStartRef.current)
       const isCorrect =
         answer.trim().toLowerCase() ===
         currentQuestion.correct_answer.trim().toLowerCase()
@@ -159,6 +152,13 @@ export default function QuizPlayPage({ params }: QuizPlayPageProps) {
     },
     [currentQuestion, user?.id, isSubmitting]
   )
+
+  // Auto-submit when timer reaches zero
+  useEffect(() => {
+    if (timeLeft === 0 && phase === 'playing') {
+      handleSubmitAnswer('')
+    }
+  }, [timeLeft, phase, handleSubmitAnswer])
 
   function handleNext() {
     if (currentIndex < totalQuestions - 1) {

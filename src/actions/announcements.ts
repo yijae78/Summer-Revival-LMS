@@ -16,6 +16,7 @@ export async function createAnnouncement(input: {
   content: string
   type: string
   isPinned: boolean
+  department?: string | null
 }): Promise<ActionResult> {
   try {
     const parsed = createAnnouncementSchema.safeParse(input)
@@ -39,17 +40,18 @@ export async function createAnnouncement(input: {
       type: parsed.data.type,
       is_pinned: parsed.data.isPinned,
       author_id: user.id,
+      ...(input.department ? { department: input.department } : {}),
     })
 
     if (error) {
-      console.error('createAnnouncement failed:', error)
+
       return { error: '공지사항 등록에 실패했어요.' }
     }
 
     revalidatePath('/announcements')
     return { success: true }
   } catch (e) {
-    console.error('createAnnouncement failed:', e)
+
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }
@@ -75,14 +77,14 @@ export async function deleteAnnouncement(id: string): Promise<ActionResult> {
       .eq('id', id)
 
     if (error) {
-      console.error('deleteAnnouncement failed:', error)
+
       return { error: '공지사항 삭제에 실패했어요.' }
     }
 
     revalidatePath('/announcements')
     return { success: true }
   } catch (e) {
-    console.error('deleteAnnouncement failed:', e)
+
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }

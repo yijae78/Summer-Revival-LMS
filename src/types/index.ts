@@ -59,6 +59,16 @@ export interface Event {
   updated_at: string
 }
 
+// === event settings ===
+export interface EventSettings {
+  churchName?: string
+  departments?: string[]
+  theme?: string
+  themeVerse?: string
+  adminPassword?: string
+  adminPhone?: string
+}
+
 // === profiles ===
 export interface Profile {
   id: string
@@ -102,6 +112,7 @@ export interface Group {
   leader_id: string | null
   color: string | null
   total_points: number
+  department?: string | null
   created_at: string
 }
 
@@ -127,6 +138,7 @@ export interface Schedule {
   description: string | null
   materials: string[] | null
   order_index: number
+  department?: string | null
   created_at: string
 }
 
@@ -150,6 +162,7 @@ export interface Announcement {
   target_group_id: string | null
   is_pinned: boolean
   author_id: string | null
+  department?: string | null
   created_at: string
 }
 
@@ -164,6 +177,7 @@ export interface Material {
   file_size: number | null
   day_number: number | null
   uploaded_by: string | null
+  department?: string | null
   created_at: string
 }
 
@@ -275,6 +289,7 @@ export interface IncomeRecord {
   amount: number
   description: string
   paid_at: string | null
+  department?: string | null
   created_at: string
 }
 
@@ -288,5 +303,6 @@ export interface ExpenseRecord {
   receipt_url: string | null
   paid_by: string | null
   paid_at: string | null
+  department?: string | null
   created_at: string
 }

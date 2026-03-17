@@ -9,9 +9,11 @@ import { motion } from 'framer-motion'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useSchedules } from '@/hooks/useSchedules'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 import { cn } from '@/lib/utils'
 
 import type { Schedule } from '@/types'
@@ -113,7 +115,8 @@ function AttendanceSkeleton() {
 export default function AttendancePage() {
   const router = useRouter()
   const { eventId } = useCurrentEvent()
-  const { data: schedules, isLoading } = useSchedules(eventId ?? null)
+  const department = useDepartmentFilterStore((s) => s.department)
+  const { data: schedules, isLoading } = useSchedules(eventId ?? null, undefined, department)
 
   // Group schedules by day
   const dayNumbers = useMemo(() => {
@@ -148,6 +151,8 @@ export default function AttendancePage() {
         description="세션별 출석을 관리해요"
         backHref="/dashboard"
       />
+
+      <DepartmentFilter />
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<AttendanceSkeleton />}>

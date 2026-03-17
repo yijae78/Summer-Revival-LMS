@@ -32,9 +32,13 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { RoleGuard } from '@/components/shared/RoleGuard'
 import { AccountingGate } from '@/components/shared/AccountingGate'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useAccounting } from '@/hooks/useAccounting'
+import { useUser } from '@/hooks/useUser'
 import { useEventStore } from '@/stores/eventStore'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
+import { getDepartmentByKey } from '@/constants/departments'
 import { cn } from '@/lib/utils'
 
 import type { IncomeRecord, ExpenseRecord, ExpenseCategory } from '@/types'
@@ -415,13 +419,21 @@ function AddExpenseDialog({ eventId }: { eventId: string }) {
 
 function AccountingContent() {
   const eventId = useEventStore((s) => s.currentEventId)
+  const { data: user } = useUser()
+  const globalDept = useDepartmentFilterStore((s) => s.department)
+
+  // Staff: locked to their department. Admin: can switch freely.
+  const isStaff = user?.role === 'staff'
+  const staffDepartment = (user as unknown as Record<string, unknown>)?.department as string | undefined
+  const department = isStaff && staffDepartment ? staffDepartment : globalDept
+
   const {
     budgetCategories,
     incomeRecords,
     expenseRecords,
     summary,
     isLoading,
-  } = useAccounting(eventId)
+  } = useAccounting(eventId, department)
 
   if (isLoading) {
     return (
@@ -554,6 +566,25 @@ function AccountingContent() {
   )
 }
 
+function AccountingDepartmentSection() {
+  const { data: user } = useUser()
+  const isStaff = user?.role === 'staff'
+  const staffDepartment = (user as unknown as Record<string, unknown>)?.department as string | undefined
+
+  if (isStaff && staffDepartment) {
+    const dept = getDepartmentByKey(staffDepartment)
+    return (
+      <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5">
+        <span className="text-sm">{dept?.emoji}</span>
+        <span className="text-sm font-semibold text-foreground">{dept?.label ?? staffDepartment} 회계</span>
+        <span className="text-xs text-muted-foreground/60">내 부서 회계만 표시돼요</span>
+      </div>
+    )
+  }
+
+  return <DepartmentFilter />
+}
+
 export default function AccountingPage() {
   return (
     <RoleGuard allowedRoles={['admin', 'staff']}>
@@ -564,6 +595,7 @@ export default function AccountingPage() {
             title="회계 관리"
             description="예산과 수입/지출을 관리해요"
           />
+          <AccountingDepartmentSection />
           <AccountingContent />
         </div>
       </AccountingGate>

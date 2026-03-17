@@ -1,11 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { Bell, Menu, Flame } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Bell, Menu, Flame, ChevronRight, Home } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
+import { getDepartmentByKey, getDepartmentTheme } from '@/constants/departments'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -24,187 +27,206 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+// Page name mapping for breadcrumb
+const PAGE_NAMES: Record<string, string> = {
+  '/dashboard': '홈',
+  '/participants': '참가자',
+  '/schedule': '일정',
+  '/attendance': '출석',
+  '/quiz': '퀴즈',
+  '/groups': '조/반',
+  '/announcements': '공지사항',
+  '/gallery': '갤러리',
+  '/materials': '자료실',
+  '/accounting': '회계',
+  '/settings': '설정',
+  '/leaderboard': '리더보드',
+}
+
+function getBreadcrumb(pathname: string): string {
+  if (PAGE_NAMES[pathname]) return PAGE_NAMES[pathname]
+  // Match dynamic routes like /participants/123
+  const base = '/' + pathname.split('/')[1]
+  return PAGE_NAMES[base] ?? ''
+}
+
 interface HeaderProps {
   className?: string
 }
 
 export function Header({ className }: HeaderProps) {
+  const pathname = usePathname()
   const { event } = useCurrentEvent()
   const settings = (event?.settings ?? {}) as Record<string, unknown>
   const rawChurchName = (settings.churchName as string) ?? null
-  const departments = (settings.departments as string[]) ?? []
-  const churchName = rawChurchName
-    ? departments.length > 0
-      ? `${rawChurchName} ${departments.join(' · ')}`
-      : rawChurchName
-    : null
+  const departmentKeys = (settings.departments as string[]) ?? []
+  const departmentLabels = departmentKeys.map((k) => getDepartmentByKey(k)?.label ?? k)
   const eventTheme = (settings.theme as string) ?? null
   const themeVerse = (settings.themeVerse as string) ?? null
+  const deptKey = useDepartmentFilterStore((s) => s.department)
+  const deptTheme = getDepartmentTheme(deptKey)
+
+  const currentPage = getBreadcrumb(pathname)
 
   return (
     <header
-      className={cn(
-        'flex h-auto min-h-14 flex-col border-b bg-card',
-        className
-      )}
+      className={cn('flex h-auto flex-col', className)}
     >
-      {/* Church + Theme banner — 은혜가 퍼져나가는 효과 */}
-      {(churchName || eventTheme) && (
-        <div className="relative overflow-hidden px-6 py-6"
-          style={{ background: 'linear-gradient(180deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.04) 50%, transparent 100%)' }}>
-
-          {/* 은혜 ripple — 중심에서 사방으로 퍼지는 빛 */}
+      {/* ── Line 1 + 2: Banner (교회+부서 / 주제+성구) ── */}
+      {(rawChurchName || eventTheme) && (
+        <div
+          className="relative overflow-hidden transition-all duration-700"
+          style={{ background: `linear-gradient(180deg, rgba(${deptTheme.primary},0.07) 0%, rgba(${deptTheme.secondary},0.03) 60%, transparent 100%)` }}
+        >
+          {/* Subtle ripple effects */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="absolute rounded-full"
+                className="absolute rounded-full transition-all duration-700"
                 style={{
-                  width: `${i * 180}px`,
-                  height: `${i * 80}px`,
-                  background: `radial-gradient(ellipse, rgba(139,92,246,${0.05 / i}) 0%, transparent 70%)`,
-                  animation: `graceRipple ${4 + i}s ease-out infinite`,
-                  animationDelay: `${i * 0.7}s`,
+                  width: `${i * 200}px`,
+                  height: `${i * 60}px`,
+                  background: `radial-gradient(ellipse, rgba(${deptTheme.headerGlow},${0.04 / i}) 0%, transparent 70%)`,
+                  animation: `graceRipple ${5 + i}s ease-out infinite`,
+                  animationDelay: `${i * 0.8}s`,
                 }}
               />
             ))}
           </div>
 
-          {/* 아래로 흐르는 은혜 빛줄기 */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="absolute w-px rounded-full"
-                style={{
-                  left: `${8 + i * 14}%`,
-                  height: `${14 + (i % 3) * 6}px`,
-                  background: `linear-gradient(180deg, rgba(${i % 2 === 0 ? '139,92,246' : '99,102,241'},0.2), transparent)`,
-                  animation: `graceFlow ${2 + i * 0.3}s ease-in infinite`,
-                  animationDelay: `${i * 0.35}s`,
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Content */}
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className="relative flex flex-col items-center gap-2.5 text-center"
+            transition={{ duration: 0.5 }}
+            className="relative flex flex-col items-center gap-0.5 px-3 py-3 text-center md:gap-1 md:px-4 md:py-4"
           >
-            {/* 교회명 — 크고 선명하게 */}
-            {churchName && (
-              <motion.h2
-                className="text-[1.25rem] font-extrabold tracking-tight text-white md:text-[1.5rem]"
-                animate={{ scale: [1, 1.015, 1] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                {churchName}
-              </motion.h2>
+            {/* Church name */}
+            {rawChurchName && (
+              <p className="text-xs font-bold text-white/90 md:text-sm lg:text-base">
+                {rawChurchName}
+              </p>
             )}
 
-            {/* 주제 — 보라빛 글로우, 잘 읽히게 */}
-            {eventTheme && (
-              <motion.p
-                className="text-[1.1rem] font-bold text-violet-300 md:text-[1.25rem]"
-                style={{ textShadow: '0 0 24px rgba(139,92,246,0.35), 0 0 48px rgba(139,92,246,0.12)' }}
-                animate={{ scale: [1, 1.02, 1] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-              >
-                {eventTheme}
-              </motion.p>
+            {/* Department labels — hidden on very small, scrollable on mobile */}
+            {departmentLabels.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-1">
+                {departmentLabels.map((label, i) => (
+                  <span key={i} className="rounded-full bg-white/[0.08] px-1.5 py-0.5 text-[0.5625rem] font-medium text-slate-400 md:text-[0.625rem]">
+                    {label}
+                  </span>
+                ))}
+              </div>
             )}
 
-            {/* 성구 — 밝고 또렷하게 */}
-            {themeVerse && (
-              <motion.p
-                className="text-[0.875rem] font-medium text-indigo-300/80 md:text-[0.9375rem]"
-                animate={{ opacity: [0.65, 1, 0.65] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                {themeVerse}
-              </motion.p>
+            {/* Theme + Verse in one line */}
+            {(eventTheme || themeVerse) && (
+              <p className="flex flex-wrap items-center justify-center gap-1.5 text-[0.6875rem] text-slate-400 md:gap-2 md:text-sm">
+                {eventTheme && (
+                  <span
+                    className="font-semibold transition-colors duration-700"
+                    style={{ color: `rgba(${deptTheme.primary},0.8)`, textShadow: `0 0 20px rgba(${deptTheme.primary},0.2)` }}
+                  >
+                    &ldquo;{eventTheme}&rdquo;
+                  </span>
+                )}
+                {themeVerse && (
+                  <span className="text-slate-500">— {themeVerse}</span>
+                )}
+              </p>
             )}
           </motion.div>
         </div>
       )}
-      {/* Main header row */}
-      <div className="flex h-14 items-center justify-between px-4">
-      {/* Left: Mobile menu + App name */}
-      <div className="flex items-center gap-2">
-        {/* Mobile hamburger */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden min-h-[48px] min-w-[48px]"
-              aria-label="메뉴 열기"
+
+      {/* ── Line 3: Navigation bar ── */}
+      <div
+        className="flex h-12 items-center justify-between border-b border-white/[0.06] px-4"
+        style={{ background: 'rgba(12,14,20,0.6)', backdropFilter: 'blur(12px)' }}
+      >
+        {/* Left: Mobile menu + breadcrumb */}
+        <div className="flex items-center gap-2">
+          {/* Mobile hamburger */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden min-h-[48px] min-w-[48px]"
+                aria-label="메뉴 열기"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] p-0">
+              <div className="flex h-14 items-center border-b px-4">
+                <Flame className="mr-2 h-4 w-4 text-indigo-400" />
+                <span className="text-sm font-bold">FLOWING</span>
+              </div>
+              <nav className="space-y-1 p-2">
+                <MobileNavLink href="/dashboard" label="홈" />
+                <MobileNavLink href="/participants" label="참가자" />
+                <MobileNavLink href="/schedule" label="일정" />
+                <MobileNavLink href="/attendance" label="출석" />
+                <MobileNavLink href="/quiz" label="퀴즈" />
+                <MobileNavLink href="/groups" label="조/반" />
+                <MobileNavLink href="/announcements" label="공지" />
+                <MobileNavLink href="/gallery" label="갤러리" />
+                <MobileNavLink href="/materials" label="자료실" />
+                <MobileNavLink href="/accounting" label="회계" />
+                <MobileNavLink href="/settings" label="설정" />
+              </nav>
+            </SheetContent>
+          </Sheet>
+
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1.5 text-sm">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1 text-slate-500 transition-colors hover:text-slate-300"
             >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[280px] p-0">
-            <div className="flex h-14 items-center border-b px-4">
-              <span className="text-sm font-bold">여름행사 LMS</span>
-            </div>
-            <nav className="space-y-1 p-2">
-              <MobileNavLink href="/dashboard" label="홈" />
-              <MobileNavLink href="/participants" label="참가자" />
-              <MobileNavLink href="/schedule" label="일정" />
-              <MobileNavLink href="/attendance" label="출석" />
-              <MobileNavLink href="/quiz" label="퀴즈" />
-              <MobileNavLink href="/groups" label="조" />
-              <MobileNavLink href="/announcements" label="공지" />
-              <MobileNavLink href="/gallery" label="갤러리" />
-              <MobileNavLink href="/settings" label="설정" />
-            </nav>
-          </SheetContent>
-        </Sheet>
+              <Home className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">홈</span>
+            </Link>
+            {currentPage && pathname !== '/dashboard' && (
+              <>
+                <ChevronRight className="h-3 w-3 text-slate-600" />
+                <span className="font-medium text-slate-300">{currentPage}</span>
+              </>
+            )}
+          </div>
+        </div>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-foreground transition-colors hover:text-primary"
-        >
-          <Flame className="h-4 w-4 text-[#ef4444]" />
-          여름행사 LMS
-        </Link>
-      </div>
+        {/* Right: Notification + Avatar */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative min-h-[48px] min-w-[48px] text-slate-400 hover:text-slate-200"
+            aria-label="알림"
+          >
+            <Bell className="h-4.5 w-4.5" />
+          </Button>
 
-      {/* Right: Notification + Avatar */}
-      <div className="flex items-center gap-1">
-        {/* Notification */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative min-h-[48px] min-w-[48px]"
-          aria-label="알림"
-        >
-          <Bell className="h-5 w-5" />
-        </Button>
-
-        {/* User avatar */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="min-h-[48px] min-w-[48px]">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs font-medium">관리</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <Link href="/settings">설정</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              로그아웃
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="min-h-[48px] min-w-[48px]">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="text-[0.625rem] font-semibold">관리</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link href="/settings">설정</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">
+                로그아웃
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   )

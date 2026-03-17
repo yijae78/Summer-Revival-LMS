@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -10,42 +11,39 @@ export async function GET(request: Request) {
   }
 
   if (code) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    try {
+      const supabase = await createServerSupabaseClient()
 
-    if (!url || !key) {
-      return NextResponse.redirect(`${origin}/login?error=config_missing`)
-    }
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-    const supabase = createClient(url, key)
+      if (!error && data.user) {
+        // Create profile if not exists
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .single()
 
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        if (!profile) {
+          const { error: insertError } = await supabase.from('profiles').insert({
+            id: data.user.id,
+            name:
+              data.user.user_metadata?.full_name ||
+              data.user.user_metadata?.name ||
+              '사용자',
+            role: 'student',
+            avatar_url: data.user.user_metadata?.avatar_url,
+          })
 
-    if (!error && data.user) {
-      // Create profile if not exists
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', data.user.id)
-        .single()
-
-      if (!profile) {
-        const { error: insertError } = await supabase.from('profiles').insert({
-          id: data.user.id,
-          name:
-            data.user.user_metadata?.full_name ||
-            data.user.user_metadata?.name ||
-            '사용자',
-          role: 'student',
-          avatar_url: data.user.user_metadata?.avatar_url,
-        })
-
-        if (insertError) {
-          return NextResponse.redirect(`${origin}/login?error=profile_creation_failed`)
+          if (insertError) {
+            return NextResponse.redirect(`${origin}/login?error=profile_creation_failed`)
+          }
         }
-      }
 
-      return NextResponse.redirect(`${origin}${next}`)
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+    } catch {
+      return NextResponse.redirect(`${origin}/login?error=auth_failed`)
     }
   }
 

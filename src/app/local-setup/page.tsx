@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -36,6 +36,7 @@ import { insert, clearTable } from '@/lib/local-db'
 import { useAdminAuthStore } from '@/stores/adminAuthStore'
 import { useAppModeStore } from '@/stores/appModeStore'
 import { useEventStore } from '@/stores/eventStore'
+import { DEPARTMENT_LIST } from '@/constants/departments'
 
 import type { Event, Profile, Schedule, Group } from '@/types'
 
@@ -44,16 +45,6 @@ import type { Event, Profile, Schedule, Group } from '@/types'
 // ============================================
 
 const TOTAL_STEPS = 6
-
-const DEPARTMENT_OPTIONS = [
-  '유치부',
-  '아동부',
-  '초등부',
-  '중등부',
-  '고등부',
-  '청년부',
-  '성인부',
-]
 
 const EVENT_TYPE_OPTIONS = [
   { value: 'retreat', label: '수련회' },
@@ -351,22 +342,23 @@ function StepChurch({
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">부서 선택</Label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-            {DEPARTMENT_OPTIONS.map((dept) => {
-              const isSelected = departments.includes(dept)
+            {DEPARTMENT_LIST.map((dept) => {
+              const isSelected = departments.includes(dept.key)
               return (
                 <button
-                  key={dept}
+                  key={dept.key}
                   type="button"
-                  onClick={() => toggleDepartment(dept)}
+                  onClick={() => toggleDepartment(dept.key)}
                   className={cn(
-                    'flex min-h-[48px] items-center justify-center rounded-xl border px-3 py-2 text-sm font-medium transition-all duration-200',
+                    'flex min-h-[48px] items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-all duration-200',
                     isSelected
                       ? 'border-sky-500/30 bg-sky-500/15 text-sky-300 shadow-[0_0_12px_rgba(56,189,248,0.1)]'
                       : 'border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/[0.15] hover:bg-white/[0.06]'
                   )}
                   aria-pressed={isSelected}
                 >
-                  {dept}
+                  <span>{dept.emoji}</span>
+                  <span>{dept.label}</span>
                 </button>
               )
             })}
@@ -858,9 +850,20 @@ export default function LocalSetupPage() {
   const setMode = useAppModeStore((s) => s.setMode)
   const setCurrentEventId = useEventStore((s) => s.setCurrentEventId)
 
-  // Step state
-  const [step, setStep] = useState(1)
+  // Step state — restore from sessionStorage if available
+  const STEP_STORAGE_KEY = 'local-setup-step'
+  const [step, setStep] = useState(() => {
+    if (typeof window === 'undefined') return 1
+    const saved = sessionStorage.getItem(STEP_STORAGE_KEY)
+    const parsed = saved ? Number(saved) : 1
+    return parsed >= 1 && parsed <= TOTAL_STEPS ? parsed : 1
+  })
   const [direction, setDirection] = useState(1)
+
+  // Persist step to sessionStorage on change
+  useEffect(() => {
+    sessionStorage.setItem(STEP_STORAGE_KEY, String(step))
+  }, [step])
 
   // Step 1: Admin
   const [adminName, setAdminName] = useState('')
@@ -1066,7 +1069,10 @@ export default function LocalSetupPage() {
     // 8. Set current event
     setCurrentEventId(eventId)
 
-    // 9. Navigate
+    // 9. Clear wizard progress from sessionStorage
+    sessionStorage.removeItem(STEP_STORAGE_KEY)
+
+    // 10. Navigate
     toast.success('설정이 완료되었어요! 대시보드로 이동할게요.')
     router.push('/dashboard')
   }

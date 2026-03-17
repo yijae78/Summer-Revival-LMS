@@ -55,7 +55,7 @@ const GRADE_OPTIONS = [
   { value: 'high_2', label: '고등 2학년' },
   { value: 'high_3', label: '고등 3학년' },
   { value: 'college', label: '대학생' },
-  { value: 'adult', label: '성인' },
+  { value: 'adult', label: '교사' },
 ]
 
 const CONSENT_ITEMS = [

@@ -22,6 +22,7 @@ export async function createSchedule(data: {
   speaker?: string
   description?: string
   order_index?: number
+  department?: string | null
 }): Promise<ActionResult> {
   try {
     const supabase = await createServerSupabaseClient()
@@ -39,6 +40,7 @@ export async function createSchedule(data: {
         speaker: data.speaker ?? null,
         description: data.description ?? null,
         order_index: data.order_index ?? 0,
+        ...(data.department ? { department: data.department } : {}),
       })
       .select('id')
       .single()

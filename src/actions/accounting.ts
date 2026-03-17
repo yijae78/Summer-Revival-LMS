@@ -46,14 +46,12 @@ export async function createExpense(input: {
     })
 
     if (error) {
-      console.error('createExpense failed:', error)
       return { error: '지출 등록에 실패했어요.' }
     }
 
     revalidatePath('/accounting')
     return { success: true }
   } catch (e) {
-    console.error('createExpense failed:', e)
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }
@@ -93,14 +91,12 @@ export async function createIncome(input: {
     })
 
     if (error) {
-      console.error('createIncome failed:', error)
       return { error: '수입 등록에 실패했어요.' }
     }
 
     revalidatePath('/accounting')
     return { success: true }
   } catch (e) {
-    console.error('createIncome failed:', e)
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }
@@ -126,14 +122,12 @@ export async function deleteExpense(id: string): Promise<ActionResult> {
       .eq('id', id)
 
     if (error) {
-      console.error('deleteExpense failed:', error)
       return { error: '지출 삭제에 실패했어요.' }
     }
 
     revalidatePath('/accounting')
     return { success: true }
   } catch (e) {
-    console.error('deleteExpense failed:', e)
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }
@@ -159,14 +153,12 @@ export async function deleteIncome(id: string): Promise<ActionResult> {
       .eq('id', id)
 
     if (error) {
-      console.error('deleteIncome failed:', error)
       return { error: '수입 삭제에 실패했어요.' }
     }
 
     revalidatePath('/accounting')
     return { success: true }
   } catch (e) {
-    console.error('deleteIncome failed:', e)
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }

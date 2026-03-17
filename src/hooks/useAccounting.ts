@@ -30,6 +30,16 @@ interface AccountingData {
   summary: AccountingSummary
 }
 
+function filterIncome(records: IncomeRecord[], department?: string): IncomeRecord[] {
+  if (!department || department === 'all') return records
+  return records.filter((r) => !r.department || r.department === department)
+}
+
+function filterExpense(records: ExpenseRecord[], department?: string): ExpenseRecord[] {
+  if (!department || department === 'all') return records
+  return records.filter((r) => !r.department || r.department === department)
+}
+
 function computeSummary(
   budgetCategories: BudgetCategory[],
   incomeRecords: IncomeRecord[],
@@ -42,21 +52,23 @@ function computeSummary(
   return { totalBudget, totalIncome, totalExpense, balance }
 }
 
-export function useAccounting(eventId: string | null) {
+export function useAccounting(eventId: string | null, department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.accounting(eventId!),
+    queryKey: queryKeys.accounting(eventId!, department),
     queryFn: async (): Promise<AccountingData> => {
       if (mode === 'local') {
         const budgetCategories = getAll<BudgetCategory>('budget_categories').filter(
           (c) => c.event_id === eventId
         )
-        const incomeRecords = getAll<IncomeRecord>('income_records').filter(
-          (r) => r.event_id === eventId
+        const incomeRecords = filterIncome(
+          getAll<IncomeRecord>('income_records').filter((r) => r.event_id === eventId),
+          department
         )
-        const expenseRecords = getAll<ExpenseRecord>('expense_records').filter(
-          (r) => r.event_id === eventId
+        const expenseRecords = filterExpense(
+          getAll<ExpenseRecord>('expense_records').filter((r) => r.event_id === eventId),
+          department
         )
         return {
           budgetCategories,
@@ -91,8 +103,8 @@ export function useAccounting(eventId: string | null) {
       if (expenseRes.error) throw expenseRes.error
 
       const budgetCategories = (budgetRes.data ?? []) as BudgetCategory[]
-      const incomeRecords = (incomeRes.data ?? []) as IncomeRecord[]
-      const expenseRecords = (expenseRes.data ?? []) as ExpenseRecord[]
+      const incomeRecords = filterIncome((incomeRes.data ?? []) as IncomeRecord[], department)
+      const expenseRecords = filterExpense((expenseRes.data ?? []) as ExpenseRecord[], department)
 
       return {
         budgetCategories,
@@ -106,17 +118,12 @@ export function useAccounting(eventId: string | null) {
 
   if (mode === 'demo') {
     const budgetCategories = DEMO_BUDGET_CATEGORIES
-    const incomeRecords = DEMO_INCOME_RECORDS
-    const expenseRecords = DEMO_EXPENSE_RECORDS
+    const incomeRecords = filterIncome(DEMO_INCOME_RECORDS, department)
+    const expenseRecords = filterExpense(DEMO_EXPENSE_RECORDS, department)
     const summary = computeSummary(budgetCategories, incomeRecords, expenseRecords)
 
     return {
-      ...createDemoQueryResult({
-        budgetCategories,
-        incomeRecords,
-        expenseRecords,
-        summary,
-      }),
+      ...createDemoQueryResult({ budgetCategories, incomeRecords, expenseRecords, summary }),
       budgetCategories,
       incomeRecords,
       expenseRecords,

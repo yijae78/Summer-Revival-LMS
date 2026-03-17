@@ -2,6 +2,7 @@
 
 import { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   HelpCircle,
   PlayCircle,
@@ -11,11 +12,29 @@ import {
   Users,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { QuizResults } from '@/components/dashboard/QuizResults'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
@@ -23,7 +42,10 @@ import { PageHeader } from '@/components/shared/PageHeader'
 
 import { useQuiz, useQuizResponses } from '@/hooks/useQuiz'
 import { useUser } from '@/hooks/useUser'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { toggleQuizActive } from '@/actions/quiz'
+import { insert } from '@/lib/local-db'
+import { queryKeys } from '@/lib/query-keys'
 
 import type { QuizQuestion } from '@/types'
 
@@ -57,6 +79,207 @@ function getTypeLabel(type: string): string {
   }
 }
 
+function AddQuestionDialog({
+  open,
+  onOpenChange,
+  quizId,
+  currentQuestionCount,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  quizId: string
+  currentQuestionCount: number
+}) {
+  const mode = useAppModeStore((s) => s.mode)
+  const queryClient = useQueryClient()
+  const [questionText, setQuestionText] = useState('')
+  const [questionType, setQuestionType] = useState<string>('multiple_choice')
+  const [correctAnswer, setCorrectAnswer] = useState('')
+  const [options, setOptions] = useState(['', '', '', ''])
+  const [points, setPoints] = useState(10)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  function resetForm() {
+    setQuestionText('')
+    setQuestionType('multiple_choice')
+    setCorrectAnswer('')
+    setOptions(['', '', '', ''])
+    setPoints(10)
+  }
+
+  function handleOptionChange(index: number, value: string) {
+    const updated = [...options]
+    updated[index] = value
+    setOptions(updated)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!questionText.trim()) {
+      toast.error('문제 내용을 입력해 주세요')
+      return
+    }
+    if (!correctAnswer.trim()) {
+      toast.error('정답을 입력해 주세요')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const optionsData =
+        questionType === 'multiple_choice'
+          ? { A: options[0], B: options[1], C: options[2], D: options[3] }
+          : null
+
+      if (mode === 'local' || mode === 'demo') {
+        insert<QuizQuestion>('quiz_questions', {
+          id: crypto.randomUUID(),
+          quiz_id: quizId,
+          question: questionText.trim(),
+          type: questionType,
+          options: optionsData,
+          correct_answer: correctAnswer.trim(),
+          order_index: currentQuestionCount,
+          points,
+        })
+        toast.success('문제가 추가되었어요')
+      } else {
+        const { getSupabaseClient } = await import('@/lib/supabase/client')
+        const supabase = getSupabaseClient()
+        if (supabase) {
+          const { error } = await supabase.from('quiz_questions').insert({
+            quiz_id: quizId,
+            question: questionText.trim(),
+            type: questionType,
+            options: optionsData,
+            correct_answer: correctAnswer.trim(),
+            order_index: currentQuestionCount,
+            points,
+          })
+          if (error) {
+            toast.error('문제 추가에 실패했어요')
+            return
+          }
+          toast.success('문제가 추가되었어요')
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: queryKeys.quiz(quizId) })
+      resetForm()
+      onOpenChange(false)
+    } catch {
+      toast.error('문제 추가 중 오류가 발생했어요')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>문제 추가</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="question-text">문제 내용</Label>
+            <Textarea
+              id="question-text"
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+              placeholder="문제를 입력하세요"
+              rows={3}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="question-type">문제 유형</Label>
+            <Select value={questionType} onValueChange={setQuestionType}>
+              <SelectTrigger id="question-type" className="h-12">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="multiple_choice">객관식</SelectItem>
+                <SelectItem value="ox">OX 퀴즈</SelectItem>
+                <SelectItem value="fill_blank">빈칸 채우기</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {questionType === 'multiple_choice' && (
+            <div className="space-y-2">
+              <Label>보기</Label>
+              {['A', 'B', 'C', 'D'].map((label, index) => (
+                <div key={label} className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                    {label}
+                  </span>
+                  <Input
+                    value={options[index]}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    placeholder={`보기 ${label}`}
+                    className="h-12"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="correct-answer">정답</Label>
+            <Input
+              id="correct-answer"
+              value={correctAnswer}
+              onChange={(e) => setCorrectAnswer(e.target.value)}
+              placeholder={
+                questionType === 'multiple_choice'
+                  ? 'A, B, C, D 중 하나'
+                  : questionType === 'ox'
+                    ? 'O 또는 X'
+                    : '정답을 입력하세요'
+              }
+              className="h-12"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="question-points">배점</Label>
+            <Input
+              id="question-points"
+              type="number"
+              min={1}
+              max={100}
+              value={points}
+              onChange={(e) => setPoints(Number(e.target.value) || 10)}
+              className="h-12 w-32"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="min-h-[48px]"
+            >
+              취소
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !questionText.trim() || !correctAnswer.trim()}
+              className="min-h-[48px]"
+            >
+              {isSubmitting ? '추가 중...' : '추가하기'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export default function QuizDetailPage({ params }: QuizDetailPageProps) {
   const { id: quizId } = use(params)
   const router = useRouter()
@@ -64,6 +287,7 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
   const { data: quiz, isLoading } = useQuiz(quizId)
   const { data: responses } = useQuizResponses(quizId)
   const [isToggling, setIsToggling] = useState(false)
+  const [questionDialogOpen, setQuestionDialogOpen] = useState(false)
 
   const isAdminOrStaff = user?.role === 'admin' || user?.role === 'staff'
   const hasQuestions = quiz?.questions && quiz.questions.length > 0
@@ -180,13 +404,18 @@ export default function QuizDetailPage({ params }: QuizDetailPageProps) {
                   <Button
                     variant="outline"
                     className="h-12 w-full gap-2"
-                    onClick={() => {
-                      // Placeholder: open add question dialog
-                    }}
+                    onClick={() => setQuestionDialogOpen(true)}
                   >
                     <Plus className="h-4 w-4" />
                     문제 추가하기
                   </Button>
+
+                  <AddQuestionDialog
+                    open={questionDialogOpen}
+                    onOpenChange={setQuestionDialogOpen}
+                    quizId={quizId}
+                    currentQuestionCount={quiz?.questions?.length ?? 0}
+                  />
                 </CardContent>
               </Card>
             )}

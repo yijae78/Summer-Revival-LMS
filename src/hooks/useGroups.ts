@@ -32,16 +32,21 @@ function computeMemberCounts(groups: Group[], members: GroupMember[]): GroupWith
   }))
 }
 
-export function useGroups(eventId: string | null) {
+function filterByDepartment(groups: GroupWithMemberCount[], department?: string): GroupWithMemberCount[] {
+  if (!department || department === 'all') return groups
+  return groups.filter((g) => !g.department || g.department === department)
+}
+
+export function useGroups(eventId: string | null, department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.groups(eventId!),
+    queryKey: queryKeys.groups(eventId!, department),
     queryFn: async (): Promise<GroupWithMemberCount[]> => {
       if (mode === 'local') {
         const groups = getAll<Group>('groups').filter((g) => g.event_id === eventId)
         const members = getAll<GroupMember>('group_members')
-        return computeMemberCounts(groups, members)
+        return filterByDepartment(computeMemberCounts(groups, members), department)
       }
 
       const supabase = getSupabaseClient()!
@@ -68,16 +73,20 @@ export function useGroups(eventId: string | null) {
         countMap.set(gid, (countMap.get(gid) ?? 0) + 1)
       }
 
-      return (groups as Group[]).map((g) => ({
+      const result = (groups as Group[]).map((g) => ({
         ...g,
         member_count: countMap.get(g.id) ?? 0,
       }))
+
+      return filterByDepartment(result, department)
     },
     enabled: eventId !== null && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
 
   if (mode === 'demo') {
-    return createDemoQueryResult(computeMemberCounts(DEMO_GROUPS, DEMO_GROUP_MEMBERS))
+    return createDemoQueryResult(
+      filterByDepartment(computeMemberCounts(DEMO_GROUPS, DEMO_GROUP_MEMBERS), department)
+    )
   }
 
   return query

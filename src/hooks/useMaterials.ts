@@ -13,11 +13,16 @@ import { getAll } from '@/lib/local-db'
 
 import type { Material } from '@/types'
 
-export function useMaterials(eventId: string, category?: string) {
+function filterByDepartment(materials: Material[], department?: string): Material[] {
+  if (!department || department === 'all') return materials
+  return materials.filter((m) => !m.department || m.department === department)
+}
+
+export function useMaterials(eventId: string, category?: string, department?: string) {
   const mode = useAppModeStore((s) => s.mode)
 
   const query = useQuery({
-    queryKey: queryKeys.materials(eventId, category),
+    queryKey: queryKeys.materials(eventId, category, department),
     queryFn: async () => {
       if (mode === 'local') {
         let materials = getAll<Material>('materials').filter(
@@ -26,6 +31,7 @@ export function useMaterials(eventId: string, category?: string) {
         if (category) {
           materials = materials.filter((m) => m.category === category)
         }
+        materials = filterByDepartment(materials, department)
         return materials.sort(
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )
@@ -44,7 +50,7 @@ export function useMaterials(eventId: string, category?: string) {
 
       const { data, error } = await q
       if (error) throw error
-      return data as Material[]
+      return filterByDepartment(data as Material[], department)
     },
     enabled: !!eventId && (mode === 'local' || (mode === 'cloud' && isSupabaseConfigured())),
   })
@@ -54,6 +60,7 @@ export function useMaterials(eventId: string, category?: string) {
     if (category) {
       materials = materials.filter((m) => m.category === category)
     }
+    materials = filterByDepartment(materials, department)
     return createDemoQueryResult(materials)
   }
 

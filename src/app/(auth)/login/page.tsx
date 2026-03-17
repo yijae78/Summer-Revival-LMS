@@ -46,7 +46,7 @@ export default function LoginPage() {
       {/* PIN Login Link */}
       <Link
         href="/pin"
-        className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-border bg-background text-[0.9375rem] font-medium text-foreground transition-colors hover:bg-muted active:scale-[0.98]"
+        className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-border bg-background text-[0.9375rem] font-medium text-foreground transition-colors hover:bg-muted active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         PIN으로 입장
       </Link>

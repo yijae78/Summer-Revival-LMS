@@ -46,14 +46,12 @@ export async function createMaterial(input: {
     })
 
     if (error) {
-      console.error('createMaterial failed:', error)
       return { error: '자료 등록에 실패했어요.' }
     }
 
     revalidatePath('/materials')
     return { success: true }
   } catch (e) {
-    console.error('createMaterial failed:', e)
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }
@@ -79,14 +77,12 @@ export async function deleteMaterial(id: string): Promise<ActionResult> {
       .eq('id', id)
 
     if (error) {
-      console.error('deleteMaterial failed:', error)
       return { error: '자료 삭제에 실패했어요.' }
     }
 
     revalidatePath('/materials')
     return { success: true }
   } catch (e) {
-    console.error('deleteMaterial failed:', e)
     return { error: '처리 중 오류가 발생했어요.' }
   }
 }

@@ -21,10 +21,12 @@ import {
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useGroups } from '@/hooks/useGroups'
 import { useUser } from '@/hooks/useUser'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 import { createGroup } from '@/actions/groups'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
@@ -127,7 +129,8 @@ export default function GroupsPage() {
   const queryClient = useQueryClient()
   const { eventId } = useCurrentEvent()
   const { data: user } = useUser()
-  const { data: groups, isLoading } = useGroups(eventId ?? null)
+  const department = useDepartmentFilterStore((s) => s.department)
+  const { data: groups, isLoading } = useGroups(eventId ?? null, department)
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [groupName, setGroupName] = useState('')
@@ -182,6 +185,8 @@ export default function GroupsPage() {
           ) : undefined
         }
       />
+
+      <DepartmentFilter />
 
       {/* Group Grid */}
       <motion.div variants={fadeUp}>

@@ -20,9 +20,11 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { DepartmentFilter } from '@/components/shared/DepartmentFilter'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useSchedules } from '@/hooks/useSchedules'
+import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 import { cn } from '@/lib/utils'
 
 import type { Schedule, SessionType } from '@/types'
@@ -195,7 +197,8 @@ function ScheduleSkeleton() {
 
 export default function SchedulePage() {
   const { eventId } = useCurrentEvent()
-  const { data: schedules, isLoading } = useSchedules(eventId ?? null)
+  const department = useDepartmentFilterStore((s) => s.department)
+  const { data: schedules, isLoading } = useSchedules(eventId ?? null, undefined, department)
 
   const groupedByDay = useMemo(() => {
     if (!schedules || schedules.length === 0) return new Map<number, Schedule[]>()
@@ -236,6 +239,8 @@ export default function SchedulePage() {
         description="행사 일정을 확인해요"
         backHref="/dashboard"
       />
+
+      <DepartmentFilter />
 
       <motion.div variants={fadeUp}>
         <LoadingSkeleton isLoading={isLoading} skeleton={<ScheduleSkeleton />}>

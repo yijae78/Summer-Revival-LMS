@@ -14,6 +14,7 @@ export async function createGroup(input: {
   eventId: string
   name: string
   color: string
+  department?: string | null
 }): Promise<ActionResult> {
   try {
     const supabase = await createServerSupabaseClient()
@@ -24,6 +25,7 @@ export async function createGroup(input: {
         name: input.name,
         color: input.color,
         total_points: 0,
+        ...(input.department ? { department: input.department } : {}),
       })
       .select('id')
       .single()

@@ -46,7 +46,7 @@ const GRADE_LABELS: Record<string, string> = {
   high_2: '고등 2학년',
   high_3: '고등 3학년',
   college: '대학생',
-  adult: '성인',
+  adult: '교사',
 }
 
 const TRANSPORTATION_LABELS: Record<string, string> = {
@@ -179,7 +179,7 @@ export default function ParticipantDetailPage() {
 
   const healthNote =
     participant?.health_info && typeof participant.health_info === 'object'
-      ? (participant.health_info as Record<string, unknown>).note
+      ? (participant.health_info as Record<string, unknown>)?.note
       : null
 
   return (
