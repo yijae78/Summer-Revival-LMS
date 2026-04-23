@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { SkeletonBox } from '@/components/shared/LoadingSkeleton'
 
 import { generateQrDataUrl } from '@/lib/qr'
+import { useAppModeStore } from '@/stores/appModeStore'
 
 interface ParticipantQrCodeProps {
   participantId: string
@@ -17,6 +18,7 @@ interface ParticipantQrCodeProps {
 
 export function ParticipantQrCode({ participantId, participantName, size = 200 }: ParticipantQrCodeProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null)
+  const mode = useAppModeStore((s) => s.mode)
 
   useEffect(() => {
     const baseUrl = window.location.origin
@@ -46,6 +48,11 @@ export function ParticipantQrCode({ participantId, participantName, size = 200 }
         <img src={dataUrl} alt={`${participantName} QR 코드`} width={size} height={size} />
       </div>
       <p className="text-sm font-medium text-foreground">{participantName}</p>
+      <p className="text-xs leading-relaxed text-muted-foreground/70">
+        {mode === 'cloud'
+          ? '학생에게 보내면 자동 로그인돼요'
+          : '이름표에 인쇄하거나 이 기기에서 스캔하세요'}
+      </p>
       <Button variant="outline" size="sm" onClick={handleDownload} className="border-white/[0.08]">
         <Download className="mr-1.5 size-3.5" />
         QR 다운로드

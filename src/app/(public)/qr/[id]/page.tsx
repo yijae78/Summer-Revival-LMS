@@ -20,7 +20,7 @@ export default function QrLoginPage() {
   const mode = useAppModeStore((s) => s.mode)
   const setSession = useParticipantSessionStore((s) => s.setSession)
 
-  const [status, setStatus] = useState<'loading' | 'error'>('loading')
+  const [status, setStatus] = useState<'loading' | 'error' | 'local-only'>('loading')
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
@@ -35,17 +35,22 @@ export default function QrLoginPage() {
         let participant: { id: string; name: string; eventId: string } | null = null
 
         if (mode === 'local') {
+          // Local mode: admin device only — look up from localStorage
           const p = getById<Participant>('participants', params.id)
           if (p) {
             participant = { id: p.id, name: p.name, eventId: p.event_id ?? '' }
+          } else {
+            setStatus('error')
+            setErrorMsg('참가자를 찾을 수 없어요.')
+            return
           }
         } else if (mode === 'demo') {
           const p = DEMO_PARTICIPANTS.find((d) => d.id === params.id)
           if (p) {
             participant = { id: p.id, name: p.name, eventId: p.event_id ?? '' }
           }
-        } else {
-          // Cloud mode
+        } else if (mode === 'cloud') {
+          // Cloud mode: student login via API
           const response = await fetch('/api/auth/qr', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -55,6 +60,28 @@ export default function QrLoginPage() {
           if (response.ok) {
             const data = await response.json()
             participant = data.participant
+          }
+        } else {
+          // mode === 'none': new browser, no setup
+          // Try cloud API first — if it works, this is a cloud deployment
+          try {
+            const response = await fetch('/api/auth/qr', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ participantId: params.id }),
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              participant = data.participant
+            } else {
+              // Cloud API failed — this is likely a local-mode QR
+              setStatus('local-only')
+              return
+            }
+          } catch {
+            setStatus('local-only')
+            return
           }
         }
 
@@ -74,6 +101,25 @@ export default function QrLoginPage() {
 
     authenticate()
   }, [params.id, mode, setSession, router])
+
+  if (status === 'local-only') {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10">
+          <QrCode className="size-8 text-amber-400" />
+        </div>
+        <h2 className="text-lg font-semibold text-foreground">관리자 기기에서 스캔해 주세요</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          이 QR코드는 행사 관리자 기기에서만 사용할 수 있어요.
+          <br />
+          관리자에게 요청해 주세요.
+        </p>
+        <Button variant="outline" onClick={() => router.push('/')} className="mt-2">
+          홈으로 돌아가기
+        </Button>
+      </div>
+    )
+  }
 
   if (status === 'error') {
     return (
