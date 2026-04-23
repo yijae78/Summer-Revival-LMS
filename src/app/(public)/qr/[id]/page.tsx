@@ -35,10 +35,11 @@ export default function QrLoginPage() {
         let participant: { id: string; name: string; eventId: string } | null = null
 
         if (mode === 'local') {
-          // Local mode: admin device only — look up from localStorage
+          // Local mode: admin scans QR → go to participant detail page (not login)
           const p = getById<Participant>('participants', params.id)
           if (p) {
-            participant = { id: p.id, name: p.name, eventId: p.event_id ?? '' }
+            router.replace(`/participants/${p.id}`)
+            return
           } else {
             setStatus('error')
             setErrorMsg('참가자를 찾을 수 없어요.')
