@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 const PUBLIC_PATHS = ['/', '/login', '/pin', '/setup', '/start', '/local-setup', '/auth/callback', '/join', '/design-preview']
 
 // Public path prefixes (startsWith matching)
-const PUBLIC_PREFIXES = ['/join/', '/api/auth/']
+const PUBLIC_PREFIXES = ['/join/', '/api/auth/', '/qr/']
 
 // API routes that require authentication
 const PROTECTED_API = ['/api/chat']
@@ -71,8 +71,6 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   // --- Demo mode: allow all dashboard routes without authentication ---
   if (isDemoModeEnabled(request)) {
-    // In demo mode, allow access to all dashboard routes
-    // But block protected APIs (chat requires real credentials)
     if (isProtectedApi(pathname)) {
       return NextResponse.json(
         { error: 'AI 챗봇은 데모 모드에서 사용할 수 없어요.' },
@@ -80,6 +78,29 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
       )
     }
     return NextResponse.next()
+  }
+
+  // --- Participant session (QR / PIN login) ---
+  const participantCookie = request.cookies.get('participant-session')?.value
+  if (participantCookie) {
+    try {
+      const session = JSON.parse(decodeURIComponent(participantCookie))
+      if (session && session.id && session.name && session.eventId) {
+        // Participant sessions can access dashboard but NOT admin-only pages
+        if (pathname.startsWith('/settings') || pathname.startsWith('/accounting')) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
+        if (isProtectedApi(pathname)) {
+          return NextResponse.json(
+            { error: 'AI 챗봇은 참가자 모드에서 사용할 수 없어요.' },
+            { status: 403 }
+          )
+        }
+        return NextResponse.next()
+      }
+    } catch {
+      // Invalid cookie, continue to normal auth
+    }
   }
 
   // --- Authentication required beyond this point ---

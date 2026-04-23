@@ -1,12 +1,18 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { participantSchema } from '@/validators/participant'
+import { participantSchema, adminParticipantSchema, adminBulkParticipantSchema } from '@/validators/participant'
 
 interface ActionResult {
   success?: boolean
   error?: string
   data?: { id: string }
+}
+
+interface BulkActionResult {
+  success?: boolean
+  error?: string
+  data?: { count: number }
 }
 
 export async function registerParticipant(formData: FormData): Promise<ActionResult> {
@@ -60,6 +66,99 @@ export async function registerParticipant(formData: FormData): Promise<ActionRes
     return { success: true, data: { id: data.id } }
   } catch {
     return { error: '참가 신청 중 문제가 발생했어요.' }
+  }
+}
+
+export async function addParticipantByAdmin(input: {
+  name: string
+  grade: string
+  gender: string
+  phone?: string
+  birthDate?: string
+  eventId: string
+}): Promise<ActionResult> {
+  try {
+    const parsed = adminParticipantSchema.safeParse(input)
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0]
+      return { error: firstIssue?.message ?? '입력 데이터가 올바르지 않아요' }
+    }
+
+    const supabase = await createServerSupabaseClient()
+    const { data, error } = await supabase
+      .from('participants')
+      .insert({
+        event_id: parsed.data.eventId,
+        name: parsed.data.name,
+        grade: parsed.data.grade,
+        gender: parsed.data.gender,
+        phone: parsed.data.phone || null,
+        birth_date: parsed.data.birthDate || null,
+        fee_paid: false,
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      return { error: '참가자 추가에 실패했어요.' }
+    }
+
+    return { success: true, data: { id: data.id } }
+  } catch {
+    return { error: '참가자 추가 중 문제가 발생했어요.' }
+  }
+}
+
+export async function addParticipantsBulk(input: {
+  eventId: string
+  participants: { name: string; grade: string; gender: string }[]
+}): Promise<BulkActionResult> {
+  try {
+    const parsed = adminBulkParticipantSchema.safeParse(input)
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0]
+      return { error: firstIssue?.message ?? '입력 데이터가 올바르지 않아요' }
+    }
+
+    const supabase = await createServerSupabaseClient()
+    const rows = parsed.data.participants.map((p) => ({
+      event_id: parsed.data.eventId,
+      name: p.name,
+      grade: p.grade,
+      gender: p.gender,
+      fee_paid: false,
+    }))
+
+    const { error } = await supabase.from('participants').insert(rows)
+
+    if (error) {
+      return { error: '일괄 등록에 실패했어요.' }
+    }
+
+    return { success: true, data: { count: rows.length } }
+  } catch {
+    return { error: '일괄 등록 중 문제가 발생했어요.' }
+  }
+}
+
+export async function deleteParticipant(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await createServerSupabaseClient()
+
+    // Nullify FK references that don't cascade
+    await supabase.from('points').update({ participant_id: null }).eq('participant_id', id)
+    await supabase.from('income_records').update({ participant_id: null }).eq('participant_id', id)
+
+    // Delete participant (CASCADE handles group_members, attendance, quiz_responses, room_assignments)
+    const { error } = await supabase.from('participants').delete().eq('id', id)
+
+    if (error) {
+      return { error: '참가자 삭제에 실패했어요.' }
+    }
+
+    return { success: true }
+  } catch {
+    return { error: '참가자 삭제 중 문제가 발생했어요.' }
   }
 }
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Users,
@@ -13,8 +14,12 @@ import {
   FolderOpen,
   Settings,
   Banknote,
+  Copy,
+  Check,
+  Ticket,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 
 import { EventBanner } from '@/components/dashboard/EventBanner'
 import { StatCard } from '@/components/dashboard/StatCard'
@@ -25,6 +30,7 @@ import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useEvents } from '@/hooks/useEvents'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useSchedules } from '@/hooks/useSchedules'
+import { useUser } from '@/hooks/useUser'
 import { useEventStore } from '@/stores/eventStore'
 import { useDepartmentFilterStore } from '@/stores/departmentFilterStore'
 import { useViewportStore } from '@/stores/viewportStore'
@@ -158,14 +164,75 @@ function EventSelector() {
   )
 }
 
+function InviteCodeCard({ inviteCode, isMobileView }: { inviteCode: string; isMobileView: boolean }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    const joinUrl = `${window.location.origin}/join/${inviteCode}`
+    navigator.clipboard.writeText(joinUrl).then(() => {
+      setCopied(true)
+      toast.success('초대 링크가 복사됐어요')
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {
+      navigator.clipboard.writeText(inviteCode)
+      setCopied(true)
+      toast.success('초대코드가 복사됐어요')
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      className={cn(
+        'relative overflow-hidden rounded-2xl border border-amber-500/20',
+        'bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15',
+        'backdrop-blur-xl',
+        isMobileView ? 'px-4 py-3' : 'px-6 py-4'
+      )}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            'flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg',
+            isMobileView ? 'h-10 w-10' : 'h-12 w-12'
+          )}>
+            <Ticket className={cn('text-white', isMobileView ? 'size-5' : 'size-6')} />
+          </div>
+          <div>
+            <p className={cn('font-medium text-amber-200/70', isMobileView ? 'text-[0.6875rem]' : 'text-xs')}>초대코드</p>
+            <p className={cn('font-black tracking-[0.2em] text-amber-300', isMobileView ? 'text-lg' : 'text-2xl')}>
+              {inviteCode}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className={cn(
+            'flex items-center gap-1.5 rounded-xl border border-amber-500/20 px-3 py-2 text-xs font-semibold transition-all duration-200',
+            'hover:bg-amber-500/10 active:scale-95',
+            copied ? 'text-emerald-400' : 'text-amber-300'
+          )}
+        >
+          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          {copied ? '복사됨' : '링크 복사'}
+        </button>
+      </div>
+    </motion.div>
+  )
+}
+
 function DashboardContent() {
   const router = useRouter()
   const { event, isLoading: isEventLoading, eventId } = useCurrentEvent()
+  const { data: user } = useUser()
   const viewport = useViewportStore((s) => s.viewport)
   const isMobileView = viewport === 'mobile' || viewport === 'tablet'
   const department = useDepartmentFilterStore((s) => s.department)
   const deptDef = getDepartmentByKey(department)
   const deptTheme = getDepartmentTheme(department)
+  const canManage = user?.role === 'admin' || user?.role === 'staff'
   const { data: participants, isLoading: isParticipantsLoading } = useParticipants(eventId)
   const { data: schedules, isLoading: isSchedulesLoading } = useSchedules(eventId, undefined, department)
   const clearCurrentEvent = useEventStore((state) => state.clearCurrentEvent)
@@ -276,6 +343,11 @@ function DashboardContent() {
           </motion.div>
         </div>
       </div>
+
+      {/* Invite Code */}
+      {canManage && event?.invite_code && (
+        <InviteCodeCard inviteCode={event.invite_code} isMobileView={isMobileView} />
+      )}
 
       {/* Quick Actions Grid — mobile: compact 4 cols */}
       <motion.div variants={fadeUp}>

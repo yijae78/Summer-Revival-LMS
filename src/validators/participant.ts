@@ -69,3 +69,45 @@ export const participantSchema = z
   })
 
 export type ParticipantFormValues = z.infer<typeof participantSchema>
+
+// Admin quick-add schema (name + grade + gender required, phone + birthDate optional)
+export const adminParticipantSchema = z.object({
+  name: z
+    .string()
+    .min(1, '이름을 입력해 주세요')
+    .max(20, '이름은 20글자 이하로 입력해 주세요'),
+  grade: z.string().min(1, '학년을 선택해 주세요'),
+  gender: z.enum(['male', 'female'], {
+    error: '성별을 선택해 주세요',
+  }),
+  phone: z
+    .string()
+    .regex(PHONE_REGEX, '올바른 전화번호를 입력해 주세요')
+    .optional()
+    .or(z.literal('')),
+  birthDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, '올바른 생년월일을 선택해 주세요')
+    .optional()
+    .or(z.literal('')),
+  eventId: z.string().uuid('올바른 행사 정보가 아니에요'),
+})
+
+export type AdminParticipantValues = z.infer<typeof adminParticipantSchema>
+
+// Admin bulk-add schema
+export const adminBulkParticipantSchema = z.object({
+  eventId: z.string().uuid('올바른 행사 정보가 아니에요'),
+  participants: z
+    .array(
+      z.object({
+        name: z.string().min(1, '이름을 입력해 주세요').max(20),
+        grade: z.string().min(1, '학년을 선택해 주세요'),
+        gender: z.enum(['male', 'female'], { error: '성별을 선택해 주세요' }),
+      })
+    )
+    .min(1, '최소 1명 이상 등록해 주세요')
+    .max(100, '한 번에 최대 100명까지 등록할 수 있어요'),
+})
+
+export type AdminBulkParticipantValues = z.infer<typeof adminBulkParticipantSchema>

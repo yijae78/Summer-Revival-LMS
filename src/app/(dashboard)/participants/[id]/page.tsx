@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
 import { useQueryClient } from '@tanstack/react-query'
@@ -12,6 +12,9 @@ import {
   DollarSign,
   ShieldCheck,
   AlertTriangle,
+  Pencil,
+  Trash2,
+  QrCode,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -22,10 +25,15 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { RoleGuard } from '@/components/shared/RoleGuard'
+import { EditParticipantDialog } from '@/components/dashboard/EditParticipantDialog'
+import { DeleteParticipantDialog } from '@/components/dashboard/DeleteParticipantDialog'
+import { ParticipantQrCode } from '@/components/dashboard/ParticipantQrCode'
 
 import { useParticipant } from '@/hooks/useParticipants'
 import { useUser } from '@/hooks/useUser'
+import { useAppModeStore } from '@/stores/appModeStore'
 import { updateParticipant } from '@/actions/participants'
+import { updateLocalParticipant } from '@/lib/local-db/participants'
 import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
 
@@ -149,13 +157,32 @@ export default function ParticipantDetailPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const mode = useAppModeStore((s) => s.mode)
   const { data: user } = useUser()
   const { data: participant, isLoading } = useParticipant(params.id ?? null)
 
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
   const canManage = user?.role === 'admin' || user?.role === 'staff'
+
+  const invalidateParticipant = useCallback(() => {
+    if (!participant) return
+    queryClient.invalidateQueries({ queryKey: queryKeys.participant(participant.id) })
+    if (participant.event_id) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.participants(participant.event_id) })
+    }
+  }, [participant, queryClient])
 
   const handleToggleFeePaid = useCallback(async () => {
     if (!participant) return
+
+    if (mode === 'local') {
+      updateLocalParticipant(participant.id, { fee_paid: !participant.fee_paid })
+      toast.success(participant.fee_paid ? '미납 상태로 변경했어요.' : '납부 완료로 변경했어요.')
+      invalidateParticipant()
+      return
+    }
 
     const result = await updateParticipant(participant.id, {
       fee_paid: !participant.fee_paid,
@@ -169,13 +196,8 @@ export default function ParticipantDetailPage() {
     toast.success(
       participant.fee_paid ? '미납 상태로 변경했어요.' : '납부 완료로 변경했어요.'
     )
-    queryClient.invalidateQueries({ queryKey: queryKeys.participant(participant.id) })
-    if (participant.event_id) {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.participants(participant.event_id),
-      })
-    }
-  }, [participant, queryClient])
+    invalidateParticipant()
+  }, [participant, mode, invalidateParticipant])
 
   const healthNote =
     participant?.health_info && typeof participant.health_info === 'object'
@@ -251,23 +273,43 @@ export default function ParticipantDetailPage() {
               </div>
             </motion.div>
 
-            {/* Fee toggle (admin/staff only) */}
+            {/* Admin actions (admin/staff only) */}
             {canManage && (
-              <motion.div variants={fadeUp}>
+              <motion.div variants={fadeUp} className="space-y-2">
                 <RoleGuard allowedRoles={['admin', 'staff']}>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'min-h-12 w-full gap-2 rounded-xl',
-                      participant.fee_paid
-                        ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
-                        : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
-                    )}
-                    onClick={handleToggleFeePaid}
-                  >
-                    <DollarSign className="size-4" />
-                    {participant.fee_paid ? '미납으로 변경' : '납부 완료로 변경'}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'min-h-12 flex-1 gap-2 rounded-xl',
+                        participant.fee_paid
+                          ? 'border-amber-500/30 text-amber-400 hover:bg-amber-500/10'
+                          : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
+                      )}
+                      onClick={handleToggleFeePaid}
+                    >
+                      <DollarSign className="size-4" />
+                      {participant.fee_paid ? '미납으로 변경' : '납부 완료로 변경'}
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="min-h-10 flex-1 gap-2 rounded-xl border-white/[0.08]"
+                      onClick={() => setEditOpen(true)}
+                    >
+                      <Pencil className="size-3.5" />
+                      수정
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="min-h-10 gap-2 rounded-xl border-red-500/20 text-red-400 hover:bg-red-500/10"
+                      onClick={() => setDeleteOpen(true)}
+                    >
+                      <Trash2 className="size-3.5" />
+                      삭제
+                    </Button>
+                  </div>
                 </RoleGuard>
               </motion.div>
             )}
@@ -343,6 +385,36 @@ export default function ParticipantDetailPage() {
                 consented={participant.consent_overseas_transfer}
               />
             </GlassSection>
+
+            {/* QR Code (admin/staff only) */}
+            {canManage && (
+              <GlassSection icon={QrCode} title="QR 코드">
+                <div className="flex justify-center py-4">
+                  <ParticipantQrCode
+                    participantId={participant.id}
+                    participantName={participant.name}
+                  />
+                </div>
+              </GlassSection>
+            )}
+
+            {/* Edit / Delete Dialogs */}
+            {canManage && (
+              <>
+                <EditParticipantDialog
+                  participant={participant}
+                  open={editOpen}
+                  onOpenChange={setEditOpen}
+                  onSuccess={invalidateParticipant}
+                />
+                <DeleteParticipantDialog
+                  participant={participant}
+                  open={deleteOpen}
+                  onOpenChange={setDeleteOpen}
+                  onSuccess={() => router.push('/participants')}
+                />
+              </>
+            )}
           </>
         )}
       </LoadingSkeleton>

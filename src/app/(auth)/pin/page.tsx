@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 
+import { useParticipantSessionStore } from '@/stores/participantSessionStore'
 import { cn } from '@/lib/utils'
 
 export default function PinPage() {
@@ -14,6 +15,7 @@ export default function PinPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const setSession = useParticipantSessionStore((s) => s.setSession)
 
   const isFormValid = inviteCode.trim().length > 0 && name.trim().length > 0 && /^\d{4}-\d{2}-\d{2}$/.test(birthDate)
 
@@ -36,6 +38,14 @@ export default function PinPage() {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        if (data.participant) {
+          setSession({
+            id: data.participant.id,
+            name: data.participant.name,
+            eventId: data.participant.event_id,
+          })
+        }
         router.push('/dashboard')
       } else if (response.status === 429) {
         setError('시도 횟수를 초과했어요. 10분 후 다시 시도해 주세요.')

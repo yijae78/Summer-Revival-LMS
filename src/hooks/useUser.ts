@@ -6,6 +6,7 @@ import { getSupabaseClient } from '@/lib/supabase/client'
 import { isSupabaseConfigured } from '@/lib/supabase/config'
 
 import { useAppModeStore } from '@/stores/appModeStore'
+import { useParticipantSessionStore } from '@/stores/participantSessionStore'
 import { DEMO_USER } from '@/lib/demo/data'
 import { createDemoQueryResult } from '@/lib/demo/hooks'
 import { getAll } from '@/lib/local-db'
@@ -23,6 +24,7 @@ interface UserProfile {
 
 export function useUser() {
   const mode = useAppModeStore((s) => s.mode)
+  const participantSession = useParticipantSessionStore((s) => s.session)
 
   const query = useQuery({
     queryKey: ['user', 'profile'],
@@ -79,7 +81,32 @@ export function useUser() {
 
   // Cloud mode without Supabase configured
   if (mode === 'cloud' && !isSupabaseConfigured()) {
+    // Check participant session as fallback (QR/PIN login)
+    if (participantSession) {
+      const participantUser: UserProfile = {
+        id: participantSession.id,
+        name: participantSession.name,
+        role: 'student',
+        phone: null,
+        avatarUrl: null,
+        hasSeenOnboarding: true,
+      }
+      return { ...query, data: participantUser, isLoading: false, isFetching: false }
+    }
     return { ...query, data: null, isLoading: false, isFetching: false }
+  }
+
+  // If cloud query returned null but participant session exists (QR/PIN login without Supabase Auth)
+  if (mode === 'cloud' && query.data === null && !query.isLoading && participantSession) {
+    const participantUser: UserProfile = {
+      id: participantSession.id,
+      name: participantSession.name,
+      role: 'student',
+      phone: null,
+      avatarUrl: null,
+      hasSeenOnboarding: true,
+    }
+    return { ...query, data: participantUser }
   }
 
   return query

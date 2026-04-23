@@ -1004,7 +1004,7 @@ export default function LocalSetupPage() {
       end_date: endDate || new Date().toISOString().split('T')[0],
       location: location.trim() || null,
       description: `${churchName.trim()} ${departments.join(', ')}`,
-      invite_code: null,
+      invite_code: crypto.randomUUID().slice(0, 6).toUpperCase(),
       settings: {
         churchName: churchName.trim(),
         departments,

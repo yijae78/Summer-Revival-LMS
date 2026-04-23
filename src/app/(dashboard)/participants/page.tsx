@@ -3,18 +3,25 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { Users, Search, DollarSign, ChevronRight, List, LayoutGrid, Table2, Phone } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Users, Search, DollarSign, ChevronRight, List, LayoutGrid, Table2, Phone, UserPlus, FileSpreadsheet } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { LoadingSkeleton, SkeletonBox } from '@/components/shared/LoadingSkeleton'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { AddParticipantDialog } from '@/components/dashboard/AddParticipantDialog'
+import { BulkAddParticipantsDialog } from '@/components/dashboard/BulkAddParticipantsDialog'
+import { BulkQrDownload } from '@/components/dashboard/BulkQrDownload'
 
 import { useCurrentEvent } from '@/hooks/useCurrentEvent'
 import { useParticipants } from '@/hooks/useParticipants'
+import { useUser } from '@/hooks/useUser'
 import { DEPARTMENTS, matchDepartment as matchDept, getDepartmentTheme } from '@/constants/departments'
+import { queryKeys } from '@/lib/query-keys'
 import { cn } from '@/lib/utils'
 
 import type { Participant } from '@/types'
@@ -289,13 +296,25 @@ function matchSubGrade(grade: string | null, subGrade: string | null): boolean {
 
 export default function ParticipantsPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { eventId } = useCurrentEvent()
+  const { data: user } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
   const [department, setDepartment] = useState('all')
   const [subGrade, setSubGrade] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('card')
+  const [addOpen, setAddOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(false)
+
+  const canManage = user?.role === 'admin' || user?.role === 'staff'
 
   const { data: participants, isLoading } = useParticipants(eventId ?? null)
+
+  const handleRefresh = useCallback(() => {
+    if (eventId) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.participants(eventId) })
+    }
+  }, [eventId, queryClient])
 
   const activeDept = DEPARTMENTS.find((d) => d.key === department)
   const deptTheme = getDepartmentTheme(department)
@@ -361,6 +380,23 @@ export default function ParticipantsPage() {
         description="행사 참가자를 관리해요"
         backHref="/dashboard"
       />
+
+      {/* Admin action bar */}
+      {canManage && eventId && (
+        <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-2">
+          <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
+            <UserPlus className="size-3.5" />
+            개별 추가
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setBulkOpen(true)} className="gap-1.5 border-white/[0.08]">
+            <FileSpreadsheet className="size-3.5" />
+            일괄 등록
+          </Button>
+          {participants && participants.length > 0 && (
+            <BulkQrDownload participants={filteredParticipants} />
+          )}
+        </motion.div>
+      )}
 
       {/* Search + View toggle */}
       <motion.div variants={fadeUp} className="flex items-center gap-2">
@@ -485,7 +521,12 @@ export default function ParticipantsPage() {
             searchQuery.trim() ? (
               <EmptyState icon={Search} title="검색 결과가 없어요" description={`"${searchQuery}"에 해당하는 참가자를 찾을 수 없어요.`} />
             ) : (
-              <EmptyState icon={Users} title="아직 참가자가 없어요" description="초대 코드를 공유해서 참가 신청을 받아 보세요." />
+              <EmptyState
+                icon={Users}
+                title="아직 참가자가 없어요"
+                description={canManage ? '참가자를 직접 추가하거나 초대 코드를 공유해 보세요.' : '초대 코드를 공유해서 참가 신청을 받아 보세요.'}
+                action={canManage && eventId ? { label: '참가자 추가', onClick: () => setAddOpen(true) } : undefined}
+              />
             )
           ) : viewMode === 'table' ? (
             <TableView participants={filteredParticipants} onNavigate={handleNavigateToDetail} deptTheme={deptTheme} />
@@ -508,6 +549,24 @@ export default function ParticipantsPage() {
           )}
         </LoadingSkeleton>
       </motion.div>
+
+      {/* Dialogs */}
+      {canManage && eventId && (
+        <>
+          <AddParticipantDialog
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            eventId={eventId}
+            onSuccess={handleRefresh}
+          />
+          <BulkAddParticipantsDialog
+            open={bulkOpen}
+            onOpenChange={setBulkOpen}
+            eventId={eventId}
+            onSuccess={handleRefresh}
+          />
+        </>
+      )}
     </motion.div>
   )
 }
